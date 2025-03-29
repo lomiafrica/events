@@ -1,7 +1,6 @@
-# Djaouli Ent Website
+# Djaouli Ent.
 
-A comprehensive website for Djaouli Entertainment, a company based in Côte d'Ivoire specializing in event organization and services. This website combines e-commerce functionality for selling event tickets with a content-rich blog and company story.
-
+A comprehensive website for Djaouli Entertainment, a Côte d'Ivoire based company specializing in event organization and related services. This website combines e-commerce functionality for selling event tickets with a content-rich blog and more.
 ## Overview
 
 This project is built with:
@@ -9,6 +8,7 @@ This project is built with:
 - **Sanity CMS**: Content management for all aspects including e-commerce
 - **Tailwind CSS**: For styling
 - **shadcn/ui**: Component library
+- **Resend**: Programmatic emails
 
 The website features:
 - Event listings with flyers as clickable items
@@ -40,18 +40,20 @@ The project is designed to integrate with lomi., a payment service provider base
 2. **Cart functionality** is implemented in the frontend
 3. **Checkout process** connects to a lomi.'s API.
 4. **Order confirmation** updates inventory in Sanity via API
-5. **Email Servive** email service with resend or any other non-programmatic tool.
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18.17 or later
-- npm or yarn
+- bun
 - Sanity account
+- Resend account
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/lomiafrica/djaouli-ent.git
+   git clone https://github.com/princemuichkine/djaouli-ent.git
    cd djaouli-ent
+   bun install
+   bun run dev
