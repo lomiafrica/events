@@ -10,7 +10,14 @@ interface Category {
   title: string;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+// Define the props interface
+interface PageProps {
+  params: { slug: string };
+  // Optionally include searchParams if needed
+  // searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export async function generateMetadata({ params }: PageProps) {
   const post = await getBlogPostBySlug(params.slug)
 
   if (!post) {
@@ -25,7 +32,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params }: PageProps) {
   const post = await getBlogPostBySlug(params.slug)
 
   if (!post) {
