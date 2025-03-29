@@ -3,11 +3,12 @@ import { getProductBySlug } from '@/lib/sanity/queries';
 import { notFound } from 'next/navigation';
 
 type Props = {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 };
 
 export default async function ProductDetailPage({ params }: Props) {
-    const product = await getProductBySlug(params.slug);
+    const { slug } = await params;
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         notFound(); // Trigger 404 if product not found

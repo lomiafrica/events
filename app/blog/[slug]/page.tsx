@@ -10,15 +10,13 @@ interface Category {
   title: string;
 }
 
-// Define the props interface
-interface PageProps {
-  params: { slug: string };
-  // Optionally include searchParams if needed
-  // searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const post = await getBlogPostBySlug(params.slug)
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  const post = await getBlogPostBySlug(slug)
 
   if (!post) {
     return {
@@ -32,8 +30,13 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
-  const post = await getBlogPostBySlug(params.slug)
+export default async function BlogPostPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  const post = await getBlogPostBySlug(slug)
 
   if (!post) {
     notFound()

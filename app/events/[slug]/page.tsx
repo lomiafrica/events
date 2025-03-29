@@ -8,8 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getEventBySlug } from "@/lib/sanity/queries"
 import TicketSelector from "@/components/ticket-selector"
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const event = await getEventBySlug(params.slug)
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  const event = await getEventBySlug(slug)
 
   if (!event) {
     return {
@@ -23,8 +28,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function EventPage({ params }: { params: { slug: string } }) {
-  const event = await getEventBySlug(params.slug)
+export default async function EventPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  const event = await getEventBySlug(slug)
 
   if (!event) {
     notFound()
