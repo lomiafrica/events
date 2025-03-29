@@ -25,11 +25,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-type Props = {
-  params: { slug: string };
-};
-
-export default async function BlogPostPage({ params }: Props) {
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await getBlogPostBySlug(params.slug)
 
   if (!post) {
