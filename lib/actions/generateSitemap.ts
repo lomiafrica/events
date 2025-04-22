@@ -1,26 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { XMLBuilder } from "fast-xml-parser";
-import { getArticles } from "@/lib/sanity/queries";
 
 const baseUrl = "https://www.djaoulient.com";
-
-interface Article {
-  section: {
-    slug: {
-      current: string;
-    };
-  };
-  slug: {
-    current: string;
-  };
-  publishedAt: string;
-}
 
 export async function generateSitemap() {
   const appDir = path.join(process.cwd(), "app");
   const staticPages = await getPages(appDir);
-  const articles = await getArticles();
 
   const xmlObj = {
     "?xml": { "@_version": "1.0", "@_encoding": "UTF-8" },
@@ -32,12 +18,6 @@ export async function generateSitemap() {
           lastmod: new Date().toISOString().split("T")[0],
           changefreq: page.changefreq,
           priority: page.priority,
-        })),
-        ...articles.map((article: Article) => ({
-          loc: `${baseUrl}/${article.section.slug.current}/${article.slug.current}`,
-          lastmod: new Date(article.publishedAt).toISOString().split("T")[0],
-          changefreq: "weekly",
-          priority: "0.7",
         })),
       ],
     },
