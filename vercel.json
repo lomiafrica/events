@@ -1,0 +1,33 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.sanity.io *.vercel.com *.vercel-insights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: *.sanity.io res.cloudinary.com blob:; font-src 'self' fonts.gstatic.com; connect-src 'self' *.api.sanity.io *.sanity.io *.vercel.com *.vercel-insights.com *.liveblocks.io; media-src 'self' *.sanity.io res.cloudinary.com blob:; object-src 'none'; frame-src 'self' *.sanity.studio; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+} 
