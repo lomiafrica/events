@@ -43,3 +43,5 @@ next-env.d.ts
 # env files
 .env
 .env.production
+data/
+cloudinary-app/

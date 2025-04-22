@@ -1,4 +1,3 @@
-// Placeholder for Shop Landing Page
 import { getAllProducts } from '@/lib/sanity/queries';
 
 export default async function ShopPage() {
@@ -13,7 +12,7 @@ export default async function ShopPage() {
                         <div key={product._id} className="border p-4 rounded shadow">
                             {/* Basic product card - enhance later */}
                             <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
-                            <p>Price: {product.price} XOF</p>
+                            <p>Price: {product.price} F CFA</p>
                             {/* Link to product detail page */}
                             <a href={`/shop/${typeof product.slug === 'string' ? product.slug : product.slug?.current}`} className="text-blue-500 hover:underline mt-2 inline-block">
                                 View Details
