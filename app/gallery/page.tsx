@@ -4,6 +4,9 @@ import Image from "next/image";
 import React, { useState, useEffect } from 'react';
 import type { ImageProps } from "@/lib/utils/types";
 import LoadingSpinner from '@/components/ui/Bouncer';
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
+
 export default function GalleryPage() {
     const [images, setImages] = useState<ImageProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -71,12 +74,24 @@ export default function GalleryPage() {
 
     // --- Render Logic ---
     if (isLoading) {
-        // Use the new LoadingSpinner component
-        return <LoadingSpinner />;
+        // No padding added here for now
+        return (
+            <>
+                <Header />
+                <LoadingSpinner />
+                <Footer />
+            </>
+        );
     }
 
     if (error) {
-        return <div className="flex justify-center items-center h-screen text-red-500">Error loading gallery: {error}</div>;
+        return (
+            <>
+                <Header />
+                <div className="flex justify-center items-center h-screen text-red-500 pt-20">Error loading gallery: {error}</div>
+                <Footer />
+            </>
+        );
     }
 
     // Function to handle closing the modal
@@ -93,7 +108,8 @@ export default function GalleryPage() {
 
     return (
         <>
-            <main className="mx-auto max-w-[1960px] p-4">
+            <Header />
+            <main className="mx-auto max-w-[1960px] p-4 pt-20">
                 {/* Display error inline if needed, without blocking gallery */}
                 {error && (
                     <p className="text-center text-red-500 mb-4">Error loading images: {error}</p>
@@ -207,8 +223,7 @@ export default function GalleryPage() {
                 </div>
             )}
 
-            {/* Footer might be better in layout.tsx */}
-            {/* <footer className="p-6 text-center text-white/80 sm:p-12"> ... </footer> */}
+            <Footer />
         </>
     );
 }

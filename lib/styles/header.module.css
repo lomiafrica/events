@@ -1,0 +1,106 @@
+@font-face {
+  font-family: "Geist Sans";
+  src: url("https://assets.codepen.io/605876/GeistVF.ttf") format("truetype");
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0.5rem 0;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.3s ease, border-bottom-color 0.3s ease, backdrop-filter 0.3s ease;
+  color: white;
+}
+
+.header.scrolled {
+  background-color: hsla(var(--background) / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.headerContent {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  margin-left: -8px;
+}
+
+@media (max-width: 768px) {
+  .logoContainer {
+    padding-left: 12px;
+  }
+}
+
+.navLink {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.navLink:hover {
+  color: hsl(var(--primary));
+  border-bottom-color: hsl(var(--primary));
+}
+
+.activeNavLink {
+  color: hsl(var(--primary));
+  border-bottom-color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.activeNavLink:hover {
+  color: hsl(var(--primary) / 0.9);
+}
+
+.mobileMenuButton {
+  color: inherit;
+  border-color: transparent;
+}
+
+.mobileMenuButton:hover {
+  background-color: hsl(var(--accent));
+}
+
+.sheetContent {
+  background-color: hsl(var(--background));
+}
+
+.mobileNavLink {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  padding: 0.75rem 0;
+  transition: color 0.2s ease;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.mobileNavLink:last-child {
+  border-bottom: none;
+}
+
+.mobileNavLink:hover {
+  color: hsl(var(--primary));
+}
+
+.activeMobileNavLink {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
