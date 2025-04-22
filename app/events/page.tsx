@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import EventCard from "@/components/event-card"
+import EventCard from "@/components/landing/event-card"
 import { getAllEvents } from "@/lib/sanity/queries"
 
 // Define Event type to match EventCard props

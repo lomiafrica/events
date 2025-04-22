@@ -44,7 +44,7 @@ export default async function EventPage({
     <div className="container mx-auto py-12 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Event Flyer */}
-        <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg">
+        <div className="relative aspect-[2/3] rounded-md overflow-hidden shadow-lg">
           <Image
             src={event.flyer?.url || "/placeholder.svg?height=900&width=600"}
             alt={event.title}

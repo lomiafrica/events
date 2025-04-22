@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { Plus, Minus, ShoppingCart } from "lucide-react"
 
-import { Button } from "./ui/button"
-import { Card, CardContent } from "./ui/card"
-import { Separator } from "./ui/separator"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 type TicketType = {
   id: string
@@ -136,7 +136,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <ul className="text-sm mt-2 space-y-1">
                       {bundle.includes.map((item, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                          <div className="h-1.5 w-1.5 rounded-md bg-primary" />
                           {item}
                         </li>
                       ))}
@@ -179,7 +179,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
       <Separator className="my-6" />
 
       {/* Order Summary */}
-      <div className="bg-muted p-4 rounded-lg">
+      <div className="bg-muted p-4 rounded-md">
         <h3 className="font-semibold mb-4">Order Summary</h3>
 
         {hasSelections() ? (

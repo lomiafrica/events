@@ -5,8 +5,8 @@ import Image from "next/image"
 import { CalendarDays, Clock, MapPin } from "lucide-react"
 import { motion } from "framer-motion"
 
-import { Button } from "./ui/button"
-import { Badge } from "./ui/badge"
+import { Button } from "../ui/button"
+import { Badge } from "../ui/badge"
 
 type EventProps = {
   _id: string
@@ -24,7 +24,7 @@ type EventProps = {
 export default function EventCard({ event }: { event: EventProps }) {
   return (
     <motion.div
-      className="group relative rounded-xl overflow-hidden shadow-md h-[400px]"
+      className="group relative rounded-md overflow-hidden shadow-md h-[400px]"
       whileHover={{ y: -5 }}
     >
       <Link href={`/events/${event.slug}`} className="absolute inset-0 z-10">

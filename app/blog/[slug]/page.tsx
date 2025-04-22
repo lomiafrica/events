@@ -68,7 +68,7 @@ export default async function BlogPostPage({
       </div>
 
       {post.mainImage && (
-        <div className="relative aspect-video mb-8 rounded-xl overflow-hidden">
+        <div className="relative aspect-video mb-8 rounded-md overflow-hidden">
           <Image
             src={post.mainImage.url || "/placeholder.svg"}
             alt={post.title}
@@ -85,7 +85,7 @@ export default async function BlogPostPage({
 
       <Separator className="my-8" />
 
-      <div className="bg-muted p-6 rounded-xl">
+      <div className="bg-muted p-6 rounded-md">
         <h2 className="text-xl font-bold mb-4">About the Author</h2>
         {post.author ? (
           <div className="flex items-center gap-4">
@@ -95,7 +95,7 @@ export default async function BlogPostPage({
                 alt={post.author.name}
                 width={60}
                 height={60}
-                className="rounded-full"
+                className="rounded-md"
               />
             )}
             <div>

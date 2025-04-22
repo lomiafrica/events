@@ -4,8 +4,8 @@ import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import EventCard from "@/components/event-card"
-import FeaturedStory from "@/components/featured-story"
+import EventCard from "@/components/landing/event-card"
+import FeaturedStory from "@/components/landing/featured-story"
 import { getLatestEvents, getLatestBlogPosts, getFeaturedStory } from "@/lib/sanity/queries"
 
 // Define types for the data
