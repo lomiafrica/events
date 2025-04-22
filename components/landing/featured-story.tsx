@@ -1,18 +1,18 @@
-import Image from "next/image"
-import Link from "next/link"
-import { PortableText, PortableTextBlock } from "@portabletext/react"
+import Image from "next/image";
+import Link from "next/link";
+import { PortableText, PortableTextBlock } from "@portabletext/react";
 
-import { Button } from "../ui/button"
+import { Button } from "../ui/button";
 
 type StoryProps = {
-  title: string
-  subtitle: string
-  content: PortableTextBlock[]
+  title: string;
+  subtitle: string;
+  content: PortableTextBlock[];
   image: {
-    url: string
-    alt: string
-  }
-}
+    url: string;
+    alt: string;
+  };
+};
 
 export default function FeaturedStory({ story }: { story: StoryProps }) {
   return (
@@ -39,6 +39,5 @@ export default function FeaturedStory({ story }: { story: StoryProps }) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
-

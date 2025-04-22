@@ -1,34 +1,18 @@
-import ImageScroller from '@/components/ui/ImageScroller';
-import { getLatestBlogPosts } from "@/lib/sanity/queries"
-import Header from "@/components/landing/header"
-import Footer from "@/components/landing/footer"
-
-// Re-add Post interface definition (assuming it matches ImageScroller's needs)
-interface Post {
-  _id: string;
-  title: string;
-  slug: string;
-  featuredImage: string; // Ensure this matches ImageScroller's expected prop
-  excerpt?: string;
-  section?: { name: string; slug: string };
-  category?: { name: string; slug: string };
-  credits?: string;
-  author?: { name: string };
-  publishedAt?: string;
-  recommendationTag?: string;
-  recommendedArticles?: Post[]; // Assuming recursive Post structure for recommendations
-}
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
+import BackgroundVideo from "@/components/landing/BackgroundVideo";
 
 export default async function Home() {
-  const posts: Post[] = await getLatestBlogPosts(10) // Fetch more posts for the scroller
-
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
+      <BackgroundVideo />
       <Header />
-      {/* Replace Hero Section with ImageScroller */}
-      <ImageScroller images={posts} />
+      <main className="flex-grow container mx-auto px-4 py-8 relative z-10">
+        <h1 className="text-4xl font-bold text-white my-12">
+          Welcome to Djaouli Entertainment
+        </h1>
+      </main>
       <Footer />
     </div>
-  )
+  );
 }
-

@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import Image from "next/image"
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { getAllBlogPosts } from "@/lib/sanity/queries"
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { getAllBlogPosts } from "@/lib/sanity/queries";
 
 // Define a type for blog posts
 interface BlogPost {
@@ -20,11 +20,12 @@ interface BlogPost {
 
 export const metadata: Metadata = {
   title: "Blog | Djaouli Entertainment",
-  description: "Latest news, event recaps, and entertainment insights from Djaouli Entertainment",
-}
+  description:
+    "Latest news, event recaps, and entertainment insights from Djaouli Entertainment",
+};
 
 export default async function BlogPage() {
-  const posts = await getAllBlogPosts()
+  const posts = await getAllBlogPosts();
 
   return (
     <div className="container mx-auto py-12 px-4">
@@ -35,7 +36,9 @@ export default async function BlogPage() {
           <Card key={post._id} className="overflow-hidden flex flex-col h-full">
             <div className="relative h-60">
               <Image
-                src={post.mainImage?.url || "/placeholder.svg?height=400&width=600"}
+                src={
+                  post.mainImage?.url || "/placeholder.svg?height=400&width=600"
+                }
                 alt={post.title}
                 fill
                 className="object-cover"
@@ -46,7 +49,9 @@ export default async function BlogPage() {
                 {new Date(post.publishedAt).toLocaleDateString()}
               </div>
               <h3 className="text-xl font-bold mb-2">{post.title}</h3>
-              <p className="text-muted-foreground mb-4 flex-1">{post.excerpt}</p>
+              <p className="text-muted-foreground mb-4 flex-1">
+                {post.excerpt}
+              </p>
               <Button variant="outline" asChild className="mt-auto">
                 <Link href={`/blog/${post.slug}`}>Read More</Link>
               </Button>
@@ -55,6 +60,5 @@ export default async function BlogPage() {
         ))}
       </div>
     </div>
-  )
+  );
 }
-

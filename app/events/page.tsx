@@ -1,39 +1,40 @@
-import type { Metadata } from "next"
-import EventCard from "@/components/landing/event-card"
-import { getAllEvents } from "@/lib/sanity/queries"
+import type { Metadata } from "next";
+import ImageScroller from "@/components/ui/ImageScroller";
+import { getEventsForScroller } from "@/lib/sanity/queries";
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
 
-// Define Event type to match EventCard props
-interface Event {
+interface EventImageData {
   _id: string;
   title: string;
   slug: string;
-  date: string;
-  time: string;
-  location: string;
-  flyer: {
-    url: string;
-  };
-  ticketsAvailable: boolean;
+  featuredImage: string;
+  date?: string;
 }
 
 export const metadata: Metadata = {
   title: "Events | Djaouli Entertainment",
-  description: "Browse and book tickets for upcoming events in Côte d'Ivoire",
-}
+  description: "Explore upcoming events from Djaouli Entertainment",
+};
 
 export default async function EventsPage() {
-  const events = await getAllEvents()
+  const events: EventImageData[] = await getEventsForScroller(10);
+
+  // TODO: Handle case where events might be empty
+  if (!events || events.length === 0) {
+    return (
+      <div className="container mx-auto py-12 px-4">
+        <h1 className="text-4xl font-bold mb-8">Events</h1>
+        <p>No upcoming events found.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      <h1 className="text-4xl font-bold mb-8">Upcoming Events</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event: Event) => (
-          <EventCard key={event._id} event={event} />
-        ))}
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <ImageScroller images={events} />
+      <Footer />
     </div>
-  )
+  );
 }
-

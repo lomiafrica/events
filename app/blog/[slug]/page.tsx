@@ -1,45 +1,45 @@
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import { PortableText } from "@portabletext/react"
-import { CalendarDays, User, Tag } from "lucide-react"
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { PortableText } from "@portabletext/react";
+import { CalendarDays, User, Tag } from "lucide-react";
 
-import { getBlogPostBySlug } from "@/lib/sanity/queries"
-import { Separator } from "@/components/ui/separator"
+import { getBlogPostBySlug } from "@/lib/sanity/queries";
+import { Separator } from "@/components/ui/separator";
 
 interface Category {
   title: string;
 }
 
 export async function generateMetadata({
-  params
+  params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug)
+  const post = await getBlogPostBySlug(slug);
 
   if (!post) {
     return {
       title: "Post Not Found",
-    }
+    };
   }
 
   return {
     title: `${post.title} | Djaouli Entertainment Blog`,
     description: post.excerpt,
-  }
+  };
 }
 
 export default async function BlogPostPage({
-  params
+  params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug)
+  const post = await getBlogPostBySlug(slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -49,7 +49,9 @@ export default async function BlogPostPage({
       <div className="flex flex-wrap gap-4 text-muted-foreground mb-8">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4" />
-          <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString()}</time>
+          <time dateTime={post.publishedAt}>
+            {new Date(post.publishedAt).toLocaleDateString()}
+          </time>
         </div>
 
         {post.author && (
@@ -62,7 +64,9 @@ export default async function BlogPostPage({
         {post.categories && post.categories.length > 0 && (
           <div className="flex items-center gap-2">
             <Tag className="h-4 w-4" />
-            <span>{post.categories.map((cat: Category) => cat.title).join(", ")}</span>
+            <span>
+              {post.categories.map((cat: Category) => cat.title).join(", ")}
+            </span>
           </div>
         )}
       </div>
@@ -108,7 +112,7 @@ export default async function BlogPostPage({
         )}
       </div>
     </article>
-  )
+  );
 }
 
 // Optional: Generate static paths
@@ -116,4 +120,3 @@ export default async function BlogPostPage({
 //   const posts = await getAllBlogPosts();
 //   return posts.map((post: any) => ({ slug: post.slug?.current || post.slug }));
 // }
-

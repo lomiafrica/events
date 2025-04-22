@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
 
-import { Button } from "../ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "../ui/sheet"
-import styles from '@/lib/styles/header.module.css'
+import { Button } from "../ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "../ui/sheet";
+import styles from "@/lib/styles/header.module.css";
 
 export default function Header() {
-  const [isScrolled, setScrolled] = useState(false)
-  const pathname = usePathname()
+  const [isScrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener("scroll", handleScroll)
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const isActive = (path: string) => {
-    return pathname === path
-  }
+    return pathname === path;
+  };
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -34,11 +34,11 @@ export default function Header() {
     { name: "Gallery", path: "/gallery" },
     { name: "Shop", path: "/shop" },
     { name: "Blog", path: "/blog" },
-    { name: "Story", path: "/story" }
-  ]
+    { name: "Story", path: "/story" },
+  ];
 
   return (
-    <header className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}>
+    <header className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
       <div className={styles.headerContent}>
         <nav className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
@@ -55,7 +55,11 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="outline" size="icon" className={styles.mobileMenuButton}>
+              <Button
+                variant="outline"
+                size="icon"
+                className={styles.mobileMenuButton}
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -78,6 +82,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
-

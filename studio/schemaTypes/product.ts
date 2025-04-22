@@ -1,15 +1,15 @@
-import { Rule } from 'sanity'
+import {Rule} from 'sanity'
 
 export default {
   name: 'product',
   title: 'Product',
   type: 'document',
   groups: [
-    { name: 'details', title: 'Product Details', default: true },
-    { name: 'variants', title: 'Variants & Inventory' },
-    { name: 'media', title: 'Media' },
-    { name: 'organization', title: 'Organization' },
-    { name: 'shipping', title: 'Shipping' },
+    {name: 'details', title: 'Product Details', default: true},
+    {name: 'variants', title: 'Variants & Inventory'},
+    {name: 'media', title: 'Media'},
+    {name: 'organization', title: 'Organization'},
+    {name: 'shipping', title: 'Shipping'},
   ],
   fields: [
     {
@@ -34,8 +34,9 @@ export default {
       name: 'productId',
       title: 'Product ID / SKU',
       type: 'slug',
-      options: { source: 'name', maxLength: 50 },
-      description: 'Unique identifier for this product (e.g., djaouli-tee-black-m). Auto-generated from name if not specified.',
+      options: {source: 'name', maxLength: 50},
+      description:
+        'Unique identifier for this product (e.g., djaouli-tee-black-m). Auto-generated from name if not specified.',
       validation: (Rule: Rule) => Rule.required(),
     },
     {
@@ -44,9 +45,13 @@ export default {
       type: 'array',
       group: 'details',
       of: [
-        { type: 'block' },
-        { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', title: 'Caption', type: 'string' }] },
-      ]
+        {type: 'block'},
+        {
+          type: 'image',
+          options: {hotspot: true},
+          fields: [{name: 'caption', title: 'Caption', type: 'string'}],
+        },
+      ],
     },
     {
       name: 'images',
@@ -56,25 +61,25 @@ export default {
       of: [
         {
           type: 'image',
-          options: { hotspot: true },
+          options: {hotspot: true},
           fields: [
             {
               name: 'alt',
               title: 'Alt Text (for SEO & Accessibility)',
               type: 'string',
-              options: { isHighlighted: true },
-              validation: (Rule: Rule) => Rule.required()
+              options: {isHighlighted: true},
+              validation: (Rule: Rule) => Rule.required(),
             },
             {
               name: 'caption',
               title: 'Caption',
               type: 'string',
-              options: { isHighlighted: true }
-            }
-          ]
+              options: {isHighlighted: true},
+            },
+          ],
         },
       ],
-      validation: (Rule: Rule) => Rule.min(1).error('At least one image is required.')
+      validation: (Rule: Rule) => Rule.min(1).error('At least one image is required.'),
     },
     {
       name: 'basePrice',
@@ -96,45 +101,92 @@ export default {
       title: 'Variant Options',
       type: 'array',
       group: 'variants',
-      hidden: ({ document }: { document: { manageVariants?: boolean } }) => !document?.manageVariants,
+      hidden: ({document}: {document: {manageVariants?: boolean}}) => !document?.manageVariants,
       of: [
         {
           name: 'option',
           title: 'Option Type',
           type: 'object',
           fields: [
-            { name: 'name', title: 'Option Name (e.g., Size, Color)', type: 'string', validation: (Rule: Rule) => Rule.required() },
-            { name: 'values', title: 'Option Values (e.g., S, M, L or Red, Blue, Green)', type: 'array', of: [{ type: 'string' }], validation: (Rule: Rule) => Rule.required().min(1) }
-          ]
-        }
-      ]
+            {
+              name: 'name',
+              title: 'Option Name (e.g., Size, Color)',
+              type: 'string',
+              validation: (Rule: Rule) => Rule.required(),
+            },
+            {
+              name: 'values',
+              title: 'Option Values (e.g., S, M, L or Red, Blue, Green)',
+              type: 'array',
+              of: [{type: 'string'}],
+              validation: (Rule: Rule) => Rule.required().min(1),
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'variantInventory',
       title: 'Variant Inventory & Pricing',
       type: 'array',
       group: 'variants',
-      description: 'Define stock and specific pricing for each combination of variants. If empty, base price and stock are used.',
-      hidden: ({ document }: { document: { manageVariants?: boolean } }) => !document?.manageVariants,
+      description:
+        'Define stock and specific pricing for each combination of variants. If empty, base price and stock are used.',
+      hidden: ({document}: {document: {manageVariants?: boolean}}) => !document?.manageVariants,
       of: [
         {
           name: 'variantEntry',
           title: 'Variant Combination',
           type: 'object',
           fields: [
-            { name: 'variantName', title: 'Variant Combination (e.g., Medium / Red)', type: 'string', validation: (Rule: Rule) => Rule.required(), description: "Auto-generated or manually set" },
-            { name: 'sku', title: 'SKU', type: 'string', validation: (Rule: Rule) => Rule.required(), description: "Unique identifier for this specific variant" },
-            { name: 'price', title: 'Price (XOF)', type: 'number', description: 'Leave blank to use base price' },
-            { name: 'stock', title: 'Stock', type: 'number', validation: (Rule: Rule) => Rule.required().integer().min(0) }
+            {
+              name: 'variantName',
+              title: 'Variant Combination (e.g., Medium / Red)',
+              type: 'string',
+              validation: (Rule: Rule) => Rule.required(),
+              description: 'Auto-generated or manually set',
+            },
+            {
+              name: 'sku',
+              title: 'SKU',
+              type: 'string',
+              validation: (Rule: Rule) => Rule.required(),
+              description: 'Unique identifier for this specific variant',
+            },
+            {
+              name: 'price',
+              title: 'Price (XOF)',
+              type: 'number',
+              description: 'Leave blank to use base price',
+            },
+            {
+              name: 'stock',
+              title: 'Stock',
+              type: 'number',
+              validation: (Rule: Rule) => Rule.required().integer().min(0),
+            },
           ],
           preview: {
-            select: { title: 'variantName', sku: 'sku', price: 'price', stock: 'stock' },
-            prepare({ title, sku, price, stock }: { title: string; sku: string; price?: number; stock: number }) {
-              return { title: `${title} (SKU: ${sku})`, subtitle: `${price ? price + ' XOF' : 'Base Price'} - ${stock} in stock` }
-            }
-          }
-        }
-      ]
+            select: {title: 'variantName', sku: 'sku', price: 'price', stock: 'stock'},
+            prepare({
+              title,
+              sku,
+              price,
+              stock,
+            }: {
+              title: string
+              sku: string
+              price?: number
+              stock: number
+            }) {
+              return {
+                title: `${title} (SKU: ${sku})`,
+                subtitle: `${price ? price + ' XOF' : 'Base Price'} - ${stock} in stock`,
+              }
+            },
+          },
+        },
+      ],
     },
     {
       name: 'baseStock',
@@ -142,7 +194,7 @@ export default {
       type: 'number',
       group: 'variants',
       description: 'Number of items available if not using variants. Set 0 for Sold Out.',
-      hidden: ({ document }: { document: { manageVariants?: boolean } }) => document?.manageVariants,
+      hidden: ({document}: {document: {manageVariants?: boolean}}) => document?.manageVariants,
       validation: (Rule: Rule) => Rule.integer().min(0),
     },
     {
@@ -150,7 +202,7 @@ export default {
       title: 'Base SKU / Product ID (if not managing variants)',
       type: 'string',
       group: 'variants',
-      hidden: ({ document }: { document: { manageVariants?: boolean } }) => document?.manageVariants,
+      hidden: ({document}: {document: {manageVariants?: boolean}}) => document?.manageVariants,
       validation: (Rule: Rule) => Rule.required(),
     },
     {
@@ -158,49 +210,49 @@ export default {
       title: 'Categories',
       type: 'array',
       group: 'organization',
-      of: [{ type: 'reference', to: { type: 'category' } }],
+      of: [{type: 'reference', to: {type: 'category'}}],
     },
     {
       name: 'tags',
       title: 'Tags',
       type: 'array',
       group: 'organization',
-      of: [{ type: 'string' }],
-      options: { layout: 'tags' }
+      of: [{type: 'string'}],
+      options: {layout: 'tags'},
     },
     {
       name: 'relatedProducts',
       title: 'Related Products',
       type: 'array',
       group: 'organization',
-      of: [{ type: 'reference', to: { type: 'product' } }]
+      of: [{type: 'reference', to: {type: 'product'}}],
     },
     {
       name: 'requiresShipping',
       title: 'Requires Shipping?',
       type: 'boolean',
       group: 'shipping',
-      initialValue: true
+      initialValue: true,
     },
     {
       name: 'weight',
       title: 'Weight (kg)',
       type: 'number',
       group: 'shipping',
-      hidden: ({ document }: { document: { requiresShipping?: boolean } }) => !document?.requiresShipping,
+      hidden: ({document}: {document: {requiresShipping?: boolean}}) => !document?.requiresShipping,
     },
     {
       name: 'dimensions',
       title: 'Dimensions (cm)',
       type: 'object',
       group: 'shipping',
-      hidden: ({ document }: { document: { requiresShipping?: boolean } }) => !document?.requiresShipping,
+      hidden: ({document}: {document: {requiresShipping?: boolean}}) => !document?.requiresShipping,
       fields: [
-        { name: 'length', title: 'Length', type: 'number' },
-        { name: 'width', title: 'Width', type: 'number' },
-        { name: 'height', title: 'Height', type: 'number' }
-      ]
-    }
+        {name: 'length', title: 'Length', type: 'number'},
+        {name: 'width', title: 'Width', type: 'number'},
+        {name: 'height', title: 'Height', type: 'number'},
+      ],
+    },
   ],
   preview: {
     select: {
@@ -208,16 +260,28 @@ export default {
       price: 'basePrice',
       stock: 'baseStock',
       media: 'images.0.asset',
-      manageVariants: 'manageVariants'
+      manageVariants: 'manageVariants',
     },
-    prepare({ title, price, stock, media, manageVariants }: { title: string; price: number; stock?: number; media: any; manageVariants: boolean }) {
-      let subtitle = `${price} XOF`;
+    prepare({
+      title,
+      price,
+      stock,
+      media,
+      manageVariants,
+    }: {
+      title: string
+      price: number
+      stock?: number
+      media: any
+      manageVariants: boolean
+    }) {
+      let subtitle = `${price} XOF`
       if (manageVariants) {
-          subtitle += ' - Manages Variants';
+        subtitle += ' - Manages Variants'
       } else if (stock !== undefined && stock !== null) {
-        subtitle += ` - ${stock} in stock`;
+        subtitle += ` - ${stock} in stock`
       } else {
-        subtitle += ` - Stock Undefined`;
+        subtitle += ` - Stock Undefined`
       }
       return {
         title: title,
@@ -226,4 +290,4 @@ export default {
       }
     },
   },
-} 
+}

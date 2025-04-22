@@ -1,53 +1,53 @@
-import { Rule } from 'sanity';
+import {Rule} from 'sanity'
 
 export default {
-  name: "story",
-  title: "Story",
-  type: "document",
+  name: 'story',
+  title: 'Story',
+  type: 'document',
   fields: [
     {
-      name: "title",
-      title: "Title",
-      type: "string",
+      name: 'title',
+      title: 'Title',
+      type: 'string',
       validation: (Rule: Rule) => Rule.required(),
     },
     {
-      name: "subtitle",
-      title: "Subtitle",
-      type: "string",
+      name: 'subtitle',
+      title: 'Subtitle',
+      type: 'string',
     },
     {
-      name: "mainImage",
-      title: "Main image",
-      type: "image",
+      name: 'mainImage',
+      title: 'Main image',
+      type: 'image',
       options: {
         hotspot: true,
       },
     },
     {
-      name: "content",
-      title: "Content",
-      type: "array",
+      name: 'content',
+      title: 'Content',
+      type: 'array',
       of: [
-        { type: "block" },
+        {type: 'block'},
         {
-          type: "image",
-          options: { hotspot: true },
+          type: 'image',
+          options: {hotspot: true},
           fields: [
             {
               name: 'alt',
               title: 'Alt Text (for SEO & Accessibility)',
               type: 'string',
-              options: { isHighlighted: true },
-              validation: (Rule: Rule) => Rule.required()
+              options: {isHighlighted: true},
+              validation: (Rule: Rule) => Rule.required(),
             },
             {
               name: 'caption',
               title: 'Caption',
               type: 'string',
-              options: { isHighlighted: true }
-            }
-          ]
+              options: {isHighlighted: true},
+            },
+          ],
         },
         {
           name: 'videoEmbed',
@@ -59,31 +59,31 @@ export default {
               title: 'Video URL',
               type: 'url',
               description: 'URL from YouTube, Vimeo, etc.',
-              validation: (Rule: Rule) => Rule.required()
+              validation: (Rule: Rule) => Rule.required(),
             },
             {
               name: 'caption',
               title: 'Caption',
-              type: 'string'
-            }
+              type: 'string',
+            },
           ],
           preview: {
-            select: { url: 'url', caption: 'caption' },
-            prepare({ url, caption }: { url: string; caption?: string }) {
+            select: {url: 'url', caption: 'caption'},
+            prepare({url, caption}: {url: string; caption?: string}) {
               return {
                 title: `Video: ${caption || url}`,
-                subtitle: url
+                subtitle: url,
               }
-            }
-          }
-        }
+            },
+          },
+        },
       ],
     },
     {
-      name: "featured",
-      title: "Featured on Homepage",
-      type: "boolean",
+      name: 'featured',
+      title: 'Featured on Homepage',
+      type: 'boolean',
       initialValue: true,
     },
   ],
-} 
+}

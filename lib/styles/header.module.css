@@ -12,7 +12,10 @@
   padding: 0.5rem 0;
   background-color: transparent;
   border-bottom: 1px solid transparent;
-  transition: background-color 0.3s ease, border-bottom-color 0.3s ease, backdrop-filter 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-bottom-color 0.3s ease,
+    backdrop-filter 0.3s ease;
   color: white;
 }
 
@@ -51,7 +54,9 @@
   text-decoration: none;
   padding: 0.5rem 0.25rem;
   border-bottom: 2px solid transparent;
-  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-bottom-color 0.2s ease;
 }
 
 .navLink:hover {

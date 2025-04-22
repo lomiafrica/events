@@ -1,78 +1,82 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, Minus, ShoppingCart } from "lucide-react"
+import { useState } from "react";
+import { Plus, Minus, ShoppingCart } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 type TicketType = {
-  id: string
-  name: string
-  price: number
-  description: string
-  available: boolean
-  maxPerOrder: number
-}
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  available: boolean;
+  maxPerOrder: number;
+};
 
 type BundleType = {
-  id: string
-  name: string
-  price: number
-  description: string
-  includes: string[]
-  available: boolean
-  maxPerOrder: number
-}
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  includes: string[];
+  available: boolean;
+  maxPerOrder: number;
+};
 
 type EventProps = {
-  _id: string
-  title: string
-  ticketTypes: TicketType[]
-  bundles: BundleType[]
-}
+  _id: string;
+  title: string;
+  ticketTypes: TicketType[];
+  bundles: BundleType[];
+};
 
 export default function TicketSelector({ event }: { event: EventProps }) {
-  const [selectedTickets, setSelectedTickets] = useState<Record<string, number>>({})
-  const [selectedBundles, setSelectedBundles] = useState<Record<string, number>>({})
+  const [selectedTickets, setSelectedTickets] = useState<
+    Record<string, number>
+  >({});
+  const [selectedBundles, setSelectedBundles] = useState<
+    Record<string, number>
+  >({});
 
   const handleTicketChange = (id: string, count: number, max: number) => {
     setSelectedTickets((prev) => ({
       ...prev,
       [id]: Math.max(0, Math.min(count, max)),
-    }))
-  }
+    }));
+  };
 
   const handleBundleChange = (id: string, count: number, max: number) => {
     setSelectedBundles((prev) => ({
       ...prev,
       [id]: Math.max(0, Math.min(count, max)),
-    }))
-  }
+    }));
+  };
 
   const calculateTotal = () => {
-    let total = 0
+    let total = 0;
 
     // Add ticket prices
     event.ticketTypes.forEach((ticket) => {
-      total += (selectedTickets[ticket.id] || 0) * ticket.price
-    })
+      total += (selectedTickets[ticket.id] || 0) * ticket.price;
+    });
 
     // Add bundle prices
     event.bundles.forEach((bundle) => {
-      total += (selectedBundles[bundle.id] || 0) * bundle.price
-    })
+      total += (selectedBundles[bundle.id] || 0) * bundle.price;
+    });
 
-    return total
-  }
+    return total;
+  };
 
   const hasSelections = () => {
     return (
       Object.values(selectedTickets).some((count) => count > 0) ||
       Object.values(selectedBundles).some((count) => count > 0)
-    )
-  }
+    );
+  };
 
   return (
     <div>
@@ -86,8 +90,12 @@ export default function TicketSelector({ event }: { event: EventProps }) {
               <div className="flex justify-between items-center">
                 <div>
                   <h4 className="font-semibold">{ticket.name}</h4>
-                  <p className="text-sm text-muted-foreground">{ticket.description}</p>
-                  <p className="font-medium mt-1">{ticket.price.toLocaleString()} FCFA</p>
+                  <p className="text-sm text-muted-foreground">
+                    {ticket.description}
+                  </p>
+                  <p className="font-medium mt-1">
+                    {ticket.price.toLocaleString()} FCFA
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -95,22 +103,35 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     variant="outline"
                     size="icon"
                     onClick={() =>
-                      handleTicketChange(ticket.id, (selectedTickets[ticket.id] || 0) - 1, ticket.maxPerOrder)
+                      handleTicketChange(
+                        ticket.id,
+                        (selectedTickets[ticket.id] || 0) - 1,
+                        ticket.maxPerOrder,
+                      )
                     }
                     disabled={!selectedTickets[ticket.id]}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
 
-                  <span className="w-8 text-center">{selectedTickets[ticket.id] || 0}</span>
+                  <span className="w-8 text-center">
+                    {selectedTickets[ticket.id] || 0}
+                  </span>
 
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() =>
-                      handleTicketChange(ticket.id, (selectedTickets[ticket.id] || 0) + 1, ticket.maxPerOrder)
+                      handleTicketChange(
+                        ticket.id,
+                        (selectedTickets[ticket.id] || 0) + 1,
+                        ticket.maxPerOrder,
+                      )
                     }
-                    disabled={!ticket.available || (selectedTickets[ticket.id] || 0) >= ticket.maxPerOrder}
+                    disabled={
+                      !ticket.available ||
+                      (selectedTickets[ticket.id] || 0) >= ticket.maxPerOrder
+                    }
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -132,7 +153,9 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold">{bundle.name}</h4>
-                    <p className="text-sm text-muted-foreground">{bundle.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {bundle.description}
+                    </p>
                     <ul className="text-sm mt-2 space-y-1">
                       {bundle.includes.map((item, index) => (
                         <li key={index} className="flex items-center gap-2">
@@ -141,7 +164,9 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                         </li>
                       ))}
                     </ul>
-                    <p className="font-medium mt-2">{bundle.price.toLocaleString()} FCFA</p>
+                    <p className="font-medium mt-2">
+                      {bundle.price.toLocaleString()} FCFA
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -149,22 +174,35 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        handleBundleChange(bundle.id, (selectedBundles[bundle.id] || 0) - 1, bundle.maxPerOrder)
+                        handleBundleChange(
+                          bundle.id,
+                          (selectedBundles[bundle.id] || 0) - 1,
+                          bundle.maxPerOrder,
+                        )
                       }
                       disabled={!selectedBundles[bundle.id]}
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
 
-                    <span className="w-8 text-center">{selectedBundles[bundle.id] || 0}</span>
+                    <span className="w-8 text-center">
+                      {selectedBundles[bundle.id] || 0}
+                    </span>
 
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        handleBundleChange(bundle.id, (selectedBundles[bundle.id] || 0) + 1, bundle.maxPerOrder)
+                        handleBundleChange(
+                          bundle.id,
+                          (selectedBundles[bundle.id] || 0) + 1,
+                          bundle.maxPerOrder,
+                        )
                       }
-                      disabled={!bundle.available || (selectedBundles[bundle.id] || 0) >= bundle.maxPerOrder}
+                      disabled={
+                        !bundle.available ||
+                        (selectedBundles[bundle.id] || 0) >= bundle.maxPerOrder
+                      }
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -186,9 +224,9 @@ export default function TicketSelector({ event }: { event: EventProps }) {
           <>
             <div className="space-y-2 mb-4">
               {Object.entries(selectedTickets).map(([id, count]) => {
-                if (count === 0) return null
-                const ticket = event.ticketTypes.find((t) => t.id === id)
-                if (!ticket) return null
+                if (count === 0) return null;
+                const ticket = event.ticketTypes.find((t) => t.id === id);
+                if (!ticket) return null;
 
                 return (
                   <div key={id} className="flex justify-between">
@@ -197,13 +235,13 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     </span>
                     <span>{(count * ticket.price).toLocaleString()} FCFA</span>
                   </div>
-                )
+                );
               })}
 
               {Object.entries(selectedBundles).map(([id, count]) => {
-                if (count === 0) return null
-                const bundle = event.bundles.find((b) => b.id === id)
-                if (!bundle) return null
+                if (count === 0) return null;
+                const bundle = event.bundles.find((b) => b.id === id);
+                if (!bundle) return null;
 
                 return (
                   <div key={id} className="flex justify-between">
@@ -212,7 +250,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     </span>
                     <span>{(count * bundle.price).toLocaleString()} FCFA</span>
                   </div>
-                )
+                );
               })}
             </div>
 
@@ -229,10 +267,11 @@ export default function TicketSelector({ event }: { event: EventProps }) {
             </Button>
           </>
         ) : (
-          <p className="text-muted-foreground">Select tickets or bundles to see your order summary.</p>
+          <p className="text-muted-foreground">
+            Select tickets or bundles to see your order summary.
+          </p>
         )}
       </div>
     </div>
-  )
+  );
 }
-

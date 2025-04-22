@@ -1,20 +1,20 @@
-import { Rule } from 'sanity';
+import {Rule} from 'sanity'
 
 export default {
-  name: "category",
-  title: "Category",
-  type: "document",
+  name: 'category',
+  title: 'Category',
+  type: 'document',
   fields: [
     {
-      name: "title",
-      title: "Title",
-      type: "string",
+      name: 'title',
+      title: 'Title',
+      type: 'string',
       validation: (Rule: Rule) => Rule.required(),
     },
     {
-      name: "description",
-      title: "Description",
-      type: "text",
+      name: 'description',
+      title: 'Description',
+      type: 'text',
     },
   ],
-} 
+}

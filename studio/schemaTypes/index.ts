@@ -4,12 +4,6 @@ import author from './author'
 import category from './category'
 import story from './story'
 import product from './product'
+import homepage from './homepage'
 
-export const schemaTypes = [
-  event,
-  post, 
-  author,
-  category,
-  story,
-  product
-]
+export const schemaTypes = [homepage, event, post, author, category, story, product]

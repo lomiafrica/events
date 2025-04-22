@@ -1,8 +1,9 @@
-import { client } from './client'
+import { client } from "./client";
 
 // Events
 export async function getLatestEvents(limit = 3) {
-  return client.fetch(`
+  return client.fetch(
+    `
     *[_type == "event" && dateTime(date) >= dateTime(now())] | order(date asc) [0...$limit] {
       _id,
       title,
@@ -16,29 +17,28 @@ export async function getLatestEvents(limit = 3) {
       },
       ticketsAvailable
     }
-  `, { limit })
+  `,
+    { limit },
+  );
 }
 
-export async function getAllEvents() {
-  return client.fetch(`
-    *[_type == "event"] | order(date desc) {
-      _id,
-      title,
-      slug,
-      date,
-      "date": dateTime(date),
-      "time": coalesce(time, "TBD"),
-      "location": coalesce(location, "TBD"),
-      "flyer": {
-        "url": flyer.asset->url
-      },
-      ticketsAvailable
-    }
-  `)
-}
+export const getAllEvents = async (): Promise<Event[]> => {
+  const query = `*[_type == "event"] | order(date desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    date,
+    time,
+    location,
+    "flyer": flyer.asset->{url},
+    ticketsAvailable
+  }`;
+  return await client.fetch(query);
+};
 
 export async function getEventBySlug(slug: string) {
-  const events = await client.fetch(`
+  const events = await client.fetch(
+    `
     *[_type == "event" && slug.current == $slug][0] {
       _id,
       title,
@@ -56,14 +56,17 @@ export async function getEventBySlug(slug: string) {
       ticketTypes,
       bundles
     }
-  `, { slug })
-  
-  return events
+  `,
+    { slug },
+  );
+
+  return events;
 }
 
 // Blog
 export async function getLatestBlogPosts(limit = 2) {
-  return client.fetch(`
+  return client.fetch(
+    `
     *[_type == "post"] | order(publishedAt desc) [0...$limit] {
       _id,
       title,
@@ -74,7 +77,9 @@ export async function getLatestBlogPosts(limit = 2) {
         "url": mainImage.asset->url
       }
     }
-  `, { limit })
+  `,
+    { limit },
+  );
 }
 
 export async function getAllBlogPosts() {
@@ -89,11 +94,12 @@ export async function getAllBlogPosts() {
         "url": mainImage.asset->url
       }
     }
-  `)
+  `);
 }
 
 export async function getBlogPostBySlug(slug: string) {
-  const post = await client.fetch(`
+  const post = await client.fetch(
+    `
     *[_type == "post" && slug.current == $slug][0] {
       _id,
       title,
@@ -106,9 +112,11 @@ export async function getBlogPostBySlug(slug: string) {
       body,
       "categories": categories[]->{title}
     }
-  `, { slug })
-  
-  return post
+  `,
+    { slug },
+  );
+
+  return post;
 }
 
 // Story
@@ -123,7 +131,7 @@ export async function getFeaturedStory() {
       },
       content
     }
-  `)
+  `);
 }
 
 export async function getStory() {
@@ -137,7 +145,7 @@ export async function getStory() {
         "alt": alt
       }
     }`,
-  )
+  );
 }
 
 // Products (New Section)
@@ -152,11 +160,12 @@ export async function getAllProducts() {
       price,
       stock
     }
-  `)
+  `);
 }
 
 export async function getProductBySlug(slug: string) {
-  return client.fetch(`
+  return client.fetch(
+    `
     *[_type == "product" && slug.current == $slug][0] {
       _id,
       name,
@@ -177,6 +186,46 @@ export async function getProductBySlug(slug: string) {
       // Fetch variants if implemented
       // variants
     }
-  `, { slug })
+  `,
+    { slug },
+  );
 }
 
+// Define interface for the data returned by getEventsForScroller
+interface EventScrollerData {
+  _id: string;
+  title: string;
+  slug: string;
+  featuredImage: string; // Matches the alias in the query
+  date?: string; // Matches the optional date field in the query
+}
+
+// New query for ImageScroller
+export const getEventsForScroller = async (
+  limit = 10,
+): Promise<EventScrollerData[]> => {
+  // Use the specific interface
+  const query = `*[_type == "event"] | order(date desc) [0...$limit] {
+    _id,
+    title,
+    "slug": slug.current,
+    "featuredImage": flyer.asset->url, // Alias flyer URL as featuredImage
+    date, // Keep date for potential use in scroller UI
+    // Add other fields if ImageScroller is adapted to show them
+  }`;
+  // Use the specific interface in the fetch call as well for better type safety
+  return await client.fetch<EventScrollerData[]>(query, { limit });
+};
+
+// ================================= Homepage ================================
+
+// Fetch the URL of the background video from the singleton homepage document
+export const getHomepageVideoUrl = async (): Promise<string | null> => {
+  // Query the single document of type 'homepage'
+  // Select only the URL of the asset linked in the backgroundVideo field
+  const query = `*[_type == "homepage"][0] {
+    "videoUrl": backgroundVideo.asset->url
+  }`;
+  const result = await client.fetch<{ videoUrl: string | null }>(query);
+  return result?.videoUrl ?? null;
+};

@@ -1,13 +1,13 @@
-import Image from "next/image"
-import { PortableText } from "@portabletext/react"
-import { getStory } from "@/lib/sanity/queries"
-import { notFound } from 'next/navigation'
+import Image from "next/image";
+import { PortableText } from "@portabletext/react";
+import { getStory } from "@/lib/sanity/queries";
+import { notFound } from "next/navigation";
 
 export default async function StoryPage() {
-  const story = await getStory()
+  const story = await getStory();
 
   if (!story) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -31,6 +31,5 @@ export default async function StoryPage() {
         <PortableText value={story.content} />
       </div>
     </div>
-  )
+  );
 }
-

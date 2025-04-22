@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { CalendarDays, Clock, MapPin } from "lucide-react"
-import { motion } from "framer-motion"
+import Link from "next/link";
+import Image from "next/image";
+import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 
-import { Button } from "../ui/button"
-import { Badge } from "../ui/badge"
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 type EventProps = {
-  _id: string
-  title: string
-  slug: string
-  date: string
-  time: string
-  location: string
+  _id: string;
+  title: string;
+  slug: string;
+  date: string;
+  time: string;
+  location: string;
   flyer: {
-    url: string
-  }
-  ticketsAvailable: boolean
-}
+    url: string;
+  };
+  ticketsAvailable: boolean;
+};
 
 export default function EventCard({ event }: { event: EventProps }) {
   return (
@@ -42,7 +42,9 @@ export default function EventCard({ event }: { event: EventProps }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         {!event.ticketsAvailable && (
-          <Badge className="absolute top-4 right-4 bg-red-500 hover:bg-red-600">Sold Out</Badge>
+          <Badge className="absolute top-4 right-4 bg-red-500 hover:bg-red-600">
+            Sold Out
+          </Badge>
         )}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
@@ -73,6 +75,5 @@ export default function EventCard({ event }: { event: EventProps }) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
-

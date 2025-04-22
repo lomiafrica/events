@@ -18,7 +18,9 @@ interface CloudinarySearchResults {
 // Use the defined type and initialize as undefined
 let cachedResults: CloudinarySearchResults | undefined;
 
-export default async function getResults(): Promise<CloudinarySearchResults | undefined> {
+export default async function getResults(): Promise<
+  CloudinarySearchResults | undefined
+> {
   if (!cachedResults) {
     const fetchedResults = await cloudinary.v2.search
       .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)

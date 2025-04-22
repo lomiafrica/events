@@ -2,7 +2,7 @@
 
 // Remove unused imports
 // import { useState, useEffect } from 'react';
-import Link from "next/link"
+import Link from "next/link";
 // Remove useTheme import
 // import { useTheme } from "next-themes";
 import { IG } from "@/components/icons/IG";
@@ -10,7 +10,7 @@ import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 // Remove ThemeToggle import
 // import { ThemeToggle } from "@/components/ui/theme-toggle"
-import Barcode from "@/components/ui/barcode"
+import Barcode from "@/components/ui/barcode";
 import { Soundcloud } from "@/components/icons/Soundcloud";
 import Image from "next/image";
 
@@ -20,7 +20,7 @@ const footerLinks = [
   { href: "/events", label: "Events" },
   { href: "/story", label: "Story" },
   { href: "/code", label: "Code" },
-]
+];
 
 export default function Footer() {
   // Removed theme state and effect
@@ -32,9 +32,13 @@ export default function Footer() {
         <div className="flex flex-wrap items-center justify-between gap-4 md:gap-6">
           {/* Brand Info */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center gap-x-2 -ml-2 mt-5" aria-label="Djaouli Ent.">
+            <Link
+              href="/"
+              className="flex items-center gap-x-2 -ml-2 mt-5"
+              aria-label="Djaouli Ent."
+            >
               <Image
-                src={'/white.svg'}
+                src={"/white.svg"}
                 alt="Djaouli Ent. Logo"
                 width={160}
                 height={50}
@@ -118,7 +122,8 @@ export default function Footer() {
         <div className="border-t mt-6 pt-6 grid gap-8 md:grid-cols-2 items-start">
           {/* Copyright - Moved first and aligned left */}
           <div className="text-xs text-muted-foreground md:text-left md:col-span-1">
-            &copy; {new Date().getFullYear()} Djaouli Entertainment — All rights reserved.
+            &copy; {new Date().getFullYear()} Djaouli Entertainment — All rights
+            reserved.
           </div>
 
           {/* Combined Footer Links - Moved second */}
@@ -144,6 +149,5 @@ export default function Footer() {
         <Barcode />
       </div>
     </footer>
-  )
+  );
 }
-

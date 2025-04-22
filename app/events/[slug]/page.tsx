@@ -1,43 +1,43 @@
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import { CalendarDays, Clock, MapPin, Share2 } from "lucide-react"
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { CalendarDays, Clock, MapPin, Share2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getEventBySlug } from "@/lib/sanity/queries"
-import TicketSelector from "@/components/ticket-selector"
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getEventBySlug } from "@/lib/sanity/queries";
+import TicketSelector from "@/components/landing/ticket-selector";
 
 export async function generateMetadata({
-  params
+  params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug)
+  const event = await getEventBySlug(slug);
 
   if (!event) {
     return {
       title: "Event Not Found",
-    }
+    };
   }
 
   return {
     title: `${event.title} | Djaouli Entertainment`,
     description: event.description,
-  }
+  };
 }
 
 export default async function EventPage({
-  params
+  params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug)
+  const event = await getEventBySlug(slug);
 
   if (!event) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -89,7 +89,9 @@ export default async function EventPage({
                 <TicketSelector event={event} />
               ) : (
                 <div className="bg-red-50 text-red-800 p-4 rounded-md">
-                  <p className="font-medium">Sorry, tickets are no longer available for this event.</p>
+                  <p className="font-medium">
+                    Sorry, tickets are no longer available for this event.
+                  </p>
                 </div>
               )}
             </TabsContent>
@@ -108,7 +110,12 @@ export default async function EventPage({
               </div>
 
               <div className="mt-6 h-[300px] bg-muted rounded-md relative">
-                <Image src="/placeholder.svg?height=600&width=800" alt="Venue Map" fill className="object-cover" />
+                <Image
+                  src="/placeholder.svg?height=600&width=800"
+                  alt="Venue Map"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </TabsContent>
           </Tabs>
@@ -124,6 +131,5 @@ export default async function EventPage({
         </div>
       </div>
     </div>
-  )
+  );
 }
-
