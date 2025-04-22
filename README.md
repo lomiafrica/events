@@ -23,7 +23,7 @@ The website features:
 
 Unlike traditional e-commerce platforms, this project uses Sanity to manage all e-commerce aspects
 
-## Getting Started
+## Getting started
 
    ```bash
    git clone https://github.com/princemuichkine/djaoulient.com
