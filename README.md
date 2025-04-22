@@ -6,11 +6,11 @@ A website for Djaouli Entertainment, a Côte d'Ivoire based company specializing
 
 This project is built with:
 
-- **Next.js**: Frontend framework with App Router
-- **Sanity CMS**: Content management for all aspects including e-commerce
+- **Next.js**: Frontend framework
+- **Sanity CMS**: Content management
 - **Tailwind CSS**: For styling
 - **shadcn/ui**: Component library
-- **Resend**: Programmatic emails
+- **Resend**: Emails
 - **lomi.**: Payments
 
 The website features:
@@ -21,7 +21,7 @@ The website features:
 - Company story page
 - Fully responsive design optimized for mobile
 
-Unlike traditional e-commerce platforms, this project uses Sanity to manage all e-commerce aspects
+Unlike traditional e-commerce platforms, this project uses Sanity to manage all e-commerce aspects.
 
 ## Getting started
 
