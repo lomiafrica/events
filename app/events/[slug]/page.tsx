@@ -192,7 +192,7 @@ export default async function EventPage({
           {/* Event Flyer - Assign 2 columns */}
           <div className="lg:col-span-2 relative aspect-[2/3] rounded-sm overflow-hidden shadow-lg bg-muted">
             <Image
-              src={event.flyer?.url || "/placeholder.svg"}
+              src={event.flyer?.url || "/placeholder.webp"}
               alt={event.title}
               priority
               fill

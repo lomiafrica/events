@@ -37,7 +37,7 @@ export default async function BlogPage() {
             <div className="relative h-60">
               <Image
                 src={
-                  post.mainImage?.url || "/placeholder.svg?height=400&width=600"
+                  post.mainImage?.url || "/placeholder.webp?height=400&width=600"
                 }
                 alt={post.title}
                 fill

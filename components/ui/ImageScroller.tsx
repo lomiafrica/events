@@ -169,7 +169,7 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
                 <main className={styles.main}>
                     <div className={styles.front} style={{ position: 'relative' }}>
                         <Image
-                            src={activeImage.featuredImage || '/placeholder.svg'}
+                            src={activeImage.featuredImage || '/placeholder.webp'}
                             alt={activeImage.title}
                             className={`${styles.mainImg} mainImg`}
                             onClick={handleMainImageClick}
@@ -208,7 +208,7 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
                                             className={styles.liButton}
                                         >
                                             <Image
-                                                src={image.featuredImage || '/placeholder.svg'}
+                                                src={image.featuredImage || '/placeholder.webp'}
                                                 alt={image.title}
                                                 className={styles.liImg}
                                                 loading="lazy"

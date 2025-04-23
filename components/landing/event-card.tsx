@@ -33,7 +33,7 @@ export default function EventCard({ event }: { event: EventProps }) {
 
       <div className="relative h-full w-full">
         <Image
-          src={event.flyer?.url || "/placeholder.svg?height=600&width=400"}
+          src={event.flyer?.url || "/placeholder.webp?height=600&width=400"}
           alt={event.title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"

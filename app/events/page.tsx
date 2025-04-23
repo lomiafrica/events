@@ -15,7 +15,7 @@ interface EventImageData {
 }
 
 export const metadata: Metadata = {
-  title: "Events | Djaouli Entertainment",
+  title: "Djaouli Entertainment | Events",
   description: "Explore upcoming events from Djaouli Entertainment",
 };
 

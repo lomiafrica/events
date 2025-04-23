@@ -120,16 +120,16 @@
 .comingSoonBadge {
   display: inline-block;
   margin-left: 8px;
-  padding: 4px 6px; /* Increased vertical padding for height */
-  font-size: 0.65rem;
+  padding: 2px 4px;
+  font-size: 0.6rem;
   font-weight: 600;
   line-height: 1;
-  border-radius: 2px; /* Less round */
+  border-radius: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   vertical-align: middle;
   /* Dark background, green text */
-  background-color: rgba(31, 41, 55, 0.8); /* Dark grey bg (gray-800) */
+  background-color: rgba(31, 41, 55, 0.5); /* Dark grey bg (gray-800) */
   color: #22C55E; /* Green text (green-500) */
 }
 

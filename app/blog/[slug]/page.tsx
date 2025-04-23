@@ -74,7 +74,7 @@ export default async function BlogPostPage({
       {post.mainImage && (
         <div className="relative aspect-video mb-8 rounded-md overflow-hidden">
           <Image
-            src={post.mainImage.url || "/placeholder.svg"}
+            src={post.mainImage.url || "/placeholder.webp"}
             alt={post.title}
             fill
             priority
@@ -95,7 +95,7 @@ export default async function BlogPostPage({
           <div className="flex items-center gap-4">
             {post.author.image && (
               <Image
-                src={post.author.image.url || "/placeholder.svg"}
+                src={post.author.image.url || "/placeholder.webp"}
                 alt={post.author.name}
                 width={60}
                 height={60}

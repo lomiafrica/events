@@ -18,7 +18,7 @@ export default async function StoryPage() {
       {story.image && (
         <div className="relative aspect-video mb-8 rounded-md overflow-hidden">
           <Image
-            src={story.image.url || "/placeholder.svg"}
+            src={story.image.url || "/placeholder.webp"}
             alt={story.image.alt || story.title}
             fill
             priority
