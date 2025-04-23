@@ -19,6 +19,7 @@ interface EventImageData {
     featuredImage: string;
     date?: string;
     description?: string;
+    ticketsAvailable?: boolean;
 }
 
 interface ImageScrollerProps {
@@ -166,7 +167,7 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
         <div className={styles.imageScrollerContainer} ref={containerRef}>
             <div className={styles.imageBox}>
                 <main className={styles.main}>
-                    <div className={styles.front}>
+                    <div className={styles.front} style={{ position: 'relative' }}>
                         <Image
                             src={activeImage.featuredImage || '/placeholder.svg'}
                             alt={activeImage.title}
@@ -181,6 +182,11 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
                             height={600}
                             priority={activeImageIndex === 0}
                         />
+                        {activeImage.ticketsAvailable === false && (
+                            <div className={styles.soldOutBadge}>
+                                SOLD OUT
+                            </div>
+                        )}
                     </div>
                 </main>
                 <div

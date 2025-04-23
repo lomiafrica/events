@@ -1,4 +1,4 @@
-# Djaouli Ent.
+# djaoulient.com
 
 A website for Djaouli Entertainment, a Côte d'Ivoire based company specializing in event organization and related services. This website combines e-commerce functionality for selling event tickets with a content-rich blog.
 
@@ -6,12 +6,18 @@ A website for Djaouli Entertainment, a Côte d'Ivoire based company specializing
 
 This project is built with:
 
-- **Next.js**: Frontend framework
-- **Sanity CMS**: Content management
-- **Tailwind CSS**: For styling
-- **shadcn/ui**: Component library
-- **Resend**: Emails
+- **Next.js**: Frontend
+- **Sanity CMS**: CMS
+- **Tailwind CSS**: Styling
+- **React + shadcn/ui**: UI
 - **lomi.**: Payments
+
+## Upcoming
+
+Technologies to implement to enable more features
+
+- **Resend**: Emails
+- **Supabase**: DB
 
 The website features:
 

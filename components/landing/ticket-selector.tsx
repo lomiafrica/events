@@ -71,6 +71,12 @@ export default function TicketSelector({ event }: { event: EventProps }) {
     return total;
   };
 
+  // Helper function for formatting price
+  const formatPrice = (price: number): string => {
+    // Use non-breaking space (\u00A0) for thousands separator
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
+  };
+
   const hasSelections = () => {
     return (
       Object.values(selectedTickets).some((count) => count > 0) ||
@@ -82,7 +88,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
     <div>
       {/* Tickets */}
       <div className="space-y-4 mb-6">
-        <h3 className="font-medium">Individual Tickets</h3>
+        <h3 className="font-medium">Tickets</h3>
 
         {event.ticketTypes.map((ticket) => (
           <Card key={ticket.id}>
@@ -94,7 +100,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     {ticket.description}
                   </p>
                   <p className="font-medium mt-1">
-                    {ticket.price.toLocaleString()} FCFA
+                    {formatPrice(ticket.price)} FCFA
                   </p>
                 </div>
 
@@ -145,7 +151,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
       {/* Bundles */}
       {event.bundles.length > 0 && (
         <div className="space-y-4 mb-6">
-          <h3 className="font-medium">Ticket Bundles</h3>
+          <h3 className="font-medium">Bundles</h3>
 
           {event.bundles.map((bundle) => (
             <Card key={bundle.id}>
@@ -165,7 +171,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                       ))}
                     </ul>
                     <p className="font-medium mt-2">
-                      {bundle.price.toLocaleString()} FCFA
+                      {formatPrice(bundle.price)} FCFA
                     </p>
                   </div>
 
@@ -218,7 +224,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
 
       {/* Order Summary */}
       <div className="bg-muted p-4 rounded-md">
-        <h3 className="font-semibold mb-4">Order Summary</h3>
+        <h3 className="font-semibold mb-4">Summary</h3>
 
         {hasSelections() ? (
           <>
@@ -233,7 +239,9 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <span>
                       {count}x {ticket.name}
                     </span>
-                    <span>{(count * ticket.price).toLocaleString()} FCFA</span>
+                    <span>
+                      {formatPrice(count * ticket.price)} FCFA
+                    </span>
                   </div>
                 );
               })}
@@ -248,7 +256,9 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <span>
                       {count}x {bundle.name}
                     </span>
-                    <span>{(count * bundle.price).toLocaleString()} FCFA</span>
+                    <span>
+                      {formatPrice(count * bundle.price)} FCFA
+                    </span>
                   </div>
                 );
               })}
@@ -258,17 +268,19 @@ export default function TicketSelector({ event }: { event: EventProps }) {
 
             <div className="flex justify-between font-bold mb-6">
               <span>Total</span>
-              <span>{calculateTotal().toLocaleString()} FCFA</span>
+              <span>
+                {formatPrice(calculateTotal())} FCFA
+              </span>
             </div>
 
-            <Button className="w-full" size="lg">
+            <Button className="w-full rounded-md" size="lg">
               <ShoppingCart className="mr-2 h-5 w-5" />
               Proceed to Checkout
             </Button>
           </>
         ) : (
           <p className="text-muted-foreground">
-            Select tickets or bundles to see your order summary.
+            Select tickets or bundles to see your order.
           </p>
         )}
       </div>

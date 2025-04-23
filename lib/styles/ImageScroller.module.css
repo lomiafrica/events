@@ -16,7 +16,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   width: 58px;
-  height: 78px;
+  height: 120px;
   padding-right: 1px;
   align-self: center;
   margin-left: auto;
@@ -259,10 +259,8 @@
   .imageScrollerContainer {
     margin: 0;
     margin-top: 0rem;
-    padding-bottom: 50px;
     overflow: visible;
     touch-action: pan-y;
-    padding-right: 10px;
     height: auto;
     padding-bottom: 20px;
   }
@@ -270,36 +268,34 @@
   .imageBox {
     flex-direction: column;
     height: auto;
-    width: 105%;
+    width: 100%;
     max-width: none;
     overflow: visible;
+    align-items: center;
   }
 
   .main {
     width: 100%;
-    max-height: none;
     max-width: none;
     overflow: hidden;
     padding: 0;
-    object-fit: cover;
-    aspect-ratio: 11 / 11;
     touch-action: pan-y;
     padding-top: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 60px;
+    height: 70vh;
   }
 
   .mainImg {
-    width: 100%;
-    height: auto;
-    max-height: 80vh;
-    max-width: none;
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 70vh;
     object-fit: contain;
     position: static;
-    left: 50%;
-    height: auto;
-    max-height: 70vh;
-    position: static;
     transform: none;
-    margin-bottom: 20px;
     border-radius: 16px;
     touch-action: pan-x pan-y;
     box-sizing: border-box;
@@ -320,16 +316,15 @@
   }
 
   .imageScroller {
-    width: 81.5%;
+    width: 90%;
     height: 90px;
     padding: 10px 0;
-    margin: 15px auto;
+    margin: 30px auto 15px auto;
     position: static;
     transform: none;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    margin-top: 85px;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
     touch-action: pan-x;
@@ -360,6 +355,12 @@
   .mainImg {
     touch-action: pan-x pan-y;
   }
+
+  /* Add Sold Out Badge styles for tablet */
+  .soldOutBadge {
+    bottom: 30px;
+    right: 30px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -376,20 +377,21 @@
 @media (max-width: 768px) {
   .imageScrollerContainer {
     touch-action: pan-y;
-    width: 109%;
+    width: 100%;
     margin-top: 0px;
-    margin-left: -20px;
+    margin-left: 0;
+    padding: 0 10px;
+    box-sizing: border-box;
   }
 
   .imageScroller {
-    width: 66%; /* Make the scroller slightly narrower on smaller screens */
-    height: 80px; /* Reduce the height slightly for mobile */
+    width: 90%;
+    height: 80px;
     overflow-y: hidden;
-    align-self: center;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-    scroll-snap-type: x mandatory; /* Improve scroll snapping */
-    padding: 0 7px; /* Add some padding */
-    margin-top: 80px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 0;
+    margin: 30px auto 15px auto;
   }
 
   .asideUl {
@@ -408,7 +410,8 @@
   }
 
   .mainImg {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: auto;
     max-height: 60vh;
     object-fit: contain;
@@ -422,7 +425,7 @@
   }
 
   .li:last-child {
-    margin-right: 5px; /* Add a small margin to the last item */
+    margin-right: 5px;
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -458,5 +461,98 @@
 
   .scrollButton:active {
     background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .main {
+    min-height: 55vh;
+  }
+}
+
+/* Added styles for SOLD OUT Badge */
+.soldOutBadge {
+  position: absolute;
+  bottom: 50px; /* Adjust vertical position (moved 300px up) */
+  right: 400px;  /* Adjust horizontal position (moved 600px left) */
+  background-color: rgba(127, 29, 29, 0.7); /* Dark red semi-transparent background */
+  color: #EF4444; /* Tailwind red-500 */
+  padding: 4px 8px; /* Small padding */
+  font-size: 0.7rem; /* Small font */
+  font-weight: 600; /* Semi-bold */
+  border-radius: 2px; /* 6px - Match shadcn/ui Button/Badge */
+  z-index: 10; /* Ensure it's above the image */
+  pointer-events: none; /* Don't interfere with clicks on image */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1; /* Ensure consistent height */
+}
+
+@media (max-width: 768px) {
+  .soldOutBadge {
+    bottom: 55px;
+    right: 20px;
+    font-size: 0.65rem;
+    padding: 3px 6px;
+  }
+}
+
+/* === Landscape Tablet Styles === */
+@media (min-width: 1025px) and (max-width: 1366px) {
+  /* Apply flexbox layout specifically for landscape tablets */
+  .imageBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Slightly smaller gap than desktop maybe */
+  }
+
+  .main {
+    flex-basis: calc(100% - 100px); /* Adjust basis for scroller + gap */
+    max-width: calc(100% - 100px);
+    height: 100%;
+    padding: 15px;
+    position: static; /* Override default position: relative */
+  }
+
+  .mainImg {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 85vh; /* Slightly taller max-height? */
+    object-fit: contain;
+    position: static; /* Override default absolute */
+    transform: none; /* Override default transform */
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .mainImg:hover {
+    transform: scale(1.03);
+  }
+
+  .imageScroller {
+    flex-basis: 70px; /* Adjust width */
+    width: 70px;
+    height: auto;
+    max-height: 80vh; /* Adjust height */
+    overflow-y: auto;
+    position: static; /* Override default absolute */
+    transform: none; /* Override default transform */
+    padding: 10px 5px;
+    align-self: center;
+    margin: 0; /* Reset margins */
+    right: auto; /* Override default right */
+    top: auto; /* Override default top */
+    box-sizing: border-box;
+  }
+
+  /* Position badge relative to the image container */
+  .soldOutBadge {
+    /* Override default badge positioning */
+    bottom: 40px;
+    right: 40px; /* Closer to corner for this layout */
+    /* Inherit size/color etc. from default */
   }
 }

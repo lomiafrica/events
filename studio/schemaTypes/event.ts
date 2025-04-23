@@ -158,31 +158,47 @@ export default {
       initialValue: true,
     },
     {
-      name: 'paymentLink',
-      title: 'Direct Payment Link (Optional)',
-      type: 'url',
+      name: 'checkoutType',
+      title: 'Checkout type',
+      type: 'string',
       group: 'tickets',
-      description: 'If provided, this link will be used for checkout instead of API integration. Overrides individual ticket settings for checkout.',
+      options: {
+        list: [
+          {title: 'API Checkout (On-site quantity selection)', value: 'api'},
+          {title: 'Direct Link Checkout (Per-item external links)', value: 'link'},
+        ],
+        layout: 'radio',
+      },
+      description: "Choose how users purchase tickets: 'API' for on-site selection and checkout via integration, 'Link' for directing users to separate payment links for each ticket/bundle.",
+      validation: (Rule: Rule) => Rule.required(),
+      initialValue: 'api',
     },
     {
       name: 'paymentProductId',
-      title: 'Payment Product ID (Optional)',
+      title: 'Payment product ID (Optional)',
       type: 'string',
       group: 'tickets',
-      description: 'Optional ID for integrating with a payment/ticketing API (e.g., lomi. Product ID). Used if no Direct Payment Link is provided. Enabling this parameter block the possibility of adding custom bundles.',
+      description: 'Product ID for API integration (e.g., lomi. Product ID). Used only if Checkout Mode is set to API.',
+      hidden: ({document}: {document: any}) => document?.checkoutType !== 'api',
     },
     {
       name: 'ticketTypes',
       title: 'Ticket Types / Offerings',
       type: 'array',
       group: 'tickets',
-      hidden: ({document}: {document: any}) => !!document?.paymentLink,
       of: [
         {
           name: 'ticketType',
           title: 'Ticket / Offering',
           type: 'object',
           fields: [
+            {
+              name: 'paymentLink',
+              title: 'Direct payment link',
+              type: 'url',
+              description: 'URL for direct purchase of this specific ticket type. Used only if Checkout Mode is set to Link.',
+              hidden: ({document}: {document?: any}) => document?.checkoutType !== 'link',
+            },
             {
               name: 'name',
               title: 'Name',
@@ -280,10 +296,9 @@ export default {
     },
     {
       name: 'bundles',
-      title: 'Ticket Bundles / Packages (Optional)',
+      title: 'Ticket bundles / Packages (Optional)',
       type: 'array',
       group: 'tickets',
-      hidden: ({document}: {document: any}) => !!document?.paymentLink,
       description: 'Define special packages combining tickets or offering unique value.',
       of: [
         {
@@ -293,7 +308,7 @@ export default {
           fields: [
             {
               name: 'name',
-              title: 'Bundle Name',
+              title: 'Bundle name',
               type: 'string',
               validation: (Rule: Rule) => Rule.required(),
             },
@@ -307,7 +322,7 @@ export default {
             },
             {
               name: 'price',
-              title: 'Bundle Price (XOF)',
+              title: 'Bundle price (XOF)',
               type: 'number',
               validation: (Rule: Rule) => Rule.required().min(0),
             },
@@ -318,16 +333,23 @@ export default {
             },
             {
               name: 'details',
-              title: 'Bundle Details / Inclusions',
+              title: 'Bundle details',
               type: 'text',
               description: 'List everything included in this bundle (e.g., "2x VIP Tickets, 1x Champagne Bottle").',
             },
             {
               name: 'stock',
-              title: 'Available Bundles',
+              title: 'Available bundles',
               type: 'number',
               description: "Number of bundles available. Leave empty or set 0 for 'Sold Out'.",
               validation: (Rule: Rule) => Rule.integer().min(0),
+            },
+            {
+              name: 'paymentLink',
+              title: 'Direct payment link (Link mode)',
+              type: 'url',
+              description: 'URL for direct purchase of this specific bundle. Used only if Checkout Mode is set to Link.',
+              hidden: ({document}: {document?: any}) => document?.checkoutType !== 'link',
             },
           ],
           preview: {

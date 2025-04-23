@@ -115,3 +115,35 @@
 .customSheetContent > button {
   display: none !important;
 }
+
+/* Styles for the Coming Soon Badge */
+.comingSoonBadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 6px; /* Increased vertical padding for height */
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 2px; /* Less round */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  /* Dark background, green text */
+  background-color: rgba(31, 41, 55, 0.8); /* Dark grey bg (gray-800) */
+  color: #22C55E; /* Green text (green-500) */
+}
+
+/* Styles to make disabled links non-interactive */
+.disabledNavLink {
+  /* Inherits base styles from .navLink */
+  cursor: not-allowed;
+  opacity: 0.8; /* Slightly faded */
+  /* Add other styles if needed to prevent hover effects */
+}
+
+.disabledMobileNavLink {
+  /* Inherits base styles from .mobileNavLink */
+  cursor: not-allowed;
+  opacity: 0.8; /* Slightly faded */
+   /* Add other styles if needed to prevent hover effects */
+}

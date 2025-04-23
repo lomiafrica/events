@@ -33,7 +33,7 @@ export default function Header() {
     { name: "Home", path: "/" },
     { name: "Events", path: "/events" },
     { name: "Gallery", path: "/gallery" },
-    { name: "Shop", path: "/shop" },
+    { name: "Shop", path: "/shop", isComingSoon: true },
     { name: "Blog", path: "/blog" },
   ];
 
@@ -52,13 +52,20 @@ export default function Header() {
 
         <nav className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`${styles.navLink} ${isActive(item.path) ? styles.activeNavLink : ""}`}
-            >
-              {item.name}
-            </Link>
+            item.isComingSoon ? (
+              <span key={item.path} className={`${styles.navLink} ${styles.disabledNavLink}`}>
+                {item.name}
+                <span className={styles.comingSoonBadge}>Soon</span>
+              </span>
+            ) : (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`${styles.navLink} ${isActive(item.path) ? styles.activeNavLink : ""}`}
+              >
+                {item.name}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -89,14 +96,21 @@ export default function Header() {
 
               <div className="mt-16 flex flex-col gap-8 text-left w-auto">
                 {navItems.map((item) => (
-                  <SheetClose asChild key={item.path}>
-                    <Link
-                      href={item.path}
-                      className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
-                    >
+                  item.isComingSoon ? (
+                    <div key={item.path} className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}>
                       {item.name}
-                    </Link>
-                  </SheetClose>
+                      <span className={styles.comingSoonBadge}>Soon</span>
+                    </div>
+                  ) : (
+                    <SheetClose asChild key={item.path}>
+                      <Link
+                        href={item.path}
+                        className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
+                      >
+                        {item.name}
+                      </Link>
+                    </SheetClose>
+                  )
                 ))}
               </div>
 

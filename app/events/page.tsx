@@ -11,6 +11,7 @@ interface EventImageData {
   featuredImage: string;
   date?: string;
   description?: string;
+  ticketsAvailable?: boolean;
 }
 
 export const metadata: Metadata = {

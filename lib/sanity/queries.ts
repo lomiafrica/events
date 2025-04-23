@@ -234,6 +234,7 @@ interface EventScrollerData {
   featuredImage: string; // Matches the alias in the query
   date?: string; // Matches the optional date field in the query
   description?: string; // Add description field
+  ticketsAvailable?: boolean; // <-- Add this field
 }
 
 // New query for ImageScroller
@@ -247,7 +248,8 @@ export const getEventsForScroller = async (
     "slug": slug.current,
     "featuredImage": flyer.asset->url, // Alias flyer URL as featuredImage
     date, // Keep date for potential use in scroller UI
-    description // Fetch the description
+    description, // Fetch the description
+    ticketsAvailable // <-- Add this field to the query
     // Add other fields if ImageScroller is adapted to show them
   }`;
   // Use the specific interface in the fetch call as well for better type safety

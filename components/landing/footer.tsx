@@ -21,7 +21,6 @@ const footerLinks = [
 // Define words for animation
 const animatedWords = [
   "freedom",
-  "unity",
   "energy",
   "respect",
 ];
@@ -53,7 +52,7 @@ export default function Footer() {
               We bring{' '}
               <AnimatedTextCycle
                 words={animatedWords}
-                interval={3000}
+                interval={5000}
                 className="font-extrabold"
               />{' '}
               to Abidjan&apos;s music scene.
@@ -115,7 +114,7 @@ export default function Footer() {
               {/* Instagram */}
               <li>
                 <Link
-                  href="https://www.instagram.com/djaoulient/"
+                  href="https://www.instagram.com/djaouli_ent/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
