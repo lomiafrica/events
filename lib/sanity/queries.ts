@@ -37,30 +37,65 @@ export const getAllEvents = async (): Promise<Event[]> => {
 };
 
 export async function getEventBySlug(slug: string) {
-  const events = await client.fetch(
+  const event = await client.fetch(
     `
     *[_type == "event" && slug.current == $slug][0] {
       _id,
       title,
+      subtitle,
       slug,
       date,
-      "date": dateTime(date),
+      "dateFormatted": dateTime(date),
       "time": coalesce(time, "TBD"),
-      "location": coalesce(location, "TBD"),
+      "location": location,
       "flyer": {
         "url": flyer.asset->url
       },
       description,
       venueDetails,
+      hostedBy,
       ticketsAvailable,
-      ticketTypes,
-      bundles
+      paymentLink,
+      paymentProductId,
+      ticketTypes[]{
+        _key,
+        name,
+        ticketId,
+        price,
+        description,
+        details,
+        stock,
+        maxPerOrder,
+        salesStart,
+        salesEnd
+      },
+      lineup[]->{
+        _id,
+        name,
+        bio,
+        "image": image.asset->url,
+        socialLink
+      },
+      gallery[]{
+        _key,
+        "url": asset->url,
+        "caption": caption
+      },
+      bundles[]{
+        _key,
+        name,
+        bundleId,
+        price,
+        description,
+        details,
+        stock
+      }
     }
   `,
     { slug },
   );
 
-  return events;
+  return event;
 }
 
 // Blog
@@ -198,6 +233,7 @@ interface EventScrollerData {
   slug: string;
   featuredImage: string; // Matches the alias in the query
   date?: string; // Matches the optional date field in the query
+  description?: string; // Add description field
 }
 
 // New query for ImageScroller
@@ -211,6 +247,7 @@ export const getEventsForScroller = async (
     "slug": slug.current,
     "featuredImage": flyer.asset->url, // Alias flyer URL as featuredImage
     date, // Keep date for potential use in scroller UI
+    description // Fetch the description
     // Add other fields if ImageScroller is adapted to show them
   }`;
   // Use the specific interface in the fetch call as well for better type safety

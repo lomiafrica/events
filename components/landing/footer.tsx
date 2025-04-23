@@ -1,25 +1,29 @@
 "use client";
 
-// Remove unused imports
-// import { useState, useEffect } from 'react';
+
 import Link from "next/link";
-// Remove useTheme import
-// import { useTheme } from "next-themes";
+
 import { IG } from "@/components/icons/IG";
 import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
-// Remove ThemeToggle import
-// import { ThemeToggle } from "@/components/ui/theme-toggle"
 import Barcode from "@/components/ui/barcode";
 import { Soundcloud } from "@/components/icons/Soundcloud";
 import Image from "next/image";
+import AnimatedTextCycle from "@/components/ui/animated-text";
+import { Newspaper, CalendarDays, ScrollText } from "lucide-react";
 
-// Define the new footer links
 const footerLinks = [
-  { href: "/blog", label: "Blog" },
-  { href: "/events", label: "Events" },
-  { href: "/story", label: "Story" },
-  { href: "/code", label: "Code" },
+  { href: "/terms", label: "Terms", icon: Newspaper },
+  { href: "/privacy", label: "Privacy", icon: CalendarDays },
+  { href: "/djaouli-code", label: "Code", icon: ScrollText },
+];
+
+// Define words for animation
+const animatedWords = [
+  "freedom",
+  "unity",
+  "energy",
+  "respect",
 ];
 
 export default function Footer() {
@@ -29,7 +33,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-sidebar to-background pt-2 pb-6 select-none">
       <div className="container mx-auto px-4 lg:px-8">
         {/* --- Top Section (Single Row): Brand -> Icons -> Toggle --- */}
-        <div className="flex flex-wrap items-center justify-between gap-4 md:gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 md:gap-6">
           {/* Brand Info */}
           <div className="flex-shrink-0">
             <Link
@@ -45,9 +49,15 @@ export default function Footer() {
                 priority
               />
             </Link>
-            <p className="text-muted-foreground text-xs mt-1 max-w-xs">
-              Bringing the best events to Côte d&apos;Ivoire since 2015.
-            </p>
+            <div className="text-muted-foreground text-xs mt-1 mb-1 max-w-xs">
+              We bring{' '}
+              <AnimatedTextCycle
+                words={animatedWords}
+                interval={3000}
+                className="font-extrabold"
+              />{' '}
+              to Abidjan&apos;s music scene.
+            </div>
           </div>
 
           {/* --- Right Aligned Group: Icons ONLY --- */}
@@ -119,9 +129,9 @@ export default function Footer() {
         </div>
 
         {/* --- Bottom Section (Single Row): Copyright / Links --- */}
-        <div className="border-t mt-6 pt-6 grid gap-8 md:grid-cols-2 items-start">
+        <div className="border-t mt-6 pt-6 grid gap-4 md:gap-8 md:grid-cols-2 items-start">
           {/* Copyright - Moved first and aligned left */}
-          <div className="text-xs text-muted-foreground md:text-left md:col-span-1">
+          <div className="text-xs text-muted-foreground text-center md:text-left md:col-span-1">
             &copy; {new Date().getFullYear()} Djaouli Entertainment — All rights
             reserved.
           </div>
@@ -133,7 +143,7 @@ export default function Footer() {
                 <li key={`footer-${i}`} className="shrink-0">
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
                   >
                     {link.label}
                   </Link>
@@ -145,7 +155,7 @@ export default function Footer() {
       </div>
 
       {/* Barcode remains untouched at the bottom */}
-      <div className="w-full mt-4">
+      <div className="w-full mt-16">
         <Barcode />
       </div>
     </footer>

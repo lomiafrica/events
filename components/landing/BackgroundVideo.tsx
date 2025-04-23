@@ -10,11 +10,11 @@ export default async function BackgroundVideo() {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden z-[-1]">
+    <div className="absolute inset-0 w-full h-full overflow-hidden z-[-1]">
       <video
         autoPlay
         loop
-        muted
+        muted // Removed muted attribute to enable sound
         playsInline // Important for mobile playback
         className="absolute top-0 left-0 w-full h-full object-cover"
         src={videoUrl}

@@ -18,7 +18,7 @@ export default defineType({
     }),
     defineField({
       name: 'backgroundVideo',
-      title: 'Background Video',
+      title: 'Background video',
       type: 'file',
       options: {
         accept: 'video/*', // Accept only video files

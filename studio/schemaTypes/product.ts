@@ -5,7 +5,7 @@ export default {
   title: 'Product',
   type: 'document',
   groups: [
-    {name: 'details', title: 'Product Details', default: true},
+    {name: 'details', title: 'Product details', default: true},
     {name: 'variants', title: 'Variants & Inventory'},
     {name: 'media', title: 'Media'},
     {name: 'organization', title: 'Organization'},
@@ -14,7 +14,7 @@ export default {
   fields: [
     {
       name: 'name',
-      title: 'Product Name',
+      title: 'Product name',
       type: 'string',
       group: 'details',
       validation: (Rule: Rule) => Rule.required(),
@@ -32,7 +32,7 @@ export default {
     },
     {
       name: 'productId',
-      title: 'Product ID / SKU',
+      title: 'Product ID',
       type: 'slug',
       options: {source: 'name', maxLength: 50},
       description:
@@ -55,7 +55,7 @@ export default {
     },
     {
       name: 'images',
-      title: 'Product Images',
+      title: 'Product images',
       type: 'array',
       group: 'media',
       of: [
@@ -65,7 +65,7 @@ export default {
           fields: [
             {
               name: 'alt',
-              title: 'Alt Text (for SEO & Accessibility)',
+              title: 'Alt',
               type: 'string',
               options: {isHighlighted: true},
               validation: (Rule: Rule) => Rule.required(),
@@ -83,7 +83,7 @@ export default {
     },
     {
       name: 'basePrice',
-      title: 'Base Price (XOF)',
+      title: 'Base price (XOF)',
       description: 'The main price. Variant pricing can adjust this.',
       type: 'number',
       group: 'variants',
@@ -91,32 +91,32 @@ export default {
     },
     {
       name: 'manageVariants',
-      title: 'Manage Variants (e.g., Size, Color)',
+      title: 'Manage variants (e.g., Size, Color)',
       type: 'boolean',
       group: 'variants',
       initialValue: false,
     },
     {
       name: 'variantOptions',
-      title: 'Variant Options',
+      title: 'Variant pptions',
       type: 'array',
       group: 'variants',
       hidden: ({document}: {document: {manageVariants?: boolean}}) => !document?.manageVariants,
       of: [
         {
           name: 'option',
-          title: 'Option Type',
+          title: 'Type',
           type: 'object',
           fields: [
             {
               name: 'name',
-              title: 'Option Name (e.g., Size, Color)',
+              title: 'Option name (e.g., Size, Color)',
               type: 'string',
               validation: (Rule: Rule) => Rule.required(),
             },
             {
               name: 'values',
-              title: 'Option Values (e.g., S, M, L or Red, Blue, Green)',
+              title: 'Option values (e.g., S, M, L or Red, Blue, Green)',
               type: 'array',
               of: [{type: 'string'}],
               validation: (Rule: Rule) => Rule.required().min(1),
@@ -127,7 +127,7 @@ export default {
     },
     {
       name: 'variantInventory',
-      title: 'Variant Inventory & Pricing',
+      title: 'Variant & Pricing',
       type: 'array',
       group: 'variants',
       description:
@@ -136,26 +136,26 @@ export default {
       of: [
         {
           name: 'variantEntry',
-          title: 'Variant Combination',
+          title: 'Variant combination',
           type: 'object',
           fields: [
             {
               name: 'variantName',
-              title: 'Variant Combination (e.g., Medium / Red)',
+              title: 'Variant combination (e.g., Medium / Red)',
               type: 'string',
               validation: (Rule: Rule) => Rule.required(),
               description: 'Auto-generated or manually set',
             },
             {
               name: 'sku',
-              title: 'SKU',
+              title: 'V-ID',
               type: 'string',
               validation: (Rule: Rule) => Rule.required(),
               description: 'Unique identifier for this specific variant',
             },
             {
               name: 'price',
-              title: 'Price (XOF)',
+              title: 'Price',
               type: 'number',
               description: 'Leave blank to use base price',
             },
@@ -190,7 +190,7 @@ export default {
     },
     {
       name: 'baseStock',
-      title: 'Base Stock (if not managing variants)',
+      title: 'Base stock',
       type: 'number',
       group: 'variants',
       description: 'Number of items available if not using variants. Set 0 for Sold Out.',
@@ -199,7 +199,7 @@ export default {
     },
     {
       name: 'baseSku',
-      title: 'Base SKU / Product ID (if not managing variants)',
+      title: 'Product ID (if not managing variants)',
       type: 'string',
       group: 'variants',
       hidden: ({document}: {document: {manageVariants?: boolean}}) => document?.manageVariants,
@@ -222,14 +222,14 @@ export default {
     },
     {
       name: 'relatedProducts',
-      title: 'Related Products',
+      title: 'Related products',
       type: 'array',
       group: 'organization',
       of: [{type: 'reference', to: {type: 'product'}}],
     },
     {
       name: 'requiresShipping',
-      title: 'Requires Shipping?',
+      title: 'Requires shipping?',
       type: 'boolean',
       group: 'shipping',
       initialValue: true,

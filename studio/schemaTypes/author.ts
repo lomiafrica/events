@@ -36,12 +36,12 @@ export default {
     },
     {
       name: 'socialLinks',
-      title: 'Social Media Links',
+      title: 'Social media links',
       type: 'array',
       of: [
         {
           name: 'socialLink',
-          title: 'Social Link',
+          title: 'Social link',
           type: 'object',
           fields: [
             {

@@ -109,3 +109,9 @@
   color: hsl(var(--primary));
   font-weight: 600;
 }
+
+/* Add rule to hide default close button within our specific sheet */
+/* More aggressive: Target *any* direct child button */
+.customSheetContent > button {
+  display: none !important;
+}

@@ -37,7 +37,7 @@ export default {
       fields: [
         {
           name: 'alt',
-          title: 'Alt Text (for SEO & Accessibility)',
+          title: 'Alt',
           type: 'string',
           options: {isHighlighted: true},
           validation: (Rule: Rule) => Rule.required(),
@@ -67,11 +67,6 @@ export default {
       type: 'text',
     },
     {
-      name: 'subtitle',
-      title: 'Subtitle',
-      type: 'string',
-    },
-    {
       name: 'postType',
       title: 'Post Type',
       type: 'string',
@@ -79,7 +74,7 @@ export default {
         list: [
           {title: 'Article', value: 'article'},
           {title: 'Deep Dive', value: 'deep-dive'},
-          {title: 'Story / Case Study', value: 'story'},
+          {title: 'Story', value: 'story'},
         ],
         layout: 'radio',
       },
@@ -99,7 +94,7 @@ export default {
           fields: [
             {
               name: 'alt',
-              title: 'Alt Text (for SEO & Accessibility)',
+              title: 'Alt',
               type: 'string',
               options: {isHighlighted: true},
               validation: (Rule: Rule) => Rule.required(),
@@ -114,7 +109,7 @@ export default {
         },
         {
           name: 'videoEmbed',
-          title: 'Video Embed',
+          title: 'Video embed',
           type: 'object',
           fields: [
             {
@@ -143,15 +138,8 @@ export default {
       ],
     },
     {
-      name: 'readingTime',
-      title: 'Estimated Reading Time (minutes)',
-      type: 'number',
-      readOnly: true,
-      description: 'This could be auto-calculated from the body content.',
-    },
-    {
       name: 'isFeatured',
-      title: 'Featured Post?',
+      title: 'Featured post?',
       type: 'boolean',
       initialValue: false,
       description: 'Feature this post on the homepage or blog landing page.',
