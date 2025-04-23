@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/react"
 const inter = Inter({ subsets: ["latin"] });
 
 const siteConfig = {
-  name: "Djaouli Entertainment | Underground Music Collective",
+  name: "Djaouli Ent.",
   description: "Breaking musical boundaries since 2022.",
   url: "https://djaoulient.com",
   ogImage: "/banner.webp",

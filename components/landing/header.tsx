@@ -114,7 +114,7 @@ export default function Header() {
                 ))}
               </div>
 
-              <p className="mt-24 text-sm text-zinc-400 max-w-md">
+              <p className="mt-24 text-sm text-bold text-zinc-400 max-w-md">
                 Djaouli Entertainment is a boundary-pushing DJ collective from Abidjan, Côte d&apos;Ivoire,
                 creating spaces where musical freedom thrives and social barriers dissolve.
               </p>
