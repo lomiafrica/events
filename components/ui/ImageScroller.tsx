@@ -182,11 +182,6 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
                             height={600}
                             priority={activeImageIndex === 0}
                         />
-                        {activeImage.ticketsAvailable === false && (
-                            <div className={styles.soldOutBadge}>
-                                SOLD OUT
-                            </div>
-                        )}
                     </div>
                 </main>
                 <div
