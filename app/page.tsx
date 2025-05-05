@@ -6,8 +6,8 @@ import { getHomepageVideoUrl } from "@/lib/sanity/queries";
 
 // Use the general site metadata for the home page
 export const metadata: Metadata = {
-  title: "Djaouli Ent. | Underground Music Collective",
-  description: "Breaking musical boundaries since 2022.",
+  title: "Djaouli Ent. | An Alternative Music Project from Abidjan",
+  description: "Hip Hop",
 };
 
 export default async function Home() {
