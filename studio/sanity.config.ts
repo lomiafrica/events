@@ -8,7 +8,7 @@ export default defineConfig({
   title: 'djaouli.ent',
 
   // Using the same values as defined in sanity.cli.ts
-  projectId: 'lztvi0yd',
+  projectId: '11qckjsr',
   dataset: 'production',
 
   plugins: [structureTool(), visionTool()],
