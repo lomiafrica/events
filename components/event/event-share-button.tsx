@@ -93,7 +93,7 @@ export function EventShareButton({ eventTitle, eventSlug }: EventShareButtonProp
                 onClick={() => setIsOpen(true)}
             >
                 <Share2 className="h-4 w-4" />
-                Share Event
+                Share
             </Button>
 
             {/* The Modal Dialog */}

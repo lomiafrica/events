@@ -5,11 +5,10 @@ import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEventBySlug } from "@/lib/sanity/queries";
-import TicketSelector from "@/components/landing/ticket-selector";
 import Link from "next/link";
 import { EventShareButton } from "@/components/event/event-share-button";
+import { YangoButton } from "@/components/event/YangoButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -26,6 +25,7 @@ interface TicketTypeData {
   salesStart?: string | null; // Allow null
   salesEnd?: string | null; // Allow null
   paymentLink?: string;
+  active: boolean; // Added active field
 }
 
 // Define specific type for Bundle
@@ -38,7 +38,9 @@ interface BundleData {
   details?: string;
   stock?: number | null; // Allow null
   paymentLink?: string;
-  // Bundles don't have salesStart/End in schema, only stock
+  active: boolean; // Added active field
+  salesStart?: string | null; // Added salesStart for bundles
+  salesEnd?: string | null; // Added salesEnd for bundles
 }
 
 // Updated EventData type
@@ -52,14 +54,13 @@ type EventData = {
     venueName?: string;
     address?: string;
     googleMapsUrl?: string;
+    yangoUrl?: string; // Added Yango URL
   };
   flyer?: { url: string };
   description?: string;
   venueDetails?: string;
   hostedBy?: string;
   ticketsAvailable?: boolean; // Master switch
-  checkoutType: 'api' | 'link';
-  paymentProductId?: string;
   ticketTypes?: TicketTypeData[];
   bundles?: BundleData[];
   lineup?: { _key: string; name: string; bio?: string; image?: string; socialLink?: string }[];
@@ -88,29 +89,30 @@ export async function generateMetadata({
 }
 
 // Helper function to check ticket/bundle availability
-const isAvailable = (item: { stock?: number | null; salesStart?: string | null; salesEnd?: string | null }): { available: boolean; reason: string } => {
-  // Check stock
+// Renamed and updated to include 'active' status and handle items consistently
+interface ItemForAvailabilityCheck {
+  active: boolean;
+  stock?: number | null;
+  salesStart?: string | null;
+  salesEnd?: string | null;
+}
+
+const getItemAvailabilityStatus = (item: ItemForAvailabilityCheck): { available: boolean; reason: string } => {
+  if (!item.active) {
+    return { available: false, reason: "Currently Inactive" };
+  }
   if (typeof item.stock === 'number' && item.stock <= 0) {
     return { available: false, reason: "Sold Out" };
   }
-
-  // Check sales dates (only relevant for ticketTypes based on current schema)
   const now = new Date();
-  if (item.salesStart) {
-    if (now < new Date(item.salesStart)) {
-      // Format date nicely for the reason
-      const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' });
-      return { available: false, reason: `Starts ${startDate}` };
-    }
+  if (item.salesStart && now < new Date(item.salesStart)) {
+    const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' });
+    return { available: false, reason: `Sales start ${startDate}` };
   }
-  if (item.salesEnd) {
-    if (now > new Date(item.salesEnd)) {
-      return { available: false, reason: "Sales Ended" };
-    }
+  if (item.salesEnd && now > new Date(item.salesEnd)) {
+    return { available: false, reason: "Sales have ended" };
   }
-
-  // If stock is undefined/null or > 0, and dates are okay, it's available
-  return { available: true, reason: "" };
+  return { available: true, reason: "" }; // Default is available if no other condition met
 };
 
 // Helper function for formatting price
@@ -140,49 +142,11 @@ export default async function EventPage({
     hour: 'numeric', minute: '2-digit', hour12: true
   }) || 'Time TBC';
 
-  // Map EventData to the props expected by TicketSelector (API mode)
-  const mapToTicketSelectorProps = (eventData: EventData) => {
-    const ticketTypes = eventData.ticketTypes || [];
-    const bundles = eventData.bundles || [];
-
-    return {
-      _id: eventData._id,
-      title: eventData.title,
-      ticketTypes: ticketTypes.map(tt => {
-        const availability = isAvailable(tt); // Use helper
-        return {
-          id: tt.ticketId?.current || tt._key,
-          name: tt.name,
-          price: tt.price,
-          description: tt.description || '',
-          // Combine global switch and specific availability
-          available: (eventData.ticketsAvailable === undefined || eventData.ticketsAvailable === true) && availability.available,
-          maxPerOrder: tt.maxPerOrder || 10,
-        };
-      }),
-      bundles: bundles.map(b => {
-        const availability = isAvailable(b); // Use helper (checks stock only for bundles)
-        return {
-          id: b.bundleId?.current || b._key,
-          name: b.name,
-          price: b.price,
-          description: b.description || '',
-          includes: b.details?.split('\n').map(s => s.trim()).filter(Boolean) || ['See details'],
-          // Combine global switch and specific availability
-          available: (eventData.ticketsAvailable === undefined || eventData.ticketsAvailable === true) && availability.available,
-          maxPerOrder: 10, // Bundles currently don't have maxPerOrder in schema, defaulting
-        };
-      }),
-    };
-  };
-
-  // Prepare props specifically for TicketSelector if needed (API mode)
-  const ticketSelectorProps = (event && event.checkoutType === 'api') ? mapToTicketSelectorProps(event) : null;
-
-  // Determine if any tickets/bundles are available for purchase in Link mode
-  const anyLinksAvailable = event.checkoutType === 'link' && (event.ticketsAvailable === undefined || event.ticketsAvailable === true) &&
-    ((event.ticketTypes?.some(tt => isAvailable(tt).available && tt.paymentLink)) ||
-      (event.bundles?.some(b => isAvailable(b).available && b.paymentLink)));
+  // Simplified availability check for the main "Get Tickets" section
+  const globallyTicketsOnSale = event.ticketsAvailable === undefined || event.ticketsAvailable === true;
+  const hasDefinedTickets = (event.ticketTypes?.length ?? 0) > 0;
+  const hasDefinedBundles = (event.bundles?.length ?? 0) > 0;
+  const hasAnyDefinedItems = hasDefinedTickets || hasDefinedBundles;
 
   return (
     <>
@@ -203,245 +167,213 @@ export default async function EventPage({
           {/* Event Details - Assign 3 columns */}
           <div className="lg:col-span-4">
             {/* Title and Subtitle */}
-            <h1 className="text-3xl md:text-4xl font-bold">{event.title}</h1>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">{event.title}</h1>
             {event.subtitle && (
-              <p className="text-xl md:text-2xl text-muted-foreground mt-1 mb-4">{event.subtitle}</p>
+              <p className="text-xl md:text-2xl text-slate-300 mt-1 mb-6">{event.subtitle}</p>
             )}
 
             {/* Date, Time, Location, Hosted By */}
-            <div className="flex flex-col gap-3 mb-6">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary flex-shrink-0" />
-                <span>{formattedDate}</span>
+            <div className="flex flex-col gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <CalendarDays className="h-6 w-6 text-primary flex-shrink-0" />
+                <span className="text-lg text-gray-200">{formattedDate}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary flex-shrink-0" />
-                <span>{formattedTime}</span>
+              <div className="flex items-center gap-3">
+                <Clock className="h-6 w-6 text-primary flex-shrink-0" />
+                <span className="text-lg text-gray-200">{formattedTime}</span>
               </div>
               {event.location?.venueName && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
-                  {/* Link to Google Maps if URL exists */}
-                  {event.location.googleMapsUrl ? (
-                    <a href={event.location.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {event.location.venueName}
-                      {event.location.address && <span className="text-sm text-muted-foreground block"> ({event.location.address})</span>}
-                    </a>
-                  ) : (
-                    <span>
-                      {event.location.venueName}
-                      {event.location.address && <span className="text-sm text-muted-foreground block"> ({event.location.address})</span>}
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-6 w-6 text-primary flex-shrink-0" />
+                  <div className="flex items-center gap-2 flex-wrap text-base">
+                    {event.location.googleMapsUrl ? (
+                      <a href={event.location.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <span className="font-semibold text-gray-100">{event.location.venueName}</span>
+                        {event.location.address && <span className="text-sm text-slate-400 block"> ({event.location.address})</span>}
+                      </a>
+                    ) : (
+                      <span>
+                        <span className="font-semibold text-gray-100">{event.location.venueName}</span>
+                        {event.location.address && <span className="text-sm text-slate-400 block"> ({event.location.address})</span>}
+                      </span>
+                    )}
+                    {event.location.yangoUrl && (
+                      <>
+                        <span className="text-muted-foreground">|</span>
+                        <YangoButton href={event.location.yangoUrl} />
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
               {event.hostedBy && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>Hosted by {event.hostedBy}</span>
+                <div className="flex items-center gap-3">
+                  <Users className="h-6 w-6 text-primary flex-shrink-0" />
+                  <span className="text-lg text-gray-200">Hosted by {event.hostedBy}</span>
                 </div>
               )}
             </div>
 
             <Separator className="my-6" />
 
-            {/* Tabs Section */}
-            {/* Conditionally render based on checkoutType */}
-            {event.checkoutType === 'api' ? (
-              // API Checkout Mode: Show Tabs with Ticket Selector
-              <Tabs defaultValue="tickets">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="tickets" className="rounded-sm">Tickets</TabsTrigger>
-                  <TabsTrigger value="details" className="rounded-sm">Details</TabsTrigger>
-                  <TabsTrigger value="venue" className="rounded-sm">Venue</TabsTrigger>
-                  {/* Add Gallery/Lineup tabs if needed */}
-                </TabsList>
+            {/* Tickets/Bundles Section - Always Link Checkout Mode Logic */}
+            <div className="py-4">
+              {!globallyTicketsOnSale ? (
+                <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
+                  <p className="font-medium">Ticket sales are currently closed for this event.</p>
+                </div>
+              ) : !hasAnyDefinedItems ? (
+                <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
+                  <p className="font-medium">No tickets or bundles are currently listed for this event.</p>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                    Tickets
+                  </h2>
+                  <div className="space-y-6 mt-6">
+                    {/* List Ticket Types */}
+                    {hasDefinedTickets && (
+                      <div className="space-y-3">
+                        {event.ticketTypes?.map((ticket) => {
+                          const availabilityStatus = getItemAvailabilityStatus(ticket);
+                          const canPurchase = globallyTicketsOnSale && availabilityStatus.available && ticket.paymentLink;
 
-                {/* Ticket Tab Content */}
-                <TabsContent value="tickets" className="py-4">
-                  <h2 className="text-xl font-semibold mb-4">Select tickets</h2>
-                  {/* Use refined check considering ticketSelectorProps might be null */}
-                  {event.ticketsAvailable !== false && ticketSelectorProps ? (
-                    <TicketSelector event={ticketSelectorProps} />
-                  ) : (
-                    <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
-                      <p className="font-medium">
-                        {event.ticketsAvailable === false ? "Ticket sales are currently closed for this event." : "Tickets are currently unavailable for selection."}
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
+                          return (
+                            <Card key={ticket._key} className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col">
+                              {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
+                              <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm p-3 flex flex-col flex-grow">
+                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-grow w-full">
+                                    <div className="flex-grow">
+                                      <h4 className="text-gray-100 font-bold text-base uppercase leading-tight mb-2">{ticket.name.replace(/\s*\(\d+(\s*\w+)?\)$/, '')}</h4>
+                                      {ticket.description && <p className="text-gray-400 italic text-sm leading-relaxed mb-1">{ticket.description}</p>}
+                                      {ticket.details && <p className="text-xs text-gray-400/80 leading-relaxed mb-2">{ticket.details}</p>}
+                                      <p className="text-primary font-semibold mt-2 text-lg">{formatPrice(ticket.price)} FCFA</p>
+                                    </div>
+                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
+                                      {canPurchase ? (
+                                        <Button asChild className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-sm">
+                                          <Link href={ticket.paymentLink!} target="_blank" rel="noopener noreferrer">
+                                            <Ticket className="mr-2 h-4 w-4" /> Buy Now
+                                          </Link>
+                                        </Button>
+                                      ) : (
+                                        <Badge variant="outline" className="text-sm w-full sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm">
+                                          {availabilityStatus.reason || "Unavailable"}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </div>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    )}
 
-                {/* Details Tab Content */}
-                <TabsContent value="details" className="py-4">
-                  <h2 className="text-xl font-semibold mb-4">Event details</h2>
-                  {event.description && (
-                    <div className="prose prose-invert max-w-none mb-6">
-                      <p>{event.description}</p>
-                    </div>
-                  )}
-                  {/* Display Lineup */}
-                  {event.lineup && event.lineup.length > 0 && (
-                    <>
-                      <h3 className="text-lg font-semibold mb-2 mt-4">Lineup</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {event.lineup.map((artist, index) => (
-                          <li key={artist._key || index}>{artist.name}</li>
-                          // Optionally display artist image/bio here
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </TabsContent>
-
-                {/* Venue Tab Content */}
-                <TabsContent value="venue" className="py-4">
-                  <h2 className="text-xl font-semibold mb-4">More information</h2>
-                  {event.location?.venueName && (
-                    <p className="font-medium mb-1">{event.location.venueName}</p>
-                  )}
-                  {event.location?.address && (
-                    <p className="text-muted-foreground mb-4">{event.location.address}</p>
-                  )}
-                  {event.venueDetails && (
-                    <div className="prose prose-invert max-w-none">
-                      <p>{event.venueDetails}</p>
-                    </div>
-                  )}
-                  {/* Optional: Add Map back if needed */}
-                </TabsContent>
-
-              </Tabs>
-            ) : (
-              // Link Checkout Mode: Show Direct Links
-              <div className="py-4">
-                {/* Overall Availability Check */}
-                {event.ticketsAvailable === false ? (
-                  <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
-                    <p className="font-medium">Ticket sales are currently closed for this event.</p>
+                    {/* List Bundles */}
+                    {hasDefinedBundles && (
+                      <div className="space-y-3">
+                        <h3 className="font-medium text-lg">Bundles</h3>
+                        {event.bundles?.map((bundle) => {
+                          const availabilityStatus = getItemAvailabilityStatus(bundle);
+                          const canPurchase = globallyTicketsOnSale && availabilityStatus.available && bundle.paymentLink;
+                          return (
+                            <Card key={bundle._key} className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col">
+                              <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm p-3 flex flex-col flex-grow">
+                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-grow w-full">
+                                    <div className="flex-grow">
+                                      <h4 className="text-gray-100 font-bold text-base uppercase leading-tight mb-2">{bundle.name.replace(/\s*\(\d+(\s*\w+)?\)$/, '')}</h4>
+                                      {bundle.description && <p className="text-gray-400 italic text-sm leading-relaxed mb-1">{bundle.description}</p>}
+                                      {bundle.details && (
+                                        <ul className="text-xs text-gray-400/80 leading-relaxed list-disc list-inside mb-2 space-y-0.5">
+                                          {bundle.details.split('\n').map((item, idx) => item.trim() && <li key={idx}>{item.trim()}</li>)}
+                                        </ul>
+                                      )}
+                                      <p className="text-primary font-semibold mt-2 text-lg">{formatPrice(bundle.price)} FCFA</p>
+                                    </div>
+                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
+                                      {canPurchase ? (
+                                        <Button asChild className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-sm">
+                                          <Link href={bundle.paymentLink!} target="_blank" rel="noopener noreferrer">
+                                            <Ticket className="mr-2 h-4 w-4" /> Buy Now
+                                          </Link>
+                                        </Button>
+                                      ) : (
+                                        <Badge variant="outline" className="text-sm w-full sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm">
+                                          {availabilityStatus.reason || "Unavailable"}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </div>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  /* Render Tickets and Bundles */
-                  // Use IIFE for cleaner conditional logic
-                  (() => {
-                    const hasTickets = (event.ticketTypes?.length ?? 0) > 0;
-                    const hasBundles = (event.bundles?.length ?? 0) > 0;
-                    const hasAnyItems = hasTickets || hasBundles;
+                </>
+              )}
+            </div>
 
-                    if (hasAnyItems && !anyLinksAvailable) {
-                      // Items exist, but none are available for purchase via link
-                      return (
-                        <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
-                          <p className="font-medium">All tickets and bundles are currently unavailable.</p>
-                        </div>
-                      );
-                    } else if (!hasAnyItems) {
-                      // No items listed at all
-                      return (
-                        <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
-                          <p className="font-medium">No tickets or bundles are currently listed for this event.</p>
-                        </div>
-                      );
-                    } else {
-                      // At least one item is available for purchase, render the lists AND the heading
-                      return (
-                        <>
-                          <h2 className="text-xl font-semibold mb-4">Get Tickets</h2>
-                          <div className="space-y-6"> {/* Increased spacing */}
-                            {/* List Ticket Types */}
-                            {hasTickets && (
-                              <div className="space-y-3">
-                                <h3 className="font-medium text-lg">Tickets</h3>
-                                {event.ticketTypes?.map((ticket) => {
-                                  const availability = isAvailable(ticket);
-                                  // Can purchase if global switch is on, item is available, AND has a payment link
-                                  const canPurchase = (event.ticketsAvailable === undefined || event.ticketsAvailable === true) && availability.available && ticket.paymentLink;
+            {/* Event Details, Venue, Lineup, Gallery - No longer in Tabs, shown sequentially or based on data presence */}
+            {event.description && (
+              <div className="mb-10 pt-6">
+                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                  Details
+                </h2>
+                <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                  <p>{event.description}</p>
+                </div>
+              </div>
+            )}
 
-                                  return (
-                                    <Card key={ticket._key}>
-                                      <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        <div className="flex-grow">
-                                          <h4 className="font-semibold">{ticket.name}</h4>
-                                          {ticket.description && <p className="text-sm text-muted-foreground mt-0.5">{ticket.description}</p>}
-                                          {/* Optionally show ticket details/perks */}
-                                          {ticket.details && <p className="text-xs text-muted-foreground mt-1">{ticket.details}</p>}
-                                          <p className="font-medium mt-2">{formatPrice(ticket.price)} FCFA</p>
-                                        </div>
-                                        <div className="flex-shrink-0 w-full sm:w-auto">
-                                          {canPurchase ? (
-                                            <Button asChild className="rounded-md w-full sm:w-auto">
-                                              <Link href={ticket.paymentLink!} target="_blank" rel="noopener noreferrer">
-                                                <Ticket className="mr-2 h-4 w-4" /> Buy Now
-                                              </Link>
-                                            </Button>
-                                          ) : (
-                                            <Badge variant="outline" className="text-sm w-full sm:w-auto justify-center py-2 px-3">
-                                              {availability.reason || "Unavailable"}
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  );
-                                })}
-                              </div>
-                            )}
+            {event.lineup && event.lineup.length > 0 && (
+              <div className="mb-10 pt-6">
+                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                  Lineup
+                </h2>
+                <ul className="space-y-2 mt-2">
+                  {event.lineup.map((artist, index) => (
+                    <li key={artist._key || index} className="text-gray-200 flex items-center py-1">
+                      <span className="text-primary mr-3">◆</span>
+                      {artist.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-                            {/* List Bundles */}
-                            {hasBundles && (
-                              <div className="space-y-3">
-                                <h3 className="font-medium text-lg">Bundles</h3>
-                                {event.bundles?.map((bundle) => {
-                                  const availability = isAvailable(bundle); // Bundles only check stock
-                                  const canPurchase = (event.ticketsAvailable === undefined || event.ticketsAvailable === true) && availability.available && bundle.paymentLink;
-                                  return (
-                                    <Card key={bundle._key}>
-                                      <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        <div className="flex-grow">
-                                          <h4 className="font-semibold">{bundle.name}</h4>
-                                          {bundle.description && <p className="text-sm text-muted-foreground mt-0.5">{bundle.description}</p>}
-                                          {/* Display bundle details/inclusions */}
-                                          {bundle.details && (
-                                            <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
-                                              {bundle.details.split('\\n').map((item, idx) => item.trim() && <li key={idx}>{item.trim()}</li>)}
-                                            </ul>
-                                          )}
-                                          <p className="font-medium mt-2">{formatPrice(bundle.price)} FCFA</p>
-                                        </div>
-                                        <div className="flex-shrink-0 w-full sm:w-auto">
-                                          {canPurchase ? (
-                                            <Button asChild className="rounded-md w-full sm:w-auto">
-                                              <Link href={bundle.paymentLink!} target="_blank" rel="noopener noreferrer">
-                                                <Ticket className="mr-2 h-4 w-4" /> Buy Now
-                                              </Link>
-                                            </Button>
-                                          ) : (
-                                            <Badge variant="outline" className="text-sm w-full sm:w-auto justify-center py-2 px-3">
-                                              {availability.reason || "Unavailable"}
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      );
-                    }
-                  })() // End IIFE
+            {(event.location?.venueName || event.location?.address || event.venueDetails) && (
+              <div className="mb-10 pt-6">
+                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                  Venue
+                </h2>
+                {event.location?.venueName && (
+                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">{event.location.venueName}</p>
+                )}
+                {event.location?.address && (
+                  <p className="text-slate-400 mb-4">{event.location.address}</p>
+                )}
+                {event.venueDetails && (
+                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                    <p>{event.venueDetails}</p>
+                  </div>
                 )}
               </div>
             )}
 
-            <Separator className="my-8" /> {/* Increased margin */}
-
-            {/* Share Button */}
-            <div className="flex items-center justify-start"> {/* Align start */}
+            {/* Share Button - Separator above it if content sections were present */}
+            {(event.description || (event.lineup && event.lineup.length > 0) || (event.location?.venueName || event.location?.address || event.venueDetails)) && (
+              <Separator className="my-10" />
+            )}
+            <div className="flex items-center justify-end">
               <EventShareButton eventTitle={event.title} eventSlug={event.slug.current} />
-              {/* Add other actions if needed */}
             </div>
           </div>
         </div>

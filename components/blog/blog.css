@@ -1,0 +1,419 @@
+/* Custom Blog Post Styling */
+
+/* Additional Typography Classes */
+.text-lead {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: var(--color-zinc-700);
+}
+
+.dark .text-lead {
+  color: var(--color-zinc-300);
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-zinc-500);
+  font-style: italic;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.text-highlight {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Custom Block Styles */
+.content-block {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-zinc-50);
+  border: 1px solid var(--color-zinc-200);
+}
+
+.dark .content-block {
+  background-color: var(--color-zinc-800);
+  border-color: var(--color-zinc-700);
+}
+
+.info-block {
+  border-left: 4px solid var(--color-blue-500);
+  background-color: var(--color-blue-50);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.dark .info-block {
+  background-color: rgba(var(--color-blue-500-rgb), 0.1);
+}
+
+.warning-block {
+  border-left: 4px solid var(--color-amber-500);
+  background-color: var(--color-amber-50);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.dark .warning-block {
+  background-color: rgba(var(--color-amber-500-rgb), 0.1);
+}
+
+/* Custom Image Layouts */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.image-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.image-wide {
+  margin: 2rem -2rem;
+  width: calc(100% + 4rem);
+  max-width: none;
+}
+
+@media (max-width: 768px) {
+  .image-wide {
+    margin: 2rem -1rem;
+    width: calc(100% + 2rem);
+  }
+}
+
+/* Custom Table Styles */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.custom-table th {
+  background-color: var(--color-zinc-100);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--color-zinc-300);
+}
+
+.dark .custom-table th {
+  background-color: var(--color-zinc-800);
+  border-bottom-color: var(--color-zinc-600);
+}
+
+.custom-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-zinc-200);
+}
+
+.dark .custom-table td {
+  border-bottom-color: var(--color-zinc-700);
+}
+
+.custom-table tr:nth-child(even) {
+  background-color: var(--color-zinc-50);
+}
+
+.dark .custom-table tr:nth-child(even) {
+  background-color: var(--color-zinc-800/50);
+}
+
+/* Custom Code Block Styles */
+.code-block {
+  background-color: var(--color-zinc-900);
+  color: var(--color-zinc-100);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family: "Fira Code", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 1.5rem 0;
+}
+
+.code-block .comment {
+  color: var(--color-zinc-500);
+}
+
+.code-block .keyword {
+  color: var(--color-purple-400);
+}
+
+.code-block .string {
+  color: var(--color-green-400);
+}
+
+.code-block .function {
+  color: var(--color-blue-400);
+}
+
+/* Custom List Styles */
+.custom-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 1.5rem 0;
+}
+
+.custom-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+}
+
+/* Custom Blockquote Styles */
+.custom-blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding: 1rem 0 1rem 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--color-zinc-600);
+}
+
+.dark .custom-blockquote {
+  color: var(--color-zinc-300);
+}
+
+.custom-blockquote cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-style: normal;
+  color: var(--color-zinc-500);
+}
+
+/* Custom Button Styles */
+.custom-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.custom-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Custom Divider */
+.custom-divider {
+  border: 0;
+  height: 1px;
+  background-color: var(--color-zinc-200);
+  margin: 2rem 0;
+}
+
+.dark .custom-divider {
+  background-color: var(--color-zinc-700);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.overflow-x-auto {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Blog styles */
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Blog post specific styles */
+
+/* Consistent list styling */
+.prose ul {
+  list-style-type: disc;
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+}
+
+.prose li {
+  margin: 0.5rem 0;
+  padding-left: 0.25rem;
+}
+
+/* Better handling of nested lists */
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  margin: 0.5rem 0;
+}
+
+/* Ensure consistent paragraph spacing */
+.prose p {
+  margin: 1rem 0;
+  line-height: 1.75;
+}
+
+/* Lead paragraph */
+.prose p:first-of-type {
+  font-weight: 300;
+  font-size: 1.125rem;
+}
+
+/* Different appearance for code blocks */
+.prose pre {
+  background-color: rgb(244, 244, 245);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.dark .prose pre {
+  background-color: rgb(39, 39, 42);
+}
+
+/* Ensure consistent image styling */
+.prose img {
+  border-radius: 0.25rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 100%;
+  margin: 1.5rem auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+/* Blog post image captions */
+.prose figcaption,
+article figure figcaption,
+article img + div.text-xs {
+  font-size: 0.75rem !important;
+  color: var(--color-zinc-500);
+  font-style: italic;
+  background: none !important;
+  text-align: center !important;
+  padding: 0 !important;
+  margin-top: 0.5rem !important;
+}
+
+/* Ensure the content has proper width constraints */
+.prose {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Media queries for better scaling */
+@media screen and (max-width: 768px) {
+  .prose {
+    font-size: 0.9375rem;
+    max-width: 100%;
+  }
+
+  /* Make images taller on mobile */
+  .aspect-\[16\/9\] {
+    aspect-ratio: 16/12 !important;
+  }
+
+  /* Right-align captions and make smaller on mobile with bottom border */
+  .prose figcaption,
+  figure figcaption,
+  div.text-center.text-xs,
+  div.text-xs {
+    text-align: right !important;
+    font-size: 0.675rem !important;
+    padding-right: 0.5rem !important;
+    padding-left: 0 !important;
+    margin-top: 0.25rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid transparent;
+  }
+
+  /* Extra spacing for better appearance on mobile */
+  article.pb-10 {
+    padding-bottom: 2.5rem !important;
+  }
+
+  /* Left-align excerpt text on mobile */
+  .text-lg.text-zinc-600 {
+    text-align: left !important;
+  }
+
+  .prose h1 {
+    font-size: 1.75rem;
+  }
+
+  .prose h2 {
+    font-size: 1.5rem;
+  }
+
+  .prose h3 {
+    font-size: 1.25rem;
+  }
+
+  .prose pre {
+    font-size: 0.8125rem;
+  }
+
+  .prose p:first-of-type {
+    font-size: 1rem;
+  }
+}
+
+/* Blog post card styles */
+article h2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: visible;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Ensure the card content has enough space */
+article .flex-grow {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Set excerpt to be flexible */
+article p.text-zinc-600 {
+  flex-shrink: 1; /* Allow excerpt to shrink if needed */
+}
+
+/* Ensure category and read button have proper spacing */
+article .mt-auto {
+  margin-top: 0.5rem;
+}

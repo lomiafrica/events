@@ -11,6 +11,13 @@ import styles from "@/lib/styles/header.module.css";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
 
+interface NavItem {
+  nameKey: string;
+  path: string;
+  isComingSoon?: boolean;
+  isComingSoonBadgeOnly?: boolean;
+}
+
 export default function Header() {
   const [isScrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -31,12 +38,12 @@ export default function Header() {
     return pathname === path;
   };
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { nameKey: "header.nav.home", path: "/" },
     { nameKey: "header.nav.events", path: "/events" },
     { nameKey: "header.nav.gallery", path: "/gallery" },
     { nameKey: "header.nav.shop", path: "/shop", isComingSoon: true },
-    { nameKey: "header.nav.blog", path: "/blog" },
+    { nameKey: "header.nav.blog", path: "/blog", isComingSoonBadgeOnly: true },
   ];
 
   return (
@@ -53,13 +60,28 @@ export default function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            item.isComingSoon ? (
-              <span key={item.path} className={`${styles.navLink} ${styles.disabledNavLink}`}>
-                {t(currentLanguage, item.nameKey)}
-                <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
-              </span>
-            ) : (
+          {navItems.map((item: NavItem) => {
+            if (item.isComingSoon) {
+              return (
+                <span key={item.path} className={`${styles.navLink} ${styles.disabledNavLink}`}>
+                  {t(currentLanguage, item.nameKey)}
+                  <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
+                </span>
+              );
+            }
+            if (item.isComingSoonBadgeOnly) {
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`${styles.navLink} ${isActive(item.path) ? styles.activeNavLink : ""}`}
+                >
+                  {t(currentLanguage, item.nameKey)}
+                  <span className={styles.comingSoonBadge} style={{ marginLeft: '8px' }}>{t(currentLanguage, "header.nav.soon")}</span>
+                </Link>
+              );
+            }
+            return (
               <Link
                 key={item.path}
                 href={item.path}
@@ -67,8 +89,8 @@ export default function Header() {
               >
                 {t(currentLanguage, item.nameKey)}
               </Link>
-            )
-          ))}
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-4 md:hidden">
@@ -97,13 +119,29 @@ export default function Header() {
               </div>
 
               <div className="mt-16 flex flex-col gap-8 text-left w-auto">
-                {navItems.map((item) => (
-                  item.isComingSoon ? (
-                    <div key={item.path} className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}>
-                      {t(currentLanguage, item.nameKey)}
-                      <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
-                    </div>
-                  ) : (
+                {navItems.map((item: NavItem) => {
+                  if (item.isComingSoon) {
+                    return (
+                      <div key={item.path} className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}>
+                        {t(currentLanguage, item.nameKey)}
+                        <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
+                      </div>
+                    );
+                  }
+                  if (item.isComingSoonBadgeOnly) {
+                    return (
+                      <SheetClose asChild key={item.path}>
+                        <Link
+                          href={item.path}
+                          className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
+                        >
+                          {t(currentLanguage, item.nameKey)}
+                          <span className={styles.comingSoonBadge} style={{ marginLeft: '8px', fontSize: '0.5em', verticalAlign: 'super' }}>{t(currentLanguage, "header.nav.soon")}</span>
+                        </Link>
+                      </SheetClose>
+                    );
+                  }
+                  return (
                     <SheetClose asChild key={item.path}>
                       <Link
                         href={item.path}
@@ -112,8 +150,8 @@ export default function Header() {
                         {t(currentLanguage, item.nameKey)}
                       </Link>
                     </SheetClose>
-                  )
-                ))}
+                  );
+                })}
               </div>
 
               <p className="mt-24 text-sm text-bold text-zinc-400 max-w-md">

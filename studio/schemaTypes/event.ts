@@ -88,6 +88,12 @@ export default {
         {name: 'venueName', title: 'Venue name', type: 'string'},
         {name: 'address', title: 'Address', type: 'text'},
         {name: 'googleMapsUrl', title: 'Google Maps URL', type: 'url'},
+        {
+          name: 'yangoUrl',
+          title: 'Yango Ride URL (Optional)',
+          type: 'url',
+          description: 'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link).',
+        },
       ],
     },
     {
@@ -158,30 +164,6 @@ export default {
       initialValue: true,
     },
     {
-      name: 'checkoutType',
-      title: 'Checkout type',
-      type: 'string',
-      group: 'tickets',
-      options: {
-        list: [
-          {title: 'API Checkout (On-site quantity selection)', value: 'api'},
-          {title: 'Direct Link Checkout (Per-item external links)', value: 'link'},
-        ],
-        layout: 'radio',
-      },
-      description: "Choose how users purchase tickets: 'API' for on-site selection and checkout via integration, 'Link' for directing users to separate payment links for each ticket/bundle.",
-      validation: (Rule: Rule) => Rule.required(),
-      initialValue: 'api',
-    },
-    {
-      name: 'paymentProductId',
-      title: 'Payment product ID (Optional)',
-      type: 'string',
-      group: 'tickets',
-      description: 'Product ID for API integration (e.g., lomi. Product ID). Used only if Checkout Mode is set to API.',
-      hidden: ({document}: {document: any}) => document?.checkoutType !== 'api',
-    },
-    {
       name: 'ticketTypes',
       title: 'Ticket Types / Offerings',
       type: 'array',
@@ -196,8 +178,7 @@ export default {
               name: 'paymentLink',
               title: 'Direct payment link',
               type: 'url',
-              description: 'URL for direct purchase of this specific ticket type. Used only if Checkout Mode is set to Link.',
-              hidden: ({document}: {document?: any}) => document?.checkoutType !== 'link',
+              description: 'URL for direct purchase of this specific ticket type.',
             },
             {
               name: 'name',
@@ -254,6 +235,13 @@ export default {
               name: 'salesEnd',
               title: 'Sales End Date/Time (Optional)',
               type: 'datetime',
+            },
+            {
+              name: 'active',
+              title: 'Active',
+              type: 'boolean',
+              description: 'Is this ticket type currently active for sale?',
+              initialValue: true,
             },
           ],
           preview: {
@@ -346,10 +334,26 @@ export default {
             },
             {
               name: 'paymentLink',
-              title: 'Direct payment link (Link mode)',
+              title: 'Direct payment link',
               type: 'url',
-              description: 'URL for direct purchase of this specific bundle. Used only if Checkout Mode is set to Link.',
-              hidden: ({document}: {document?: any}) => document?.checkoutType !== 'link',
+              description: 'URL for direct purchase of this specific bundle.',
+            },
+            {
+              name: 'active',
+              title: 'Active',
+              type: 'boolean',
+              description: 'Is this bundle currently active for sale?',
+              initialValue: true,
+            },
+            {
+              name: 'salesStart',
+              title: 'Sales Start Date/Time (Optional)',
+              type: 'datetime',
+            },
+            {
+              name: 'salesEnd',
+              title: 'Sales End Date/Time (Optional)',
+              type: 'datetime',
             },
           ],
           preview: {

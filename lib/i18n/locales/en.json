@@ -79,5 +79,70 @@
       "title": "THE \"BÔRÔ\" IS A CHOSEN FAMILY",
       "description": "Coming alone? You leave with brothers, sisters, vibrant souls. Say hello, smile, connect."
     }
+  },
+  "termsPage": {
+    "pageTitle": "Terms and Conditions | Djaouli Entertainment",
+    "pageDescription": "Understand the Terms and Conditions for engaging with Djaouli Entertainment, Abidjan's pioneering alternative Hip-Hop & Electronic music collective and event organizer.",
+    "title": "Terms and Conditions",
+    "subtitle": "Please read these terms carefully before using our services or attending our unique events.",
+    "lastUpdated": "Last Updated: {date}",
+    "introduction": {
+      "title": "Introduction",
+      "p1": "Welcome to Djaouli Entertainment (\"Djaouli,\" \"we,\" \"us,\" or \"our\"). Born in Abidjan in March 2022, Djaouli Entertainment is a DJ collective at the forefront of an alternative music scene blending Hip-Hop & Electronic Music. These Terms and Conditions (\"Terms\") govern your use of our website (e.g., djaoulient.com, if applicable), our services (including event promotion and organization), and your attendance at our acclaimed \"BÔRÔ DE DJAOULI\" parties and other events.",
+      "p2": "The term \"Djaouli\" itself, from Nouchi street language, signifies energy, stubbornness, and a love for partying – qualities we channel into creating unique, freeing experiences. By accessing our services, purchasing tickets, or attending our events, you agree to be bound by these Terms. If you disagree with any part of these Terms, you may not access our services or attend our events."
+    },
+    "mission": {
+      "title": "Our Mission & Your Experience",
+      "p1": "Djaouli Entertainment was formed out of a desire for artistic freedom in Abidjan's DJ scene. Our main goal is to provide a platform where DJs can express their curation and artistic personality without the constraints of mainstream demand, and where attendees can experience rich musical diversity. We strive to create a bridge between genres and audiences, fostering social cohesion and cultural exchange.",
+      "p2": "Our values are Unity, Openness, Freedom, and Respect. We live by two commandments: \"L'égalité de chacun sur le Dancefloor\" (Equality for everyone on the Dancefloor) and \"L'enjaillement dans le respect\" (Enjoyment with respect). We expect all attendees and participants to uphold these values."
+    },
+    "conduct": {
+      "title": "Use of Our Services & Event Conduct",
+      "p1": "You agree to use our website and services only for lawful purposes and in a manner that respects the rights and enjoyment of others. When attending Djaouli Entertainment events:",
+      "listItem1": "You must behave in a way that is respectful to all individuals, regardless of race, culture, or social class, reflecting the diverse community we cultivate.",
+      "listItem2": "Prohibited behavior includes harassment, discrimination, causing distress or inconvenience to any person, transmitting obscene or offensive content, or disrupting the event.",
+      "listItem3": "You must comply with all venue regulations, health and safety guidelines, and instructions from event staff, especially given that our events often take place in atypical, underground, and unique locations (such as pizzerias, disused amusement parks, or private villas).",
+      "p2": "When registering for information, newsletters, or (where applicable) event pre-sales, you must provide accurate and current information."
+    },
+    "tickets": {
+      "title": "Event Tickets and Admission",
+      "p1": "All ticket sales for Djaouli Entertainment events are subject to availability and any specific terms communicated at the time of purchase (e.g., age restrictions, specific entry requirements for unique venues).",
+      "p2": "Tickets are generally non-refundable and non-transferable, except as required by applicable law or as explicitly stated by us for a particular event. We reserve the right to cancel or reschedule events; in such cases, our refund or exchange policy will be communicated to ticket holders.",
+      "p3": "We reserve the right to refuse admission or eject any person whose conduct is deemed disorderly, who fails to comply with these Terms, specific event rules, or our core values, or who poses a risk to the safety or enjoyment of others. No refunds will be offered in such circumstances."
+    },
+    "ip": {
+      "title": "Intellectual Property",
+      "p1": "All content related to Djaouli Entertainment, including our name, logos (e.g., \"Djaouli Entertainment,\" \"BÔRÔ DE DJAOULI\"), event concepts, DJ mixes (by Mask On, Seny.D, Dalight, and guest artists when recorded and shared by us), text, graphics, images, and audio clips on our website or promotional materials, is the property of Djaouli Entertainment or its content suppliers/partners and protected by international copyright and trademark laws.",
+      "p2": "You may not reproduce, duplicate, copy, sell, resell, or exploit any portion of our service, event content, or branding without express written permission from us."
+    },
+    "userContent": {
+      "title": "User-Generated Content",
+      "p1": "If you post content or submit material related to our events (e.g., photos, videos, comments on social media tagging Djaouli Entertainment or using our event hashtags), and unless we indicate otherwise, you grant Djaouli Entertainment a nonexclusive, royalty-free, perpetual, irrevocable, and fully sublicensable right to use, reproduce, modify, adapt, publish, translate, create derivative works from, distribute, and display such content throughout the world in any media. This is primarily for promoting the Djaouli Entertainment experience, showcasing our vibrant community, and highlighting the unique atmosphere of our events.",
+      "p2": "You represent and warrant that you own or control all rights to the content you post, that it's accurate, that its use doesn't violate these Terms, and will not cause injury to any person or entity. You agree to indemnify Djaouli Entertainment for all claims resulting from content you supply."
+    },
+    "liability": {
+      "title": "Limitation of Liability",
+      "p1": "Djaouli Entertainment, including its founders (Mask On, Seny.D, Dalight) and affiliates, will not be liable for any damages of any kind arising from the use of our services or attendance at our events, including, but not limited to direct, indirect, incidental, punitive, and consequential damages, unless otherwise specified in writing.",
+      "p2": "Your attendance at our events, particularly those in unconventional, \"underground,\" or repurposed venues (e.g., Doraville, Guido's Pizzeria, La Grande Maison by Venus Room), is at your own risk. While we strive to ensure safety, you acknowledge that such venues may have inherent characteristics different from traditional clubs.",
+      "p3": "We do not warrant that our website, its servers, or emails sent from Djaouli Entertainment are free of viruses or other harmful components. We strive to provide a secure online environment but cannot guarantee absolute security."
+    },
+    "indemnification": {
+      "title": "Indemnification",
+      "p1": "You agree to indemnify, defend, and hold harmless Djaouli Entertainment, its founders, employees, agents, and partners from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms or any activity related to your engagement with our services or events (including negligent or wrongful conduct)."
+    },
+    "governingLaw": {
+      "title": "Governing Law",
+      "p1": "These Terms and any dispute or claim arising out of or in connection with them (including non-contractual disputes or claims) shall be governed by and construed in accordance with the laws of Côte d'Ivoire, the home of Djaouli Entertainment."
+    },
+    "changes": {
+      "title": "Changes to These Terms",
+      "p1": "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will aim to provide at least 30 days' notice on our website or through direct communication (if you've subscribed to updates) before new terms take effect. What constitutes a material change will be determined at our sole discretion.",
+      "p2": "By continuing to access or use our Service or attend our events after revisions become effective, you agree to be bound by the revised terms."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "p1": "If you have any questions about these Terms, or wish to learn more about Djaouli Entertainment and our mission to energize Abidjan's music scene, please contact us at: djaoulient@gmail.com.",
+      "p2": "We're building more than just parties; we're cultivating a movement. Thank you for being part of the Djaouli energy!"
+    }
   }
 }

@@ -25,17 +25,29 @@ export default defineType({
       },
       description: 'Upload a video to play in the background of the homepage.',
     }),
+    defineField({
+      name: 'promoEvent',
+      title: 'Promoted Event (for Homepage Floating flyer)',
+      type: 'reference',
+      to: [{type: 'event'}],
+      description: 'Select an event to feature in the floating promo on the homepage. The event\'s flyer will be used as the image, and the promo will link to the event page.',
+    })
     // Add other homepage-specific fields here if needed
   ],
   preview: {
     select: {
       title: 'title',
       media: 'backgroundVideo',
+      promoEventTitle: 'promoEvent.title',
     },
-    prepare({title}) {
+    prepare({title, media, promoEventTitle}) {
+      let previewTitle = title || 'Homepage Settings';
+      if (promoEventTitle) {
+        previewTitle += ` (Promo: ${promoEventTitle})`;
+      }
       return {
-        title: title || 'Homepage Settings',
-        media: HomeIcon, // Use HomeIcon for preview
+        title: previewTitle,
+        media: HomeIcon,
       }
     },
   },
