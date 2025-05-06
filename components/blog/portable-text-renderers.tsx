@@ -2,6 +2,7 @@ import Image from "next/image";
 import {
   PortableText,
   type PortableTextReactComponents,
+  type PortableTextBlock,
 } from "@portabletext/react";
 
 // TODO: Ensure urlFor is correctly imported and configured from your Sanity client setup.
@@ -67,12 +68,11 @@ const InfoBlockRenderer: React.FC<BlockProps> = ({ value }) => {
           </h4>
         )}
         <div className="text-sm text-blue-700 dark:text-blue-300 prose prose-sm dark:prose-invert max-w-none prose-p:my-1">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {typeof value.text === "string" ? (
             <p>{value.text}</p>
           ) : (
             <PortableText
-              value={value.text as any[]}
+              value={value.text as PortableTextBlock[]}
               components={
                 portableTextRenderers as Partial<PortableTextReactComponents>
               }
@@ -112,12 +112,11 @@ const WarningBlockRenderer: React.FC<BlockProps> = ({ value }) => {
           </h4>
         )}
         <div className="text-sm text-yellow-700 dark:text-yellow-300 prose prose-sm dark:prose-invert max-w-none prose-p:my-1">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {typeof value.text === "string" ? (
             <p>{value.text}</p>
           ) : (
             <PortableText
-              value={value.text as any[]}
+              value={value.text as PortableTextBlock[]}
               components={
                 portableTextRenderers as Partial<PortableTextReactComponents>
               }
