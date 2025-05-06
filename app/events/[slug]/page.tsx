@@ -11,6 +11,7 @@ import { EventShareButton } from "@/components/event/event-share-button";
 import { YangoButton } from "@/components/event/YangoButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { t } from "@/lib/i18n/translations";
 
 // Define specific type for TicketType
 interface TicketTypeData {
@@ -73,17 +74,19 @@ type EventData = {
   gallery?: { _key: string; url: string; caption?: string }[];
 };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+// Helper to get locale (consistent with other page)
+const getPageLocale = (params?: { slug?: string; locale?: string }): string => {
+  return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
+};
+
+export async function generateMetadata({ params }: { params: { slug: string; locale?: string } }) {
+  const currentLanguage = getPageLocale(params);
+  const { slug } = params;
   const event: EventData | null = await getEventBySlug(slug);
 
   if (!event) {
     return {
-      title: "Event Not Found",
+      title: t(currentLanguage, "eventSlugPage.metadata.notFoundTitle"),
     };
   }
 
@@ -104,12 +107,13 @@ interface ItemForAvailabilityCheck {
 
 const getItemAvailabilityStatus = (
   item: ItemForAvailabilityCheck,
+  currentLanguage: string
 ): { available: boolean; reason: string } => {
   if (!item.active) {
-    return { available: false, reason: "Currently Inactive" };
+    return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.inactive") };
   }
   if (typeof item.stock === "number" && item.stock <= 0) {
-    return { available: false, reason: "Sold Out" };
+    return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.soldOut") };
   }
   const now = new Date();
   if (item.salesStart && now < new Date(item.salesStart)) {
@@ -118,10 +122,10 @@ const getItemAvailabilityStatus = (
       month: "short",
       year: "numeric",
     });
-    return { available: false, reason: `Sales start ${startDate}` };
+    return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.salesStart", { startDate }) };
   }
   if (item.salesEnd && now > new Date(item.salesEnd)) {
-    return { available: false, reason: "Sales have ended" };
+    return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.salesEnded") };
   }
   return { available: true, reason: "" }; // Default is available if no other condition met
 };
@@ -132,12 +136,9 @@ const formatPrice = (price: number): string => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
 };
 
-export default async function EventPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+export default async function EventPage({ params }: { params: { slug: string; locale?: string } }) {
+  const currentLanguage = getPageLocale(params);
+  const { slug } = params;
   const event: EventData | null = await getEventBySlug(slug);
 
   if (!event) {
@@ -151,13 +152,13 @@ export default async function EventPage({
       day: "2-digit",
       month: "long",
       year: "numeric",
-    }) || "Date TBC";
+    }) || t(currentLanguage, "eventSlugPage.dateTBC");
   const formattedTime =
     eventDate?.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    }) || "Time TBC";
+    }) || t(currentLanguage, "eventSlugPage.timeTBC");
 
   // Simplified availability check for the main "Get Tickets" section
   const globallyTicketsOnSale =
@@ -251,7 +252,7 @@ export default async function EventPage({
                 <div className="flex items-center gap-3">
                   <Users className="h-6 w-6 text-primary flex-shrink-0" />
                   <span className="text-lg text-gray-200">
-                    Hosted by {event.hostedBy}
+                    {t(currentLanguage, "eventSlugPage.hostedBy", { name: event.hostedBy })}
                   </span>
                 </div>
               )}
@@ -264,19 +265,19 @@ export default async function EventPage({
               {!globallyTicketsOnSale ? (
                 <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
                   <p className="font-medium">
-                    Ticket sales are currently closed for this event.
+                    {t(currentLanguage, "eventSlugPage.tickets.salesClosedGlobal")}
                   </p>
                 </div>
               ) : !hasAnyDefinedItems ? (
                 <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
                   <p className="font-medium">
-                    No tickets or bundles are currently listed for this event.
+                    {t(currentLanguage, "eventSlugPage.tickets.noItemsListed")}
                   </p>
                 </div>
               ) : (
                 <>
                   <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                    Tickets
+                    {t(currentLanguage, "eventSlugPage.tickets.title")}
                   </h2>
                   <div className="space-y-6 mt-6">
                     {/* List Ticket Types */}
@@ -284,7 +285,7 @@ export default async function EventPage({
                       <div className="space-y-3">
                         {event.ticketTypes?.map((ticket) => {
                           const availabilityStatus =
-                            getItemAvailabilityStatus(ticket);
+                            getItemAvailabilityStatus(ticket, currentLanguage);
                           const canPurchase =
                             globallyTicketsOnSale &&
                             availabilityStatus.available &&
@@ -317,7 +318,7 @@ export default async function EventPage({
                                         </p>
                                       )}
                                       <p className="text-primary font-semibold mt-2 text-lg">
-                                        {formatPrice(ticket.price)} FCFA
+                                        {formatPrice(ticket.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                                       </p>
                                     </div>
                                     <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
@@ -332,7 +333,7 @@ export default async function EventPage({
                                             rel="noopener noreferrer"
                                           >
                                             <Ticket className="mr-2 h-4 w-4" />{" "}
-                                            Buy Now
+                                            {t(currentLanguage, "eventSlugPage.tickets.buyNow")}
                                           </Link>
                                         </Button>
                                       ) : (
@@ -341,7 +342,7 @@ export default async function EventPage({
                                           className="text-sm w-full sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm"
                                         >
                                           {availabilityStatus.reason ||
-                                            "Unavailable"}
+                                            t(currentLanguage, "eventSlugPage.availability.unavailable")}
                                         </Badge>
                                       )}
                                     </div>
@@ -357,10 +358,10 @@ export default async function EventPage({
                     {/* List Bundles */}
                     {hasDefinedBundles && (
                       <div className="space-y-3">
-                        <h3 className="font-medium text-lg">Bundles</h3>
+                        <h3 className="font-medium text-lg">{t(currentLanguage, "eventSlugPage.bundles.title")}</h3>
                         {event.bundles?.map((bundle) => {
                           const availabilityStatus =
-                            getItemAvailabilityStatus(bundle);
+                            getItemAvailabilityStatus(bundle, currentLanguage);
                           const canPurchase =
                             globallyTicketsOnSale &&
                             availabilityStatus.available &&
@@ -400,7 +401,7 @@ export default async function EventPage({
                                         </ul>
                                       )}
                                       <p className="text-primary font-semibold mt-2 text-lg">
-                                        {formatPrice(bundle.price)} FCFA
+                                        {formatPrice(bundle.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                                       </p>
                                     </div>
                                     <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
@@ -415,7 +416,7 @@ export default async function EventPage({
                                             rel="noopener noreferrer"
                                           >
                                             <Ticket className="mr-2 h-4 w-4" />{" "}
-                                            Buy Now
+                                            {t(currentLanguage, "eventSlugPage.tickets.buyNow")}
                                           </Link>
                                         </Button>
                                       ) : (
@@ -424,7 +425,7 @@ export default async function EventPage({
                                           className="text-sm w-full sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm"
                                         >
                                           {availabilityStatus.reason ||
-                                            "Unavailable"}
+                                            t(currentLanguage, "eventSlugPage.availability.unavailable")}
                                         </Badge>
                                       )}
                                     </div>
@@ -445,7 +446,7 @@ export default async function EventPage({
             {event.description && (
               <div className="mb-10 pt-6">
                 <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                  Details
+                  {t(currentLanguage, "eventSlugPage.detailsSection.title")}
                 </h2>
                 <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
                   <p>{event.description}</p>
@@ -456,7 +457,7 @@ export default async function EventPage({
             {event.lineup && event.lineup.length > 0 && (
               <div className="mb-10 pt-6">
                 <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                  Lineup
+                  {t(currentLanguage, "eventSlugPage.lineupSection.title")}
                 </h2>
                 <ul className="space-y-2 mt-2">
                   {event.lineup.map((artist, index) => (
@@ -475,27 +476,27 @@ export default async function EventPage({
             {(event.location?.venueName ||
               event.location?.address ||
               event.venueDetails) && (
-              <div className="mb-10 pt-6">
-                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                  Venue
-                </h2>
-                {event.location?.venueName && (
-                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
-                    {event.location.venueName}
-                  </p>
-                )}
-                {event.location?.address && (
-                  <p className="text-slate-400 mb-4">
-                    {event.location.address}
-                  </p>
-                )}
-                {event.venueDetails && (
-                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                    <p>{event.venueDetails}</p>
-                  </div>
-                )}
-              </div>
-            )}
+                <div className="mb-10 pt-6">
+                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                    {t(currentLanguage, "eventSlugPage.venueSection.title")}
+                  </h2>
+                  {event.location?.venueName && (
+                    <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
+                      {event.location.venueName}
+                    </p>
+                  )}
+                  {event.location?.address && (
+                    <p className="text-slate-400 mb-4">
+                      {event.location.address}
+                    </p>
+                  )}
+                  {event.venueDetails && (
+                    <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                      <p>{event.venueDetails}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||

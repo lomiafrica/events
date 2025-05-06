@@ -10,7 +10,7 @@ interface BackgroundVideoProps {
 
 export default function BackgroundVideo({ videoUrl }: BackgroundVideoProps) {
   // State to manage sound, default to muted
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null); // Create a ref for the video element
 
   // Define toggleSound and useEffect at the top level

@@ -172,7 +172,6 @@ export default function Header() {
                             style={{
                               marginLeft: "8px",
                               fontSize: "0.5em",
-                              verticalAlign: "super",
                             }}
                           >
                             {t(currentLanguage, "header.nav.soon")}

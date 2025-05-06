@@ -1,7 +1,8 @@
 {
   "footer": {
     "links": {
-      "terms": "Conditions"
+      "terms": "Conditions",
+      "privacy": "Confidentialité"
     },
     "tagline": {
       "intro": "Nous apportons",
@@ -144,5 +145,47 @@
       "p1": "Si vous avez des questions concernant ces Termes, ou si vous souhaitez en savoir plus sur Djaouli Entertainment et notre mission pour dynamiser la scène musicale d'Abidjan, veuillez nous contacter à : djaoulient@gmail.com.",
       "p2": "Nous construisons plus que de simples soirées ; nous cultivons un mouvement. Merci de faire partie de l'énergie Djaouli !"
     }
+  },
+  "eventsPage": {
+    "metadata": {
+      "title": "Événements",
+      "description": "Découvrez les prochains événements de Djaouli Entertainment"
+    },
+    "title": "Événements",
+    "noEvents": "Aucun événement à venir trouvé."
+  },
+  "eventSlugPage": {
+    "metadata": {
+      "notFoundTitle": "Événement non trouvé"
+    },
+    "dateTBC": "Date à confirmer",
+    "timeTBC": "Heure à confirmer",
+    "availability": {
+      "inactive": "Actuellement indisponible",
+      "soldOut": "Épuisé",
+      "salesStart": "Les ventes commencent le {startDate}",
+      "salesEnded": "Les ventes sont terminées",
+      "unavailable": "Indisponible"
+    },
+    "tickets": {
+      "salesClosedGlobal": "La billetterie pour cet événement est actuellement fermée.",
+      "noItemsListed": "Aucun billet ou pack n'est actuellement listé pour cet événement.",
+      "title": "Billets",
+      "buyNow": "Acheter",
+      "currencySuffix": " FCFA"
+    },
+    "bundles": {
+      "title": "Packs"
+    },
+    "detailsSection": {
+      "title": "Détails"
+    },
+    "lineupSection": {
+      "title": "Line-up"
+    },
+    "venueSection": {
+      "title": "Lieu"
+    },
+    "hostedBy": "Organisé par {name}"
   }
 }
