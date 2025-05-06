@@ -78,7 +78,8 @@ const getPageLocale = (params?: { slug?: string; locale?: string }): string => {
   return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 };
 
-export async function generateMetadata({ params }: { params: { slug: string; locale?: string } }) {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
+  const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const { slug } = params;
   const event: EventData | null = await getEventBySlug(slug);
@@ -137,7 +138,8 @@ const formatPrice = (price: number): string => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
 };
 
-export default async function EventPage({ params }: { params: { slug: string; locale?: string } }) {
+export default async function EventPage({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
+  const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const { slug } = params;
   const event: EventData | null = await getEventBySlug(slug);

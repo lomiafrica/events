@@ -19,7 +19,8 @@ const getPageLocale = (params?: { locale?: string }): string => {
   return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 };
 
-export async function generateMetadata({ params }: { params: { locale?: string } }): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   return {
     title: t(currentLanguage, "eventsPage.metadata.title"),
@@ -27,7 +28,8 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   };
 }
 
-export default async function EventsPage({ params }: { params: { locale?: string } }) {
+export default async function EventsPage({ params: paramsPromise }: { params: Promise<{ locale?: string }> }) {
+  const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const events: EventImageData[] = await getEventsForScroller(10);
 
