@@ -10,6 +10,28 @@ export default {
     {name: 'media', title: 'Media & Lineup'},
     {name: 'tickets', title: 'Tickets & Offerings'},
   ],
+  orderings: [
+    {
+      title: 'Event Date (Newest First)',
+      name: 'eventDateDesc',
+      by: [{field: 'date', direction: 'desc'}],
+    },
+    {
+      title: 'Event Date (Oldest First)',
+      name: 'eventDateAsc',
+      by: [{field: 'date', direction: 'asc'}],
+    },
+    {
+      title: 'Title (A-Z)',
+      name: 'titleAsc',
+      by: [{field: 'title', direction: 'asc'}],
+    },
+    {
+      title: 'Title (Z-A)',
+      name: 'titleDesc',
+      by: [{field: 'title', direction: 'desc'}],
+    },
+  ],
   fields: [
     {
       name: 'title',
@@ -20,7 +42,7 @@ export default {
     },
     {
       name: 'subtitle',
-      title: 'Subtitle (Optional)',
+      title: 'Subtitle',
       type: 'string',
       group: 'details',
     },
@@ -69,7 +91,7 @@ export default {
     },
     {
       name: 'hostedBy',
-      title: 'Hosted By (Optional)',
+      title: 'Hosted by',
       type: 'string',
       group: 'details',
     },
@@ -90,7 +112,7 @@ export default {
         {name: 'googleMapsUrl', title: 'Google Maps URL', type: 'url'},
         {
           name: 'yangoUrl',
-          title: 'Yango Ride URL (Optional)',
+          title: 'Yango Ride URL',
           type: 'url',
           description:
             'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link).',
@@ -189,13 +211,6 @@ export default {
               validation: (Rule: Rule) => Rule.required(),
             },
             {
-              name: 'ticketId',
-              title: 'Ticket ID',
-              type: 'slug',
-              description: 'Unique identifier for API integration (e.g., early-bird, vip-table).',
-              validation: (Rule: Rule) => Rule.required(),
-            },
-            {
               name: 'price',
               title: 'Price (XOF)',
               type: 'number',
@@ -229,20 +244,15 @@ export default {
             },
             {
               name: 'salesStart',
-              title: 'Sales Start Date/Time (Optional)',
+              title: 'Sales Start Date/Time',
               type: 'datetime',
+              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
             },
             {
               name: 'salesEnd',
-              title: 'Sales End Date/Time (Optional)',
+              title: 'Sales End Date/Time',
               type: 'datetime',
-            },
-            {
-              name: 'active',
-              title: 'Active',
-              type: 'boolean',
-              description: 'Is this ticket type currently active for sale?',
-              initialValue: true,
+              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
             },
           ],
           preview: {
@@ -285,7 +295,7 @@ export default {
     },
     {
       name: 'bundles',
-      title: 'Ticket bundles / Packages (Optional)',
+      title: 'Ticket bundles / Packages',
       type: 'array',
       group: 'tickets',
       description: 'Define special packages combining tickets or offering unique value.',
@@ -350,13 +360,15 @@ export default {
             },
             {
               name: 'salesStart',
-              title: 'Sales Start Date/Time (Optional)',
+              title: 'Sales Start Date/Time',
               type: 'datetime',
+              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
             },
             {
               name: 'salesEnd',
-              title: 'Sales End Date/Time (Optional)',
+              title: 'Sales End Date/Time',
               type: 'datetime',
+              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
             },
           ],
           preview: {

@@ -26,7 +26,7 @@ export default defineType({
     }),
     defineField({
       name: 'bio',
-      title: 'Short Bio (Optional)',
+      title: 'Short Bio',
       type: 'text',
     }),
     defineField({
@@ -37,7 +37,7 @@ export default defineType({
     }),
     defineField({
       name: 'socialLink',
-      title: 'Social Media Link (Optional)',
+      title: 'Social Media Link',
       type: 'url',
       description:
         'Link to their primary social media profile (e.g., Instagram, Twitter, Website).',

@@ -60,12 +60,12 @@ export async function getEventBySlug(slug: string) {
       ticketTypes[]{
         _key,
         name,
-        ticketId,
         price,
         description,
         details,
         stock,
         maxPerOrder,
+        paymentLink,
         salesStart,
         salesEnd
       },
@@ -88,7 +88,11 @@ export async function getEventBySlug(slug: string) {
         price,
         description,
         details,
-        stock
+        stock,
+        active,
+        paymentLink,
+        salesStart,
+        salesEnd
       }
     }
   `,
@@ -267,4 +271,23 @@ export const getHomepageVideoUrl = async (): Promise<string | null> => {
   }`;
   const result = await client.fetch<{ videoUrl: string | null }>(query);
   return result?.videoUrl ?? null;
+};
+
+// ================================= Homepage Promo Event ================================
+interface HomepagePromoEventData {
+  slug?: string;
+  flyerUrl?: string;
+  title?: string; // Added for potential use, e.g. alt text or title attribute
+}
+
+export const getHomepagePromoEvent = async (): Promise<HomepagePromoEventData | null> => {
+  const query = `*[_type == "homepage"][0] {
+    promoEvent->{
+      "slug": slug.current,
+      "flyerUrl": flyer.asset->url,
+      title
+    }
+  }`;
+  const result = await client.fetch<{ promoEvent?: HomepagePromoEventData }>(query);
+  return result?.promoEvent ?? null;
 };

@@ -12,12 +12,12 @@ import { YangoButton } from "@/components/event/YangoButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/i18n/translations";
+import ArtistHoverCard from '@/components/event/ArtistHoverCard';
 
 // Define specific type for TicketType
 interface TicketTypeData {
   _key: string;
   name: string;
-  ticketId: { current: string }; // Slug type
   price: number;
   description?: string;
   details?: string;
@@ -26,7 +26,6 @@ interface TicketTypeData {
   salesStart?: string | null; // Allow null
   salesEnd?: string | null; // Allow null
   paymentLink?: string;
-  active: boolean; // Added active field
 }
 
 // Define specific type for Bundle
@@ -39,7 +38,7 @@ interface BundleData {
   details?: string;
   stock?: number | null; // Allow null
   paymentLink?: string;
-  active: boolean; // Added active field
+  active: boolean; // Kept for bundles
   salesStart?: string | null; // Added salesStart for bundles
   salesEnd?: string | null; // Added salesEnd for bundles
 }
@@ -65,7 +64,7 @@ type EventData = {
   ticketTypes?: TicketTypeData[];
   bundles?: BundleData[];
   lineup?: {
-    _key: string;
+    _id: string;
     name: string;
     bio?: string;
     image?: string;
@@ -99,7 +98,7 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
 // Helper function to check ticket/bundle availability
 // Renamed and updated to include 'active' status and handle items consistently
 interface ItemForAvailabilityCheck {
-  active: boolean;
+  active?: boolean; // Made optional
   stock?: number | null;
   salesStart?: string | null;
   salesEnd?: string | null;
@@ -109,15 +108,17 @@ const getItemAvailabilityStatus = (
   item: ItemForAvailabilityCheck,
   currentLanguage: string
 ): { available: boolean; reason: string } => {
-  if (!item.active) {
+  // Check for 'active' status ONLY IF 'active' property exists on the item (i.e., for bundles)
+  if (typeof item.active === 'boolean' && !item.active) {
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.inactive") };
   }
+
   if (typeof item.stock === "number" && item.stock <= 0) {
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.soldOut") };
   }
   const now = new Date();
   if (item.salesStart && now < new Date(item.salesStart)) {
-    const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", {
+    const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", { // Consider using currentLanguage for formatting date
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -288,8 +289,7 @@ export default async function EventPage({ params }: { params: { slug: string; lo
                             getItemAvailabilityStatus(ticket, currentLanguage);
                           const canPurchase =
                             globallyTicketsOnSale &&
-                            availabilityStatus.available &&
-                            ticket.paymentLink;
+                            availabilityStatus.available && ticket.paymentLink;
 
                           return (
                             <Card
@@ -364,8 +364,7 @@ export default async function EventPage({ params }: { params: { slug: string; lo
                             getItemAvailabilityStatus(bundle, currentLanguage);
                           const canPurchase =
                             globallyTicketsOnSale &&
-                            availabilityStatus.available &&
-                            bundle.paymentLink;
+                            availabilityStatus.available && bundle.paymentLink;
                           return (
                             <Card
                               key={bundle._key}
@@ -442,6 +441,8 @@ export default async function EventPage({ params }: { params: { slug: string; lo
               )}
             </div>
 
+            <Separator className="my-10" />
+
             {/* Event Details, Venue, Lineup, Gallery - No longer in Tabs, shown sequentially or based on data presence */}
             {event.description && (
               <div className="mb-10 pt-6">
@@ -460,14 +461,8 @@ export default async function EventPage({ params }: { params: { slug: string; lo
                   {t(currentLanguage, "eventSlugPage.lineupSection.title")}
                 </h2>
                 <ul className="space-y-2 mt-2">
-                  {event.lineup.map((artist, index) => (
-                    <li
-                      key={artist._key || index}
-                      className="text-gray-200 flex items-center py-1"
-                    >
-                      <span className="text-primary mr-3">◆</span>
-                      {artist.name}
-                    </li>
+                  {event.lineup.map((artist) => (
+                    <ArtistHoverCard key={artist._id} artist={artist} />
                   ))}
                 </ul>
               </div>

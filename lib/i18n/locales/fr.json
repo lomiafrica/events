@@ -6,7 +6,7 @@
     },
     "tagline": {
       "intro": "Nous apportons",
-      "outro": "à la scène musicale d'Abidjan."
+      "outro": "à la scène musicale Ivoirienne."
     },
     "animatedWords": {
       "freedom": "liberté",
@@ -187,5 +187,8 @@
       "title": "Lieu"
     },
     "hostedBy": "Organisé par {name}"
+  },
+  "floatingPromo": {
+    "getTicket": "Prends ton ticket"
   }
 }

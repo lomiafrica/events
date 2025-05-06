@@ -187,5 +187,8 @@
       "title": "Venue"
     },
     "hostedBy": "Hosted by {name}"
+  },
+  "floatingPromo": {
+    "getTicket": "Get your ticket"
   }
 }
