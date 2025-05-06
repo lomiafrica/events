@@ -82,9 +82,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${event.title} | Djaouli Entertainment`,
-    // Use subtitle in description if available?
-    description: event.subtitle || event.description || "Event details for Djaouli Entertainment",
+    title: `${event.title}`,
+    description: event.subtitle || event.description,
   };
 }
 

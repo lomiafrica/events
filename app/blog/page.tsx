@@ -33,7 +33,7 @@ interface BlogPostCard {
 }
 
 export const metadata: Metadata = {
-  title: "Our Blog | Insights & Stories by Djaouli Entertainment",
+  title: "Blog",
   description:
     "Explore the latest articles, news, event recaps, and entertainment insights from the team at Djaouli Entertainment.",
 };
