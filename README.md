@@ -31,18 +31,18 @@ Unlike traditional e-commerce platforms, this project uses Sanity to manage all 
 
 ## Getting started
 
-   ```bash
-   git clone https://github.com/lomiafrica/events
-   ```
+```bash
+git clone https://github.com/lomiafrica/events
+```
 
-   ```bash
-   cd djaoulient
-   ```
+```bash
+cd djaoulient
+```
 
-   ```bash
-   pnpm install
-   ```
+```bash
+pnpm install
+```
 
-   ```bash
-   pnpm run dev
-   ```
+```bash
+pnpm run dev
+```

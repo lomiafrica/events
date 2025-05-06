@@ -239,9 +239,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <span>
                       {count}x {ticket.name}
                     </span>
-                    <span>
-                      {formatPrice(count * ticket.price)} FCFA
-                    </span>
+                    <span>{formatPrice(count * ticket.price)} FCFA</span>
                   </div>
                 );
               })}
@@ -256,9 +254,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <span>
                       {count}x {bundle.name}
                     </span>
-                    <span>
-                      {formatPrice(count * bundle.price)} FCFA
-                    </span>
+                    <span>{formatPrice(count * bundle.price)} FCFA</span>
                   </div>
                 );
               })}
@@ -268,9 +264,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
 
             <div className="flex justify-between font-bold mb-6">
               <span>Total</span>
-              <span>
-                {formatPrice(calculateTotal())} FCFA
-              </span>
+              <span>{formatPrice(calculateTotal())} FCFA</span>
             </div>
 
             <Button className="w-full rounded-md" size="lg">

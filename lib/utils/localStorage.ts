@@ -19,4 +19,4 @@ export const setLocalStorageItem = (key: string, value: string): void => {
   } catch (error) {
     console.error(`Error setting item ${key} in localStorage`, error);
   }
-}; 
+};

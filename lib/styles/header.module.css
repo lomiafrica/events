@@ -130,7 +130,7 @@
   vertical-align: middle;
   /* Dark background, green text */
   background-color: rgba(31, 41, 55, 0.5); /* Dark grey bg (gray-800) */
-  color: #22C55E; /* Green text (green-500) */
+  color: #22c55e; /* Green text (green-500) */
 }
 
 /* Styles to make disabled links non-interactive */
@@ -145,5 +145,5 @@
   /* Inherits base styles from .mobileNavLink */
   cursor: not-allowed;
   opacity: 0.8; /* Slightly faded */
-   /* Add other styles if needed to prevent hover effects */
+  /* Add other styles if needed to prevent hover effects */
 }

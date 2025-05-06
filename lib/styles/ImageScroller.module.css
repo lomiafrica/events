@@ -116,7 +116,7 @@
   height: auto; /* Changed from 100% */
   max-height: 100%; /* Ensure it doesn't overflow container vertically */
   border-radius: 12px; /* Restored original */
-  object-fit:inherit; /* Back to cover */
+  object-fit: inherit; /* Back to cover */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Restored original */
   position: absolute;
   top: 52%;
@@ -472,9 +472,14 @@
 .soldOutBadge {
   position: absolute;
   bottom: 50px; /* Adjust vertical position (moved 300px up) */
-  right: 400px;  /* Adjust horizontal position (moved 600px left) */
-  background-color: rgba(127, 29, 29, 0.7); /* Dark red semi-transparent background */
-  color: #EF4444; /* Tailwind red-500 */
+  right: 400px; /* Adjust horizontal position (moved 600px left) */
+  background-color: rgba(
+    127,
+    29,
+    29,
+    0.7
+  ); /* Dark red semi-transparent background */
+  color: #ef4444; /* Tailwind red-500 */
   padding: 4px 8px; /* Small padding */
   font-size: 0.7rem; /* Small font */
   font-weight: 600; /* Semi-bold */

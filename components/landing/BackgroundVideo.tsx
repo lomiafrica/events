@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX } from 'lucide-react'; // Import icons
+import React, { useState, useRef, useEffect } from "react";
+import { Volume2, VolumeX } from "lucide-react"; // Import icons
 
 // Define props interface
 interface BackgroundVideoProps {

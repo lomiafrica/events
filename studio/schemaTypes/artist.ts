@@ -39,7 +39,8 @@ export default defineType({
       name: 'socialLink',
       title: 'Social Media Link (Optional)',
       type: 'url',
-      description: 'Link to their primary social media profile (e.g., Instagram, Twitter, Website).',
+      description:
+        'Link to their primary social media profile (e.g., Instagram, Twitter, Website).',
     }),
     // Add any other relevant fields for artists here
   ],
@@ -55,4 +56,4 @@ export default defineType({
       }
     },
   },
-}) 
+})

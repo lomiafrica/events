@@ -92,7 +92,8 @@ export default {
           name: 'yangoUrl',
           title: 'Yango Ride URL (Optional)',
           type: 'url',
-          description: 'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link).',
+          description:
+            'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link).',
         },
       ],
     },
@@ -125,7 +126,8 @@ export default {
       title: 'Lineup / Artists',
       type: 'array',
       group: 'media',
-      description: 'Add artists performing at this event. Create new artists or link existing ones.',
+      description:
+        'Add artists performing at this event. Create new artists or link existing ones.',
       of: [
         {
           name: 'artistReference',
@@ -190,8 +192,7 @@ export default {
               name: 'ticketId',
               title: 'Ticket ID',
               type: 'slug',
-              description:
-                'Unique identifier for API integration (e.g., early-bird, vip-table).',
+              description: 'Unique identifier for API integration (e.g., early-bird, vip-table).',
               validation: (Rule: Rule) => Rule.required(),
             },
             {
@@ -305,7 +306,8 @@ export default {
               title: 'Bundle ID',
               type: 'slug',
               options: {source: 'name', maxLength: 50},
-              description: 'Unique identifier for this bundle (e.g., vip-duo-pack). Auto-generated if blank.',
+              description:
+                'Unique identifier for this bundle (e.g., vip-duo-pack). Auto-generated if blank.',
               validation: (Rule: Rule) => Rule.required(),
             },
             {
@@ -323,7 +325,8 @@ export default {
               name: 'details',
               title: 'Bundle details',
               type: 'text',
-              description: 'List everything included in this bundle (e.g., "2x VIP Tickets, 1x Champagne Bottle").',
+              description:
+                'List everything included in this bundle (e.g., "2x VIP Tickets, 1x Champagne Bottle").',
             },
             {
               name: 'stock',

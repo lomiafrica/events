@@ -18,7 +18,7 @@ export default function Footer() {
   const { currentLanguage } = useTranslation();
 
   const footerLinks = [
-    { href: "/terms", labelKey: "footer.links.terms", icon: Newspaper }
+    { href: "/terms", labelKey: "footer.links.terms", icon: Newspaper },
   ];
 
   const animatedWordsKeys = [
@@ -48,12 +48,12 @@ export default function Footer() {
               />
             </Link>
             <div className="text-muted-foreground text-xs mt-1 mb-1 max-w-xs">
-              {t(currentLanguage, "footer.tagline.intro")}{' '}
+              {t(currentLanguage, "footer.tagline.intro")}{" "}
               <AnimatedTextCycle
-                words={animatedWordsKeys.map(key => t(currentLanguage, key))}
+                words={animatedWordsKeys.map((key) => t(currentLanguage, key))}
                 interval={5000}
                 className="font-extrabold"
-              />{' '}
+              />{" "}
               {t(currentLanguage, "footer.tagline.outro")}
             </div>
           </div>
@@ -118,7 +118,9 @@ export default function Footer() {
         <div className="border-t mt-6 pt-6 grid gap-4 md:gap-8 md:grid-cols-2 items-start">
           {/* Copyright - Moved first and aligned left */}
           <div className="text-xs text-muted-foreground text-center md:text-left md:col-span-1">
-            {t(currentLanguage, "footer.copyright", { year: new Date().getFullYear() })}
+            {t(currentLanguage, "footer.copyright", {
+              year: new Date().getFullYear(),
+            })}
           </div>
 
           {/* Combined Footer Links - Moved second */}

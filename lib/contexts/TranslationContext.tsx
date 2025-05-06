@@ -3,7 +3,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { Language } from "@/lib/i18n/config";
 import { languages } from "@/lib/i18n/config";
-import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils/localStorage";
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+} from "@/lib/utils/localStorage";
 
 interface TranslationContextType {
   currentLanguage: Language;
@@ -12,18 +15,25 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType>({
   currentLanguage: "en",
-  setLanguage: () => { },
+  setLanguage: () => {},
 });
 
 // Main provider component
-export function TranslationProvider({ children }: { children: React.ReactNode }) {
+export function TranslationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [currentLanguage, setCurrentLanguage] = useState<Language>("en");
 
   useEffect(() => {
     // Try to get language from localStorage
     const savedLanguage = getLocalStorageItem("jumbo.language");
 
-    if (savedLanguage && languages.some((lang) => lang.code === savedLanguage)) {
+    if (
+      savedLanguage &&
+      languages.some((lang) => lang.code === savedLanguage)
+    ) {
       setCurrentLanguage(savedLanguage as Language);
     } else {
       // Try to detect browser language
@@ -42,7 +52,11 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     setLocalStorageItem("jumbo.language", lang);
   };
 
-  return <TranslationContext.Provider value={{ currentLanguage, setLanguage }}>{children}</TranslationContext.Provider>;
+  return (
+    <TranslationContext.Provider value={{ currentLanguage, setLanguage }}>
+      {children}
+    </TranslationContext.Provider>
+  );
 }
 
 // Hook component
