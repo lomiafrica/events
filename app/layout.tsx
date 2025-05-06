@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Analytics } from "@vercel/analytics/react"
-
+import { TranslationProvider } from "@/lib/contexts/TranslationContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -70,7 +70,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex-grow">{children}</main>
+          <TranslationProvider>
+            <main className="flex-grow">{children}</main>
+          </TranslationProvider>
         </ThemeProvider>
         <Analytics />
       </body>

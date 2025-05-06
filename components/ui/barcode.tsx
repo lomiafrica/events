@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 export default function Barcode() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { currentLanguage } = useTranslation();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,7 +56,7 @@ export default function Barcode() {
         rel="noopener noreferrer"
         className="absolute -bottom-6 right-0 text-xs text-white font-mono hover:underline"
       >
-        This website is open-source.
+        {t(currentLanguage, "barcode.opensource")}
       </a>
     </div>
   );

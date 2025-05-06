@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Header from "@/components/landing/header";
 import BackgroundVideo from "@/components/landing/BackgroundVideo";
 import Footer from "@/components/landing/footer";
+import OurCodeSection from "@/components/landing/djaouli-code";
 import { getHomepageVideoUrl } from "@/lib/sanity/queries";
 
 // Use the general site metadata for the home page
 export const metadata: Metadata = {
   title: "Djaouli Ent. | An Alternative Music Project from Abidjan",
-  description: "Hip Hop",
+  description: "Breaking musical boundaries since 2022."
 };
 
 export default async function Home() {
@@ -21,6 +22,7 @@ export default async function Home() {
           <Header />
         </div>
       </div>
+      <OurCodeSection />
       <Footer />
     </>
   );

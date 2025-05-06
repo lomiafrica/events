@@ -5,14 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
-
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "../ui/sheet";
 import styles from "@/lib/styles/header.module.css";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 export default function Header() {
   const [isScrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { currentLanguage } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,11 +32,11 @@ export default function Header() {
   };
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Events", path: "/events" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Shop", path: "/shop", isComingSoon: true },
-    { name: "Blog", path: "/blog" },
+    { nameKey: "header.nav.home", path: "/" },
+    { nameKey: "header.nav.events", path: "/events" },
+    { nameKey: "header.nav.gallery", path: "/gallery" },
+    { nameKey: "header.nav.shop", path: "/shop", isComingSoon: true },
+    { nameKey: "header.nav.blog", path: "/blog" },
   ];
 
   return (
@@ -54,8 +56,8 @@ export default function Header() {
           {navItems.map((item) => (
             item.isComingSoon ? (
               <span key={item.path} className={`${styles.navLink} ${styles.disabledNavLink}`}>
-                {item.name}
-                <span className={styles.comingSoonBadge}>Soon</span>
+                {t(currentLanguage, item.nameKey)}
+                <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
               </span>
             ) : (
               <Link
@@ -63,7 +65,7 @@ export default function Header() {
                 href={item.path}
                 className={`${styles.navLink} ${isActive(item.path) ? styles.activeNavLink : ""}`}
               >
-                {item.name}
+                {t(currentLanguage, item.nameKey)}
               </Link>
             )
           ))}
@@ -76,20 +78,20 @@ export default function Header() {
                 className={`${styles.mobileMenuButton} bg-transparent border-none hover:bg-transparent focus:ring-0`}
               >
                 <Menu className="h-5 w-5 text-white" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only">{t(currentLanguage, "header.mobileMenu.toggle")}</span>
               </Button>
             </SheetTrigger>
             <SheetContent
               side="top"
               className={`${styles.customSheetContent} bg-zinc-900 text-white h-screen w-screen p-16 duration-200 flex flex-col items-start justify-start`}
             >
-              <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+              <SheetTitle className="sr-only">{t(currentLanguage, "header.mobileMenu.title")}</SheetTitle>
 
               <div className="absolute top-4 right-4">
                 <SheetClose asChild>
                   <Button variant="ghost" size="icon" className="text-white hover:bg-zinc-800 hover:text-white">
                     <X className="h-6 w-6" />
-                    <span className="sr-only">Close menu</span>
+                    <span className="sr-only">{t(currentLanguage, "header.mobileMenu.close")}</span>
                   </Button>
                 </SheetClose>
               </div>
@@ -98,8 +100,8 @@ export default function Header() {
                 {navItems.map((item) => (
                   item.isComingSoon ? (
                     <div key={item.path} className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}>
-                      {item.name}
-                      <span className={styles.comingSoonBadge}>Soon</span>
+                      {t(currentLanguage, item.nameKey)}
+                      <span className={styles.comingSoonBadge}>{t(currentLanguage, "header.nav.soon")}</span>
                     </div>
                   ) : (
                     <SheetClose asChild key={item.path}>
@@ -107,7 +109,7 @@ export default function Header() {
                         href={item.path}
                         className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
                       >
-                        {item.name}
+                        {t(currentLanguage, item.nameKey)}
                       </Link>
                     </SheetClose>
                   )
@@ -115,8 +117,7 @@ export default function Header() {
               </div>
 
               <p className="mt-24 text-sm text-bold text-zinc-400 max-w-md">
-                Djaouli Entertainment is a boundary-pushing DJ collective from Abidjan, Côte d&apos;Ivoire,
-                creating spaces where musical freedom thrives and social barriers dissolve.
+                {t(currentLanguage, "header.mobileMenu.description")}
               </p>
             </SheetContent>
           </Sheet>

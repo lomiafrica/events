@@ -1,32 +1,31 @@
 "use client";
 
-
 import Link from "next/link";
+import Image from "next/image";
+import { Newspaper } from "lucide-react";
 
 import { IG } from "@/components/icons/IG";
 import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 import Barcode from "@/components/ui/barcode";
 import { Soundcloud } from "@/components/icons/Soundcloud";
-import Image from "next/image";
 import AnimatedTextCycle from "@/components/ui/animated-text";
-import { Newspaper, CalendarDays, ScrollText } from "lucide-react";
-
-const footerLinks = [
-  { href: "/terms", label: "Terms", icon: Newspaper },
-  { href: "/privacy", label: "Privacy", icon: CalendarDays },
-  { href: "/djaouli-code", label: "Code", icon: ScrollText },
-];
-
-// Define words for animation
-const animatedWords = [
-  "freedom",
-  "energy",
-  "respect",
-];
+import { LanguageSwitcher } from "@/components/landing/LanguageSwitcher";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 export default function Footer() {
-  // Removed theme state and effect
+  const { currentLanguage } = useTranslation();
+
+  const footerLinks = [
+    { href: "/terms", labelKey: "footer.links.terms", icon: Newspaper }
+  ];
+
+  const animatedWordsKeys = [
+    "footer.animatedWords.freedom",
+    "footer.animatedWords.energy",
+    "footer.animatedWords.respect",
+  ];
 
   return (
     <footer className="bg-gradient-to-b from-sidebar to-background pt-2 pb-6 select-none">
@@ -49,13 +48,13 @@ export default function Footer() {
               />
             </Link>
             <div className="text-muted-foreground text-xs mt-1 mb-1 max-w-xs">
-              We bring{' '}
+              {t(currentLanguage, "footer.tagline.intro")}{' '}
               <AnimatedTextCycle
-                words={animatedWords}
+                words={animatedWordsKeys.map(key => t(currentLanguage, key))}
                 interval={5000}
                 className="font-extrabold"
               />{' '}
-              to Abidjan&apos;s music scene.
+              {t(currentLanguage, "footer.tagline.outro")}
             </div>
           </div>
 
@@ -63,18 +62,6 @@ export default function Footer() {
           <div className="flex items-center gap-x-2">
             {/* Contact/Social Icons (Using custom icons) */}
             <ul className="flex items-center space-x-2 list-none flex-wrap justify-center">
-              {/* Email */}
-              {/* <li>
-                <Link
-                  href="mailto:hello@djaoulient.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Email"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-sm text-muted-foreground dark:text-white transition-colors hover:text-[#4285F4] dark:hover:text-[#4285F4]"
-                >
-                  <MailIcon className="h-[23px] w-[23px]" />
-                </Link>
-              </li> */}
               {/* WhatsApp */}
               <li>
                 <Link
@@ -131,23 +118,25 @@ export default function Footer() {
         <div className="border-t mt-6 pt-6 grid gap-4 md:gap-8 md:grid-cols-2 items-start">
           {/* Copyright - Moved first and aligned left */}
           <div className="text-xs text-muted-foreground text-center md:text-left md:col-span-1">
-            &copy; {new Date().getFullYear()} Djaouli Entertainment — All rights
-            reserved.
+            {t(currentLanguage, "footer.copyright", { year: new Date().getFullYear() })}
           </div>
 
           {/* Combined Footer Links - Moved second */}
           <nav className="md:col-span-1">
-            <ul className="list-none flex  text-xs flex-wrap justify-center md:justify-end gap-x-4 gap-y-1">
+            <ul className="list-none flex text-xs flex-wrap justify-center md:justify-end gap-x-4 gap-y-1 items-center">
               {footerLinks.map((link, i) => (
-                <li key={`footer-${i}`} className="shrink-0">
+                <li key={`footer-link-${i}`} className="shrink-0">
                   <Link
                     href={link.href}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
                   >
-                    {link.label}
+                    {t(currentLanguage, link.labelKey)}
                   </Link>
                 </li>
               ))}
+              <li className="shrink-0">
+                <LanguageSwitcher className="text-muted-foreground hover:text-foreground" />
+              </li>
             </ul>
           </nav>
         </div>

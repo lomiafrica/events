@@ -1,0 +1,83 @@
+{
+  "footer": {
+    "links": {
+      "terms": "Terms"
+    },
+    "tagline": {
+      "intro": "We bring",
+      "outro": "to Abidjan's music scene."
+    },
+    "animatedWords": {
+      "freedom": "freedom",
+      "energy": "energy",
+      "respect": "respect"
+    },
+    "copyright": "© {year} Djaouli Entertainment — All rights reserved."
+  },
+  "header": {
+    "nav": {
+      "home": "Home",
+      "events": "Events",
+      "gallery": "Gallery",
+      "shop": "Shop",
+      "blog": "Blog",
+      "soon": "Soon"
+    },
+    "mobileMenu": {
+      "toggle": "Toggle menu",
+      "title": "Mobile Menu",
+      "close": "Close menu",
+      "description": "Djaouli Entertainment is a boundary-pushing DJ collective from Abidjan, Côte d'Ivoire, creating spaces where musical freedom thrives and social barriers dissolve."
+    }
+  },
+  "barcode": {
+    "opensource": "This website is open-source."
+  },
+  "djaouliCode": {
+    "prefix": "CODE",
+    "item1": {
+      "title": "NOBODY IS WATCHING YOU",
+      "description": "Let go, breathe, sweat. Here, you have nothing to prove — just enjoy."
+    },
+    "item2": {
+      "title": "TOTAL FREEDOM, TOTAL RESPECT",
+      "description": "We're all here to shine, but not by dimming others. We look out for each other."
+    },
+    "item3": {
+      "title": "HERE, BODIES DANCE WITHOUT A MANUAL",
+      "description": "Consent isn't an option, it's a vibe. We respect each other, we check in, we listen."
+    },
+    "item4": {
+      "title": "THE STAGE IS SACRED AND IT BELONGS TO EVERYONE",
+      "description": "DJ, audience, organizers, friend filming on their phone — everyone brings their energy and that creates the magic."
+    },
+    "item5": {
+      "title": "IF YOU CAME TO SIT, YOU MISSED THE ADDRESS",
+      "description": "Don't come to consume, come to contribute. The dance floor is our temple."
+    },
+    "item6": {
+      "title": "DJS ARE NOT JUKEBOXES",
+      "description": "Let them tell their story. Each DJ has their style, we let ourselves be carried away, let ourselves be surprised."
+    },
+    "item7": {
+      "title": "YOU DON'T KNOW THE SONG? EVEN BETTER",
+      "description": "Be curious. What you hear here, you may never have heard before, but you'll remember it for a long time."
+    },
+    "item8": {
+      "title": "YES, YOU CAN SWEAT YOUR LIFE OUT TO ELECTRONIC MUSIC",
+      "description": "EVEN IN ABIDJAN."
+    },
+    "item9": {
+      "title": "EVERYONE WRITES A PIECE OF THE LEGEND",
+      "description": "A Djaouli night is a collective affair. Your vibe counts. Your sweat counts."
+    },
+    "item10": {
+      "title": "COME AS YOU ARE. THE ONLY DRESS CODE HERE IS ATTITUDE",
+      "description": "Come with your best mood. No outfit required. No judgment."
+    },
+    "item11": {
+      "title": "THE \"BÔRÔ\" IS A CHOSEN FAMILY",
+      "description": "Coming alone? You leave with brothers, sisters, vibrant souls. Say hello, smile, connect."
+    }
+  }
+}

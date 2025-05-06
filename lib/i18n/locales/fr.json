@@ -1,0 +1,83 @@
+{
+  "footer": {
+    "links": {
+      "terms": "Conditions"
+    },
+    "tagline": {
+      "intro": "Nous apportons",
+      "outro": "à la scène musicale d'Abidjan."
+    },
+    "animatedWords": {
+      "freedom": "liberté",
+      "energy": "énergie",
+      "respect": "respect"
+    },
+    "copyright": "© {year} Djaouli Entertainment — Tous droits réservés."
+  },
+  "header": {
+    "nav": {
+      "home": "Accueil",
+      "events": "Events",
+      "gallery": "Galerie",
+      "shop": "Boutique",
+      "blog": "Blog",
+      "soon": "SOON"
+    },
+    "mobileMenu": {
+      "toggle": "Ouvrir/Fermer le menu",
+      "title": "Menu Mobile",
+      "close": "Fermer le menu",
+      "description": "Djaouli Entertainment est un collectif de DJs avant-gardiste d'Abidjan, Côte d'Ivoire, créant des espaces où la liberté musicale s'épanouit et les barrières sociales se dissolvent."
+    }
+  },
+  "barcode": {
+    "opensource": "Ce site web est open-source."
+  },
+  "djaouliCode": {
+    "prefix": "CODE",
+    "item1": {
+      "title": "PERSONNE NE TE REGARDE",
+      "description": "Relâche-toi, respire, transpire. Ici, tu n'as rien à prouver — juste à kiffer."
+    },
+    "item2": {
+      "title": "LIBERTÉ TOTALE, RESPECT TOTAL",
+      "description": "On est tous là pour briller, mais sans éteindre les autres. On veille les un·es sur les autres."
+    },
+    "item3": {
+      "title": "ICI, LES CORPS DANSENT SANS MODE D'EMPLOI",
+      "description": "Le consentement, c'est pas une option, c'est une vibe. On se respecte, on se check, on s'écoute."
+    },
+    "item4": {
+      "title": "LA SCÈNE EST SACRÉE ET ELLE EST À TOUT LE MONDE",
+      "description": "DJ, public, orga, poto en train de filmer au téléphone — chacun pose son énergie et ça fait la magie."
+    },
+    "item5": {
+      "title": "SI T'ES VENU T'ASSEOIR, T'AS LOUPÉ L'ADRESSE",
+      "description": "Viens pas consommer, viens contribuer. Le dance-floor est notre temple."
+    },
+    "item6": {
+      "title": "LES DJS NE SONT PAS DES JUKE-BOX",
+      "description": "Laisse-les raconter leur histoire. Chaque DJ a sa patte, on se laisse emporter, se laisse surprendre."
+    },
+    "item7": {
+      "title": "TU CONNAIS PAS LE SON ? ENCORE MIEUX",
+      "description": "Sois curieux. Ce que t'entends ici, tu ne l'as peut-être jamais entendu, mais tu vas t'en souvenir longtemps."
+    },
+    "item8": {
+      "title": "OUI, ON PEUT TRANSPIRER SA VIE SUR DE LA MUSIQUE ÉLECTRONIQUE",
+      "description": "MÊME À ABIDJAN."
+    },
+    "item9": {
+      "title": "CHACUN ÉCRIT UN BOUT DE LA LÉGENDE",
+      "description": "Une soirée Djaouli, c'est une affaire collective. Ta vibe compte. Ta sueur compte."
+    },
+    "item10": {
+      "title": "VIENS COMME TU ES. LE SEUL DRESS CODE ICI, C'EST L'ATTITUDE",
+      "description": "Viens avec ton meilleur mood, Pas de tenue exigée. Pas de jugement."
+    },
+    "item11": {
+      "title": "LE \"BÔRÔ\" EST UNE FAMILLE CHOISIE",
+      "description": "Tu viens seul·e ? Tu repars avec des frères, des sœurs, des âmes vibrantes. Dis bonjour, souris, connecte-toi."
+    }
+  }
+}
