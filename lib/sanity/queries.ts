@@ -74,7 +74,8 @@ export async function getEventBySlug(slug: string) {
         name,
         bio,
         "image": image.asset->url,
-        socialLink
+        socialLink,
+        isResident
       },
       gallery[]{
         _key,

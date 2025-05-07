@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { CalendarDays, Clock, MapPin, Users, Ticket } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Users, Ticket, Check } from "lucide-react";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,7 @@ type EventData = {
     bio?: string;
     image?: string;
     socialLink?: string;
+    isResident?: boolean; // Added isResident
   }[];
   gallery?: { _key: string; url: string; caption?: string }[];
 };
@@ -300,7 +301,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                             >
                               {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
-                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm p-3 flex flex-col flex-grow">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm py-2 px-3 flex flex-col flex-grow">
                                   <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-grow w-full">
                                     <div className="flex-grow">
                                       <h4 className="text-gray-100 font-bold text-base uppercase leading-tight mb-2">
@@ -310,16 +311,48 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                         )}
                                       </h4>
                                       {ticket.description && (
-                                        <p className="text-gray-400 italic text-sm leading-relaxed mb-1">
-                                          {ticket.description}
-                                        </p>
+                                        <div className="text-sm mb-1 space-y-1">
+                                          {ticket.description.split('\n').map((line, index) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={index} />;
+                                            }
+                                            if (trimmedLine.startsWith("⚠️")) {
+                                              return (
+                                                <p key={index} className="text-amber-400 font-medium">
+                                                  {trimmedLine}
+                                                </p>
+                                              );
+                                            }
+                                            return <p key={index} className="text-gray-400 leading-relaxed">{trimmedLine}</p>;
+                                          })}
+                                        </div>
                                       )}
                                       {ticket.details && (
-                                        <p className="text-xs text-gray-400/80 leading-relaxed mb-2">
-                                          {ticket.details}
-                                        </p>
+                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
+                                          {ticket.details.split('\n').map((line, idx) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={idx} />;
+                                            }
+                                            const match = trimmedLine.match(/^(✅|✔|•|-|\*)\s*(.*)/);
+                                            if (match && match[2]) {
+                                              return (
+                                                <div key={idx} className="flex items-start pl-2">
+                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                  <span className="leading-snug">{match[2]}</span>
+                                                </div>
+                                              );
+                                            }
+                                            return (
+                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly if preferred or remove ml for full width */}
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                        </div>
                                       )}
-                                      <p className="text-primary font-semibold mt-2 text-lg">
+                                      <p className="text-primary font-semibold mt-3 text-lg">
                                         {formatPrice(ticket.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                                       </p>
                                     </div>
@@ -373,7 +406,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                               className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col"
                             >
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
-                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm p-3 flex flex-col flex-grow">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm py-2 px-3 flex flex-col flex-grow">
                                   <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-grow w-full">
                                     <div className="flex-grow">
                                       <h4 className="text-gray-100 font-bold text-base uppercase leading-tight mb-2">
@@ -383,25 +416,48 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                         )}
                                       </h4>
                                       {bundle.description && (
-                                        <p className="text-gray-400 italic text-sm leading-relaxed mb-1">
-                                          {bundle.description}
-                                        </p>
+                                        <div className="text-sm mb-1 space-y-1">
+                                          {bundle.description.split('\n').map((line, index) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={index} />;
+                                            }
+                                            if (trimmedLine.startsWith("⚠️")) {
+                                              return (
+                                                <p key={index} className="text-amber-400 font-medium">
+                                                  {trimmedLine}
+                                                </p>
+                                              );
+                                            }
+                                            return <p key={index} className="text-gray-400 leading-relaxed">{trimmedLine}</p>;
+                                          })}
+                                        </div>
                                       )}
                                       {bundle.details && (
-                                        <ul className="text-xs text-gray-400/80 leading-relaxed list-disc list-inside mb-2 space-y-0.5">
-                                          {bundle.details
-                                            .split("\n")
-                                            .map(
-                                              (item, idx) =>
-                                                item.trim() && (
-                                                  <li key={idx}>
-                                                    {item.trim()}
-                                                  </li>
-                                                ),
-                                            )}
-                                        </ul>
+                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
+                                          {bundle.details.split('\n').map((line, idx) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={idx} />;
+                                            }
+                                            const match = trimmedLine.match(/^(✅|✔|•|-|\*)\s*(.*)/);
+                                            if (match && match[2]) {
+                                              return (
+                                                <div key={idx} className="flex items-start pl-2">
+                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                  <span className="leading-snug">{match[2]}</span>
+                                                </div>
+                                              );
+                                            }
+                                            return (
+                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly */}
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                        </div>
                                       )}
-                                      <p className="text-primary font-semibold mt-2 text-lg">
+                                      <p className="text-primary font-semibold mt-3 text-lg">
                                         {formatPrice(bundle.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                                       </p>
                                     </div>
@@ -489,7 +545,13 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                   )}
                   {event.venueDetails && (
                     <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                      <p>{event.venueDetails}</p>
+                      {event.venueDetails.split('\n').map((line, index) => {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine === "") {
+                          return <br key={index} />;
+                        }
+                        return <p key={index}>{trimmedLine}</p>;
+                      })}
                     </div>
                   )}
                 </div>

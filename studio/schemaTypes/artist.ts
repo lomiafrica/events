@@ -42,6 +42,13 @@ export default defineType({
       description:
         'Link to their primary social media profile (e.g., Instagram, Twitter, Website).',
     }),
+    defineField({
+      name: 'isResident',
+      title: 'Is Resident?',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Check if this artist is a resident for the event series or venue.',
+    }),
     // Add any other relevant fields for artists here
   ],
   preview: {
