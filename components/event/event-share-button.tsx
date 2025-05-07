@@ -15,6 +15,8 @@ import { XIcon as TwitterIcon } from "@/components/icons/X";
 import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { IG } from "@/components/icons/IG";
 import { Facebook, Copy, Share2, Check } from "lucide-react";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 interface EventShareButtonProps {
   eventTitle: string;
@@ -28,6 +30,7 @@ export function EventShareButton({
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const { currentLanguage } = useTranslation();
 
   // Construct URL client-side
   useEffect(() => {
@@ -59,27 +62,38 @@ export function EventShareButton({
       });
   };
 
+  const platformTranslations = {
+    twitter: t(currentLanguage, "eventShare.platformTwitter"),
+    facebook: t(currentLanguage, "eventShare.platformFacebook"),
+    whatsapp: t(currentLanguage, "eventShare.platformWhatsApp"),
+    instagram: t(currentLanguage, "eventShare.platformInstagram"),
+  };
+
   const shareOptions = [
     {
-      name: "Twitter",
+      id: "twitter",
+      name: platformTranslations.twitter,
       icon: <TwitterIcon className="h-5 w-5" />,
       url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
       className: `${baseButtonClasses} bg-black hover:bg-zinc-800 dark:bg-black dark:text-white dark:hover:bg-black`,
     },
     {
-      name: "Facebook",
+      id: "facebook",
+      name: platformTranslations.facebook,
       icon: <Facebook className="h-5 w-5" />,
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       className: `${baseButtonClasses} bg-[#1877F2] hover:bg-[#166FE5] dark:bg-[#1877F2] dark:hover:bg-[#3B82F6]`,
     },
     {
-      name: "WhatsApp",
+      id: "whatsapp",
+      name: platformTranslations.whatsapp,
       icon: <WhatsappIcon className="h-5 w-5" />,
       url: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
       className: `${baseButtonClasses} bg-[#128C7E] hover:bg-[#075E54] dark:bg-[#128C7E] dark:hover:bg-[#075E54]`,
     },
     {
-      name: "Instagram",
+      id: "instagram",
+      name: platformTranslations.instagram,
       icon: <IG className="h-5 w-5" />,
       onClick: handleCopy,
       className: `${baseButtonClasses} bg-[#E1306C] hover:bg-[#C13584] dark:bg-[#E1306C] dark:hover:bg-[#C13584]`,
@@ -101,7 +115,7 @@ export function EventShareButton({
         onClick={() => setIsOpen(true)}
       >
         <Share2 className="h-4 w-4" />
-        Share
+        {t(currentLanguage, "eventShare.triggerButton")}
       </Button>
 
       {/* The Modal Dialog */}
@@ -109,10 +123,10 @@ export function EventShareButton({
         <DialogContent className="sm:max-w-[425px] p-4 rounded-[5px] border border-border/40 bg-background backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Share2 className="h-5 w-5 mr-2" /> Share this event
+              <Share2 className="h-5 w-5 mr-2" /> {t(currentLanguage, "eventShare.modalTitle")}
             </DialogTitle>
             <DialogDescription>
-              Share this event on your favorite platforms.
+              {t(currentLanguage, "eventShare.modalDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-2">
@@ -121,7 +135,7 @@ export function EventShareButton({
                 // Render link button
                 return (
                   <Button
-                    key={option.name}
+                    key={option.id}
                     variant="default"
                     className={option.className}
                     asChild
@@ -140,7 +154,7 @@ export function EventShareButton({
                 // Render action button
                 return (
                   <Button
-                    key={option.name}
+                    key={option.id}
                     variant="default"
                     className={option.className}
                     onClick={option.onClick}
@@ -160,7 +174,7 @@ export function EventShareButton({
                 value={shareUrl}
                 readOnly
                 className="flex-1 rounded-[5px]"
-                placeholder="Loading link..."
+                placeholder={t(currentLanguage, "eventShare.inputPlaceholder")}
               />
               <Button
                 type="button"
@@ -176,7 +190,7 @@ export function EventShareButton({
                   <Copy className="h-4 w-4" />
                 )}
                 <span className="sr-only">
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t(currentLanguage, "eventShare.copyButtonCopied") : t(currentLanguage, "eventShare.copyButtonCopy")}
                 </span>
               </Button>
             </div>

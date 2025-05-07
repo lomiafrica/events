@@ -49,7 +49,7 @@ export default function Header() {
     { nameKey: "header.nav.events", path: "/events" },
     { nameKey: "header.nav.gallery", path: "/gallery" },
     { nameKey: "header.nav.shop", path: "/shop", isComingSoon: true },
-    { nameKey: "header.nav.blog", path: "/blog", isComingSoonBadgeOnly: true },
+    { nameKey: "header.nav.blog", path: "/blog", isComingSoon: true },
   ];
 
   return (

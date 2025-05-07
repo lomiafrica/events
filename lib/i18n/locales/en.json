@@ -28,7 +28,7 @@
       "toggle": "Toggle menu",
       "title": "Mobile Menu",
       "close": "Close menu",
-      "description": "Djaouli Entertainment is a boundary-pushing DJ collective from Abidjan, Côte d'Ivoire, creating spaces where musical freedom thrives and social barriers dissolve."
+      "description": "Djaouli Entertainment is a boundary-pushing DJ collective from Abidjan, Côte d'Ivoire. We create spaces where musical freedom thrives and social barriers dissolve."
     }
   },
   "barcode": {
@@ -190,5 +190,17 @@
   },
   "floatingPromo": {
     "getTicket": "Get your ticket"
+  },
+  "eventShare": {
+    "triggerButton": "Share",
+    "modalTitle": "Share this event",
+    "modalDescription": "Share this event on your favorite platforms.",
+    "platformTwitter": "Twitter",
+    "platformFacebook": "Facebook",
+    "platformWhatsApp": "WhatsApp",
+    "platformInstagram": "Instagram",
+    "inputPlaceholder": "Loading link...",
+    "copyButtonCopied": "Copied!",
+    "copyButtonCopy": "Copy link"
   }
 }

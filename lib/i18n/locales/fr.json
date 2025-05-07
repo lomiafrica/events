@@ -28,7 +28,7 @@
       "toggle": "Ouvrir/Fermer le menu",
       "title": "Menu Mobile",
       "close": "Fermer le menu",
-      "description": "Djaouli Entertainment est un collectif de DJs avant-gardiste d'Abidjan, Côte d'Ivoire, créant des espaces où la liberté musicale s'épanouit et les barrières sociales se dissolvent."
+      "description": "Djaouli Entertainment est un collectif de DJs avant-gardiste basé à Abidjan. Nous créons des espaces où la liberté musicale s'épanouit et les barrières sociales s'effacent."
     }
   },
   "barcode": {
@@ -190,5 +190,17 @@
   },
   "floatingPromo": {
     "getTicket": "Prends ton ticket"
+  },
+  "eventShare": {
+    "triggerButton": "Partager",
+    "modalTitle": "Partager cet événement",
+    "modalDescription": "Partagez cet événement sur vos plateformes préférées.",
+    "platformTwitter": "Twitter",
+    "platformFacebook": "Facebook",
+    "platformWhatsApp": "WhatsApp",
+    "platformInstagram": "Instagram",
+    "inputPlaceholder": "Chargement du lien...",
+    "copyButtonCopied": "Copié !",
+    "copyButtonCopy": "Copier le lien"
   }
 }
