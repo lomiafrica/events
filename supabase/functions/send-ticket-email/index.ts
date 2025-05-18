@@ -6,12 +6,19 @@ import { corsHeaders } from "../_shared/cors.ts"; // Assuming you have this
 // Supabase client
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Third-party libraries for email, PDF, QR, React rendering
+// Third-party libraries for email, PDF, QR
 import { Resend } from "npm:resend";
-// import QRCode from "npm:qrcode"; // For generating QR code data URL or SVG
-// import React from "npm:react"; // For JSX
-// import ReactDOMServer from "npm:react-dom/server"; // To render React to HTML string
-// import puppeteer from "https://deno.land/x/puppeteer@16.2.0/mod.ts"; // For HTML to PDF via Puppeteer
+import { PDFDocument, StandardFonts, rgb, PageSizes, PDFFont } from "npm:pdf-lib"; // Added PDFFont
+
+// Helper function to convert Uint8Array to Base64 string
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
 
 // The multi-line commented block containing a placeholder EventTicketProps interface and renderTicketToHtml function (with HTML/CSS)
 // was removed from here to resolve TypeScript parsing errors.
@@ -20,7 +27,7 @@ import { Resend } from "npm:resend";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-const fromEmail = Deno.env.get("FROM_EMAIL")! || "noreply@yourdomain.com"; // IMPORTANT: Set this in your env vars
+const fromEmail = Deno.env.get("FROM_EMAIL")! || "noreply@send.lomi.africa"; // Use your verified domain
 const appBaseUrl = Deno.env.get("APP_BASE_URL") || "http://localhost:3000"; // For links in email if any
 
 interface UpdatePurchasePayload {
@@ -28,6 +35,9 @@ interface UpdatePurchasePayload {
   email_last_dispatch_attempt_at: string;
   email_dispatch_error?: string | null;
   email_dispatch_attempts?: number;
+  pdf_ticket_generated?: boolean;
+  pdf_ticket_sent_at?: string;
+  unique_ticket_identifier?: string;
 }
 
 // --- Main Serve Function ---
@@ -42,7 +52,8 @@ serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
     const resend = new Resend(resendApiKey);
 
-    const { purchase_id } = await req.json();
+    const body = await req.json();
+    const purchase_id = body.purchase_id;
     purchaseIdFromRequest = purchase_id;
 
     if (!purchaseIdFromRequest) {
@@ -125,106 +136,138 @@ serve(async (req: Request) => {
       ticketIdentifier: uniqueTicketId,
     };
 
-    // --- 3. Generate QR Code ---
-    // const qrValue = JSON.stringify({
-    //   ticketId: ticketProps.ticketIdentifier,
-    //   eventName: ticketProps.eventName,
-    //   name: \`\${ticketProps.firstName} \${ticketProps.lastName}\`,
-    //   quantity: ticketProps.quantity,
-    // });
-    // const qrCodeDataURL = await QRCode.toDataURL(qrValue, { errorCorrectionLevel: 'M', width: 200 });
-    // For now, placeholder
-    const qrCodeDataURL = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(ticketProps.ticketIdentifier);
+    // --- 3. Generate QR Code Bytes ---
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&format=png&data=${encodeURIComponent(ticketProps.ticketIdentifier)}`;
+    let qrCodeImageBytes: Uint8Array;
+    try {
+      const qrResponse = await fetch(qrCodeUrl);
+      if (!qrResponse.ok) throw new Error(`Failed to fetch QR code (${qrResponse.status} from ${qrCodeUrl})`);
+      qrCodeImageBytes = new Uint8Array(await qrResponse.arrayBuffer());
+    } catch (qrError) {
+      console.error(`Failed to generate QR for ${purchaseIdFromRequest}:`, qrError);
+      const errorMessage = qrError instanceof Error ? qrError.message : "Unknown QR generation error";
+      await updatePurchaseDispatchStatus(supabase, purchaseIdFromRequest, 'DISPATCH_FAILED', `QR generation error: ${errorMessage}`);
+      return new Response(JSON.stringify({ error: "Failed to generate QR code", details: errorMessage }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }});
+    }
 
+    // --- 4. Generate PDF with pdf-lib ---
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage(PageSizes.A4);
+    const { width, height } = page.getSize();
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // --- 4. Generate PDF ---
-    // This is the complex part.
-    // Option A: Puppeteer (higher fidelity for your React component design)
-    // Option B: pdf-lib (more manual, design might be simplified)
-    // The user wants a "sure to work" method, design impact is secondary.
-    // Let's assume a simple HTML string for now, which Puppeteer would render.
+    let y = height - 50;
+    const margin = 50;
+    const lineH = 18; 
+    const primaryColor = rgb(0.1, 0.1, 0.1);
+    const secondaryColor = rgb(0.3, 0.3, 0.3);
+    const labelColor = rgb(0, 0, 0);
+
+    const drawTextLine = (
+        pdfPage: typeof page,
+        font: PDFFont,
+        text: string,
+        xPos: number,
+        yPos: number,
+        size: number,
+        color = primaryColor
+    ) => {
+        pdfPage.drawText(text, { x: xPos, y: yPos, font, size, color });
+    };
     
-    // const ticketHtml = renderTicketToHtml({ ...ticketProps, qrCodeDataURL }); // qrCodeDataURL would be embedded in HTML
-    // For a "sure to work" very basic PDF if Puppeteer is an issue or not set up yet:
-    // const pdfBytes = await generateSimplePdfWithPdfLib(ticketProps, qrCodeDataURL);
+    drawTextLine(page, helveticaBold, ticketProps.eventName, margin, y, 20);
+    y -= lineH * 2;
 
-    // Placeholder HTML. In reality, this would come from rendering your EventTicket.tsx component.
-    // And it would need the Tailwind CSS inlined or linked for Puppeteer.
-    const simpleTicketHtml = `
-      <html><body>
-        <h1>Ticket: ${ticketProps.eventName}</h1>
-        <p>ID: ${ticketProps.ticketIdentifier}</p>
-        <p>Name: ${ticketProps.firstName} ${ticketProps.lastName}</p>
-        <p>Quantity: ${ticketProps.quantity}</p>
-        <p>Date: ${ticketProps.eventDate}, Time: ${ticketProps.eventTime}, Venue: ${ticketProps.eventVenue}</p>
-        <img src="${qrCodeDataURL}" alt="QR Code" />
-      </body></html>
-    `;
+    const details = [
+        { label: "Ticket ID", value: ticketProps.ticketIdentifier, boldValue: true },
+        { label: "Attendee", value: `${ticketProps.firstName} ${ticketProps.lastName}` },
+        { label: "Email", value: ticketProps.email },
+        ...(ticketProps.phone ? [{ label: "Phone", value: ticketProps.phone }] : []),
+        { label: "Event Date", value: ticketProps.eventDate, spaceBefore: true },
+        { label: "Event Time", value: ticketProps.eventTime },
+        { label: "Venue", value: ticketProps.eventVenue },
+        { label: "Quantity", value: ticketProps.quantity.toString() },
+    ];
 
-    // PUPPETEER USAGE (Conceptual - requires Puppeteer setup and Tailwind CSS handling)
-    // This is a rough guide and might need adjustments for Deno Puppeteer environment.
-    /*
-    let pdfBytes: Uint8Array;
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] }); // Required for many environments
-    const page = await browser.newPage();
-    // Option 1: Set content directly with inlined CSS
-    // await page.setContent(ticketHtmlWithInlinedTailwind, { waitUntil: 'networkidle0' });
-    // Option 2: Go to a URL (if you serve the ticket HTML temporarily - more complex)
-    // await page.goto('some_url_serving_the_ticket_html', { waitUntil: 'networkidle0' });
-    
-    // For a very simple HTML without complex CSS, direct content setting is easier:
-    await page.setContent(simpleTicketHtml, { waitUntil: 'domcontentloaded' });
-    
-    pdfBytes = await page.pdf({
-      format: 'A4', // or specific dimensions
-      printBackground: true,
-      // margin: { top: '1in', right: '1in', bottom: '1in', left: '1in' },
+    details.forEach(detail => {
+        if (detail.spaceBefore) y -= lineH * 0.5;
+        drawTextLine(page, helveticaBold, `${detail.label}:`, margin, y, 11, labelColor);
+        drawTextLine(page, detail.boldValue ? helveticaBold : helvetica, detail.value, margin + 100, y, 11, secondaryColor);
+        y -= lineH;
     });
-    await browser.close();
-    */
 
-    // For now, as a "sure to work" placeholder, let's skip actual PDF generation
-    // and send the HTML content in the email body directly for testing purposes.
-    // In a real scenario, you'd generate pdfBytes.
-    console.warn("PDF Generation with Puppeteer is conceptual here and needs full implementation and CSS handling.");
-    const pdfBytesPlaceholder = new TextEncoder().encode(simpleTicketHtml); // This is NOT a PDF
+    y -= lineH * 0.5; // Space before QR
 
-    // --- 5. Send Email with Resend ---
+    if (qrCodeImageBytes && qrCodeImageBytes.length > 0) {
+      try {
+        const qrImage = await pdfDoc.embedPng(qrCodeImageBytes);
+        const qrDims = qrImage.scale(0.60); // Adjust scale as needed
+        const qrX = width / 2 - qrDims.width / 2;
+        let qrY = y - qrDims.height;
+
+        if (qrY < margin + 40) { // Check if QR fits, considering footer
+            page.addPage(); // Add new page if not enough space
+            y = height - 50; // Reset y for new page
+            qrY = y - qrDims.height; 
+        }
+        page.drawImage(qrImage, { x: qrX, y: qrY, width: qrDims.width, height: qrDims.height });
+        y = qrY - lineH; 
+      } catch (imgError) {
+        const embedErrorMsg = imgError instanceof Error ? imgError.message : "Unknown QR image embedding error";
+        console.error(`Error embedding QR for ${purchaseIdFromRequest}: ${embedErrorMsg}`);
+        drawTextLine(page, helvetica, "[QR Code Unavailable]", margin, y, 10, rgb(0.7, 0.1, 0.1));
+        y -= lineH;
+      }
+    } else {
+        drawTextLine(page, helvetica, "[QR Code Data Missing]", margin, y, 10, rgb(0.5, 0.5, 0.5));
+        y -= lineH;
+    }
+    
+    // Footer text on the last active page
+    const currentContentPage = pdfDoc.getPage(pdfDoc.getPageCount() - 1);
+    drawTextLine(currentContentPage, helvetica, "Present this ticket at the event.", margin, margin + lineH, 9, secondaryColor);
+    drawTextLine(currentContentPage, helvetica, `Generated: ${new Date().toLocaleString()}`, margin, margin, 8, rgb(0.6, 0.6, 0.6));
+
+    const pdfBytes = await pdfDoc.save();
+
+    // --- 5. Send Email with Resend (with PDF attachment) ---
+    const emailHtmlBody = `
+      <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333;">
+        <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h1 style="font-size: 22px; color: #1a1a1a; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">Your Ticket for ${ticketProps.eventName}</h1>
+          <p style="font-size: 16px; line-height: 1.6;">Hello ${ticketProps.firstName},</p>
+          <p style="font-size: 16px; line-height: 1.6;">Thank you for your purchase! Your PDF ticket for <strong>${ticketProps.eventName}</strong> is attached.</p>
+          <h3 style="font-size: 18px; color: #1a1a1a; margin-top: 20px; margin-bottom: 10px;">Summary:</h3>
+          <ul style="font-size: 15px; line-height: 1.7; list-style: none; padding-left: 0;">
+            <li><strong>Event:</strong> ${ticketProps.eventName}</li>
+            <li><strong>Ticket ID:</strong> ${ticketProps.ticketIdentifier}</li>
+            <li><strong>Date:</strong> ${ticketProps.eventDate} at ${ticketProps.eventTime}</li>
+            <li><strong>Venue:</strong> ${ticketProps.eventVenue}</li>
+          </ul>
+          <p style="font-size: 16px; line-height: 1.6; margin-top: 25px;">Please find your PDF ticket attached. If you have any questions, contact support.</p>
+          <p style="font-size: 15px; color: #555; margin-top: 30px;">We look forward to seeing you there!</p>
+        </div>
+        <p style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;">&copy; ${new Date().getFullYear()} Djaouli Event Management</p>
+      </body>`;
+
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: fromEmail,
-      to: ticketProps.email, // Ensure this is a valid email from customer data
-      subject: `Your Ticket for ${ticketProps.eventName}!`,
-      html: `
-        <h1>Here's your ticket for ${ticketProps.eventName}!</h1>
-        <p>Thank you for your purchase, ${ticketProps.firstName}.</p>
-        <p>Details:</p>
-        <ul>
-          <li>Event: ${ticketProps.eventName}</li>
-          <li>Ticket ID: ${ticketProps.ticketIdentifier}</li>
-          <li>Date: ${ticketProps.eventDate}</li>
-          <li>Time: ${ticketProps.eventTime}</li>
-          <li>Venue: ${ticketProps.eventVenue}</li>
-          <li>Quantity: ${ticketProps.quantity}</li>
-        </ul>
-        <p>Your QR code is attached and also displayed below (if your email client supports it):</p>
-        <img src="${qrCodeDataURL}" alt="Ticket QR Code" />
-        <p>We've also attached your ticket as a PDF.</p>
-      `,
-      attachments: [
-        {
-          filename: `ticket-${ticketProps.ticketIdentifier}.pdf`,
-          // content: Buffer.from(pdfBytes).toString("base64"), // Use actual pdfBytes here
-          content: btoa(new TextDecoder().decode(pdfBytesPlaceholder)), // Placeholder: sending HTML as base64
-        },
-      ],
+      to: ticketProps.email,
+      subject: `Your PDF Ticket for ${ticketProps.eventName}`,
+      html: emailHtmlBody,
+      attachments: [{
+        filename: `Ticket-${ticketProps.ticketIdentifier}.pdf`,
+        content: uint8ArrayToBase64(pdfBytes),
+      }],
     });
 
     if (emailError) {
-      console.error(`send-ticket-email: Resend error for purchase ${purchaseIdFromRequest}:`, emailError);
-      await updatePurchaseDispatchStatus(supabase, purchaseIdFromRequest, 'DISPATCH_FAILED', `Resend API error: ${emailError.message}`);
-      return new Response(JSON.stringify({ error: "Failed to send email", details: emailError }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+      const resendErrorMsg = emailError instanceof Error ? emailError.message : JSON.stringify(emailError);
+      console.error(`Resend error for purchase ${purchaseIdFromRequest}:`, resendErrorMsg);
+      await updatePurchaseDispatchStatus(supabase, purchaseIdFromRequest, 'DISPATCH_FAILED', `Resend API error: ${resendErrorMsg}`);
+      return new Response(JSON.stringify({ error: "Failed to send email", details: resendErrorMsg }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
@@ -233,39 +276,33 @@ serve(async (req: Request) => {
       .from("purchases")
       .update({
         email_dispatch_status: 'SENT_SUCCESSFULLY',
-        pdf_ticket_generated: true, 
+        pdf_ticket_generated: true, // Set to true as PDF is now generated
         pdf_ticket_sent_at: new Date().toISOString(),
-        email_last_dispatch_attempt_at: new Date().toISOString(), // Also update this on success
-        email_dispatch_error: null // Clear any previous error
+        email_last_dispatch_attempt_at: new Date().toISOString(),
+        email_dispatch_error: null
       })
       .eq("id", purchaseIdFromRequest);
 
-    console.log(`send-ticket-email: Ticket email sent successfully for purchase ${purchaseIdFromRequest}. Email ID: ${emailData?.id}`);
-    return new Response(JSON.stringify({ message: "Ticket email sent successfully!", email_id: emailData?.id }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+    console.log(`Email with PDF sent for ${purchaseIdFromRequest}. Email ID: ${emailData?.id}`);
+    return new Response(JSON.stringify({ message: "Ticket email with PDF sent successfully!", email_id: emailData?.id }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
 
   } catch (e: unknown) {
-    let errorMessage = "An unknown error occurred";
-    if (e instanceof Error) {
-      errorMessage = e.message;
-    }
-    console.error(`send-ticket-email: Unexpected error for purchase ${purchaseIdFromRequest || 'unknown'}:`, e);
+    const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
+    console.error(`Unexpected error for ${purchaseIdFromRequest || 'unknown'}:`, e);
     if (purchaseIdFromRequest) {
-      // Ensure createClient is available or passed correctly if Supabase instance isn't in this scope
-      const supabaseForError = createClient(supabaseUrl, supabaseServiceRoleKey);
-      await updatePurchaseDispatchStatus(supabaseForError, purchaseIdFromRequest, 'DISPATCH_FAILED', `Unexpected error: ${errorMessage}`);
+      const supabaseForErrorFallback = createClient(supabaseUrl, supabaseServiceRoleKey); // Fallback client
+      await updatePurchaseDispatchStatus(supabaseForErrorFallback, purchaseIdFromRequest, 'DISPATCH_FAILED', `Unexpected error: ${errorMessage}`);
     }
     return new Response(JSON.stringify({ error: "Internal server error", details: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 });
 
 async function updatePurchaseDispatchStatus(
-    supabase: SupabaseClient, 
+    supabaseClient: SupabaseClient, 
     purchaseId: string | null, 
     status: string, 
     errorMessage: string | null,
@@ -277,13 +314,15 @@ async function updatePurchaseDispatchStatus(
             email_dispatch_status: status,
             email_last_dispatch_attempt_at: new Date().toISOString(),
         };
-        if (errorMessage !== undefined) { // Allow clearing the error with null
+        if (errorMessage !== undefined) { 
             updatePayload.email_dispatch_error = errorMessage;
         }
         if (attempts !== undefined) {
             updatePayload.email_dispatch_attempts = attempts;
         }
-        const { error } = await supabase
+        // pdf_ticket_generated and pdf_ticket_sent_at are updated directly in the main success block
+
+        const { error } = await supabaseClient
             .from('purchases')
             .update(updatePayload)
             .eq('id', purchaseId);
@@ -291,32 +330,29 @@ async function updatePurchaseDispatchStatus(
             console.error(`send-ticket-email: Failed to update purchase dispatch status for ${purchaseId} to ${status}:`, error);
         }
     } catch(e) {
-        console.error(`send-ticket-email: Exception while updating purchase dispatch status for ${purchaseId}:`, e);
+        const catchErrorMsg = e instanceof Error ? e.message : "Unknown error in updatePurchaseDispatchStatus";
+        console.error(`send-ticket-email: Exception while updating purchase dispatch status for ${purchaseId}:`, catchErrorMsg);
     }
 }
 
 // --- NOTES & TODOs ---
-// 1. PDF Generation:
-//    - The current 'pdfBytesPlaceholder' sends HTML, not a real PDF.
-//    - For real PDFs: Implement Puppeteer. This involves:
-//      - Ensuring Puppeteer works in Supabase Edge Functions (check resource limits, Deno compatibility).
-//      - Adapting your EventTicket.tsx for server-side rendering (SSR) or creating a dedicated SSR version.
-//      - Inlining Tailwind CSS into the HTML string or ensuring Puppeteer can access a deployed CSS file.
-// 2. Dynamic Event Details:
-//    - The fields event_date_text, event_time_text, event_venue_name MUST exist on purchaseData.
-//    - This means `create-lomi-checkout-session` needs to save them, or they need to be fetched from an `events` table.
-// 3. QR Code:
-//    - Uncomment and use a library like 'npm:qrcode' to generate a proper QR code image data URL.
-//    - Embed this data URL in the HTML for the PDF.
-// 4. Error Handling & Retries:
-//    - The current error handling is basic. Consider a more robust retry mechanism if an email fails to send.
-//    - (Your `03.sql` migration includes `email_dispatch_attempts` which is good for this).
-// 5. Environment Variables:
-//    - RESEND_API_KEY, FROM_EMAIL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, APP_BASE_URL must be set in your Supabase Function secrets.
-// 6. Tailwind CSS for PDF:
-//    - This is the biggest challenge for high-fidelity PDFs from HTML.
-//    - You might need to compile your Tailwind CSS and inline it into the HTML string passed to Puppeteer.
-//      Or, have Puppeteer load an HTML page that includes your full site CSS (might be slower/more complex).
+// 1. PDF Design: 
+//    - The current PDF layout is basic. `pdf-lib` allows for more complex drawing, custom fonts (requires font file embedding),
+//      and precise element placement if a more sophisticated design is needed.
+// 2. Multi-page PDFs: 
+//    - Current implementation assumes a single page. If content overflows, logic to add new pages is needed.
+//      Placeholders for this are marked with "/* TODO: Add new page */".
+// 3. QR Code Image Type: 
+//    - Assumed QR server (api.qrserver.com) sends PNG. `pdfDoc.embedPng` is used.
+//    - If it's JPEG, use `pdfDoc.embedJpg`. If SVG, it needs rasterization first or a different embedding strategy.
+// 4. Error Handling for QR/Image Embedding: 
+//    - Currently logs an error and tries to proceed. You might want stricter handling.
+// 5. Environment Variables & Dependencies: 
+//    - Ensure `npm:pdf-lib` is correctly handled by Supabase Edge Functions tooling.
+//    - All environment variables must be set.
+// 6. Custom Fonts for PDF: 
+//    - StandardFonts are used. For custom fonts, you would need to fetch/load .ttf or .otf files into the function 
+//      and use `pdfDoc.embedFont(customFontBytes)`.
 // 7. Testing:
 //    - Test thoroughly, including error cases (e.g., invalid purchase ID, Resend API failure).
 //    - Test the actual PDF output on different email clients. 

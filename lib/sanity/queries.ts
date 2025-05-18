@@ -55,6 +55,8 @@ export async function getEventBySlug(slug: string) {
       venueDetails,
       hostedBy,
       ticketsAvailable,
+      paymentLink,
+      paymentProductId,
       ticketTypes[]{
         _key,
         name,
@@ -63,6 +65,7 @@ export async function getEventBySlug(slug: string) {
         details,
         stock,
         maxPerOrder,
+        paymentLink,
         salesStart,
         salesEnd,
         active
@@ -89,6 +92,7 @@ export async function getEventBySlug(slug: string) {
         details,
         stock,
         active,
+        paymentLink,
         salesStart,
         salesEnd,
         maxPerOrder
