@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, MapPin, Users, Ticket, Check } from "lucide-react";
@@ -6,13 +9,24 @@ import Footer from "@/components/landing/footer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getEventBySlug } from "@/lib/sanity/queries";
-import Link from "next/link";
 import { EventShareButton } from "@/components/event/event-share-button";
 import { YangoButton } from "@/components/event/YangoButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/i18n/translations";
 import ArtistHoverCard from '@/components/event/ArtistHoverCard';
+import PurchaseFormModal from '@/components/event/PurchaseFormModal';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// Define the shape of the ticket/bundle item passed to the modal (ensure this matches PurchaseFormModal's expectation)
+interface PurchaseItem {
+  id: string; // Sanity _key or bundleId.current
+  name: string;
+  price: number;
+  isBundle: boolean;
+  maxPerOrder?: number;
+  stock?: number | null;
+}
 
 // Define specific type for TicketType
 interface TicketTypeData {
@@ -21,26 +35,26 @@ interface TicketTypeData {
   price: number;
   description?: string;
   details?: string;
-  stock?: number | null; // Allow null
+  stock?: number | null;
   maxPerOrder?: number;
-  salesStart?: string | null; // Allow null
-  salesEnd?: string | null; // Allow null
-  paymentLink?: string;
+  salesStart?: string | null;
+  salesEnd?: string | null;
+  active?: boolean;
 }
 
 // Define specific type for Bundle
 interface BundleData {
   _key: string;
   name: string;
-  bundleId: { current: string }; // Slug type
+  bundleId: { current: string };
   price: number;
   description?: string;
   details?: string;
-  stock?: number | null; // Allow null
-  paymentLink?: string;
-  active: boolean; // Kept for bundles
-  salesStart?: string | null; // Added salesStart for bundles
-  salesEnd?: string | null; // Added salesEnd for bundles
+  stock?: number | null;
+  maxPerOrder?: number;
+  active: boolean;
+  salesStart?: string | null;
+  salesEnd?: string | null;
 }
 
 // Updated EventData type
@@ -49,18 +63,18 @@ type EventData = {
   title: string;
   subtitle?: string;
   slug: { current: string };
-  date: string; // ISO datetime string
+  date: string;
   location?: {
     venueName?: string;
     address?: string;
     googleMapsUrl?: string;
-    yangoUrl?: string; // Added Yango URL
+    yangoUrl?: string;
   };
   flyer?: { url: string };
   description?: string;
   venueDetails?: string;
   hostedBy?: string;
-  ticketsAvailable?: boolean; // Master switch
+  ticketsAvailable?: boolean;
   ticketTypes?: TicketTypeData[];
   bundles?: BundleData[];
   lineup?: {
@@ -69,12 +83,26 @@ type EventData = {
     bio?: string;
     image?: string;
     socialLink?: string;
-    isResident?: boolean; // Added isResident
+    isResident?: boolean;
   }[];
   gallery?: { _key: string; url: string; caption?: string }[];
 };
 
-// Helper to get locale (consistent with other page)
+// Supabase client setup (move to a utility file if used elsewhere)
+// Ensure these environment variables are available on the client-side if you initialize here
+// OR pass the initialized client from a server component if preferred for security of URLs/keys
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// It's generally recommended to initialize Supabase client once and export it from a utility file.
+// For this example, initializing here for simplicity assuming NEXT_PUBLIC vars are set.
+let supabase: SupabaseClient | null = null;
+try {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+} catch (error) {
+  console.error("Failed to initialize Supabase client:", error);
+  // Handle error appropriately, maybe show a message to the user or disable purchase functionality
+}
+
 const getPageLocale = (params?: { slug?: string; locale?: string }): string => {
   return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 };
@@ -97,10 +125,8 @@ export async function generateMetadata({ params: paramsPromise }: { params: Prom
   };
 }
 
-// Helper function to check ticket/bundle availability
-// Renamed and updated to include 'active' status and handle items consistently
 interface ItemForAvailabilityCheck {
-  active?: boolean; // Made optional
+  active?: boolean;
   stock?: number | null;
   salesStart?: string | null;
   salesEnd?: string | null;
@@ -110,61 +136,92 @@ const getItemAvailabilityStatus = (
   item: ItemForAvailabilityCheck,
   currentLanguage: string
 ): { available: boolean; reason: string } => {
-  // Check for 'active' status ONLY IF 'active' property exists on the item (i.e., for bundles)
   if (typeof item.active === 'boolean' && !item.active) {
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.inactive") };
   }
-
   if (typeof item.stock === "number" && item.stock <= 0) {
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.soldOut") };
   }
   const now = new Date();
   if (item.salesStart && now < new Date(item.salesStart)) {
-    const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", { // Consider using currentLanguage for formatting date
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+    const startDate = new Date(item.salesStart).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", year: "numeric",
     });
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.salesStart", { startDate }) };
   }
   if (item.salesEnd && now > new Date(item.salesEnd)) {
     return { available: false, reason: t(currentLanguage, "eventSlugPage.availability.salesEnded") };
   }
-  return { available: true, reason: "" }; // Default is available if no other condition met
+  return { available: true, reason: "" };
 };
 
-// Helper function for formatting price
 const formatPrice = (price: number): string => {
-  // Use non-breaking space (\u00A0) for thousands separator
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
 };
 
-export default async function EventPage({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
-  const params = await paramsPromise;
-  const currentLanguage = getPageLocale(params);
-  const { slug } = params;
-  const event: EventData | null = await getEventBySlug(slug);
+export default function EventPage({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
+  const [event, setEvent] = useState<EventData | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<string>("en");
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
 
-  if (!event) {
-    notFound();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<PurchaseItem | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const params = await paramsPromise;
+        const lang = getPageLocale(params);
+        setCurrentLanguage(lang);
+        const eventData = await getEventBySlug(params.slug);
+        if (!eventData) {
+          notFound();
+          return;
+        }
+        setEvent(eventData);
+      } catch (err) {
+        console.error("Failed to fetch event data:", err);
+        notFound(); // Or some other error handling
+      } finally {
+        setIsLoadingPage(false);
+      }
+    }
+    fetchData();
+  }, [paramsPromise]);
+
+  const handleOpenPurchaseModal = (item: PurchaseItem) => {
+    if (!supabase) {
+      alert(t(currentLanguage, "eventSlugPage.errors.supabaseNotInitialized")); // Or a more graceful notification
+      console.error("Supabase client not initialized. Cannot open purchase modal.");
+      return;
+    }
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  if (isLoadingPage || !event) {
+    // Optional: Add a more sophisticated loading skeleton here
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="container mx-auto py-20 px-4 flex-grow flex items-center justify-center">
+          <p>{t(currentLanguage, "eventSlugPage.loading")}</p> {/* Add loading translation */}
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
-  // Format Date and Time
   const eventDate = event.date ? new Date(event.date) : null;
   const formattedDate =
-    eventDate?.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
+    eventDate?.toLocaleDateString(currentLanguage === 'fr' ? 'fr-FR' : 'en-GB', {
+      day: "2-digit", month: "long", year: "numeric",
     }) || t(currentLanguage, "eventSlugPage.dateTBC");
   const formattedTime =
-    eventDate?.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
+    eventDate?.toLocaleTimeString(currentLanguage === 'fr' ? 'fr-FR' : 'en-US', {
+      hour: "numeric", minute: "2-digit", hour12: currentLanguage !== 'fr',
     }) || t(currentLanguage, "eventSlugPage.timeTBC");
 
-  // Simplified availability check for the main "Get Tickets" section
   const globallyTicketsOnSale =
     event.ticketsAvailable === undefined || event.ticketsAvailable === true;
   const hasDefinedTickets = (event.ticketTypes?.length ?? 0) > 0;
@@ -176,7 +233,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
       <Header />
       <div className="container mx-auto py-22 px-4">
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 lg:gap-12 items-start">
-          {/* Event Flyer - Assign 2 columns */}
+          {/* Event Flyer */}
           <div className="lg:col-span-2 relative aspect-[2/3] rounded-sm overflow-hidden shadow-lg bg-muted">
             <Image
               src={event.flyer?.url || "/placeholder.webp"}
@@ -187,9 +244,8 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
             />
           </div>
 
-          {/* Event Details - Assign 3 columns */}
+          {/* Event Details */}
           <div className="lg:col-span-4">
-            {/* Title and Subtitle */}
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
               {event.title}
             </h1>
@@ -198,8 +254,6 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                 {event.subtitle}
               </p>
             )}
-
-            {/* Date, Time, Location, Hosted By */}
             <div className="flex flex-col gap-4 mb-8">
               <div className="flex items-center gap-3">
                 <CalendarDays className="h-6 w-6 text-primary flex-shrink-0" />
@@ -264,7 +318,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
 
             <Separator className="my-6" />
 
-            {/* Tickets/Bundles Section - Always Link Checkout Mode Logic */}
+            {/* Tickets/Bundles Section - Updated Logic */}
             <div className="py-4">
               {!globallyTicketsOnSale ? (
                 <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
@@ -290,16 +344,12 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                         {event.ticketTypes?.map((ticket) => {
                           const availabilityStatus =
                             getItemAvailabilityStatus(ticket, currentLanguage);
-                          const canPurchase =
-                            globallyTicketsOnSale &&
-                            availabilityStatus.available && ticket.paymentLink;
 
                           return (
                             <Card
                               key={ticket._key}
                               className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col"
                             >
-                              {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
                                 <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm py-2 px-3 flex flex-col flex-grow">
                                   <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-grow w-full">
@@ -345,7 +395,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                               );
                                             }
                                             return (
-                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly if preferred or remove ml for full width */}
+                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]">
                                                 {trimmedLine}
                                               </p>
                                             );
@@ -357,19 +407,20 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                       </p>
                                     </div>
                                     <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
-                                      {canPurchase ? (
+                                      {globallyTicketsOnSale && availabilityStatus.available ? (
                                         <Button
-                                          asChild
+                                          onClick={() => handleOpenPurchaseModal({
+                                            id: ticket._key,
+                                            name: ticket.name,
+                                            price: ticket.price,
+                                            isBundle: false,
+                                            maxPerOrder: ticket.maxPerOrder,
+                                            stock: ticket.stock,
+                                          })}
                                           className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-sm"
                                         >
-                                          <Link
-                                            href={ticket.paymentLink!}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                          >
-                                            <Ticket className="mr-2 h-4 w-4" />{" "}
-                                            {t(currentLanguage, "eventSlugPage.tickets.buyNow")}
-                                          </Link>
+                                          <Ticket className="mr-2 h-4 w-4" />
+                                          {t(currentLanguage, "eventSlugPage.tickets.getETicket")}
                                         </Button>
                                       ) : (
                                         <Badge
@@ -390,16 +441,14 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                       </div>
                     )}
 
-                    {/* List Bundles */}
+                    {/* List Bundles - Updated Logic */}
                     {hasDefinedBundles && (
                       <div className="space-y-3">
                         <h3 className="font-medium text-lg">{t(currentLanguage, "eventSlugPage.bundles.title")}</h3>
                         {event.bundles?.map((bundle) => {
                           const availabilityStatus =
                             getItemAvailabilityStatus(bundle, currentLanguage);
-                          const canPurchase =
-                            globallyTicketsOnSale &&
-                            availabilityStatus.available && bundle.paymentLink;
+
                           return (
                             <Card
                               key={bundle._key}
@@ -450,7 +499,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                               );
                                             }
                                             return (
-                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly */}
+                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]">
                                                 {trimmedLine}
                                               </p>
                                             );
@@ -462,19 +511,20 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                       </p>
                                     </div>
                                     <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
-                                      {canPurchase ? (
+                                      {globallyTicketsOnSale && availabilityStatus.available ? (
                                         <Button
-                                          asChild
+                                          onClick={() => handleOpenPurchaseModal({
+                                            id: bundle.bundleId.current,
+                                            name: bundle.name,
+                                            price: bundle.price,
+                                            isBundle: true,
+                                            maxPerOrder: bundle.maxPerOrder || 10,
+                                            stock: bundle.stock,
+                                          })}
                                           className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-sm"
                                         >
-                                          <Link
-                                            href={bundle.paymentLink!}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                          >
-                                            <Ticket className="mr-2 h-4 w-4" />{" "}
-                                            {t(currentLanguage, "eventSlugPage.tickets.buyNow")}
-                                          </Link>
+                                          <Ticket className="mr-2 h-4 w-4" />
+                                          {t(currentLanguage, "eventSlugPage.tickets.getETicket")}
                                         </Button>
                                       ) : (
                                         <Badge
@@ -501,7 +551,6 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
 
             <Separator className="my-10" />
 
-            {/* Event Details, Venue, Lineup, Gallery - No longer in Tabs, shown sequentially or based on data presence */}
             {event.description && (
               <div className="mb-10 pt-6">
                 <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
@@ -557,7 +606,6 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                 </div>
               )}
 
-            {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||
               (event.lineup && event.lineup.length > 0) ||
               event.location?.venueName ||
@@ -569,9 +617,24 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                 eventSlug={event.slug.current}
               />
             </div>
+
           </div>
         </div>
       </div>
+      {/* Modal for purchasing */}
+      {selectedItem && supabase && (
+        <PurchaseFormModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          item={selectedItem}
+          eventDetails={{
+            id: event._id,
+            title: event.title,
+            currentLanguage: currentLanguage,
+          }}
+          supabaseClient={supabase}
+        />
+      )}
       <Footer />
     </>
   );

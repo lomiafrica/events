@@ -199,12 +199,6 @@ export default {
           type: 'object',
           fields: [
             {
-              name: 'paymentLink',
-              title: 'Direct payment link',
-              type: 'url',
-              description: 'URL for direct purchase of this specific ticket type.',
-            },
-            {
               name: 'name',
               title: 'Name',
               type: 'string',
@@ -236,6 +230,13 @@ export default {
               validation: (Rule: Rule) => Rule.integer().min(0),
             },
             {
+              name: 'active',
+              title: 'Active for Sale',
+              type: 'boolean',
+              description: 'Is this ticket type currently available for sale (independent of stock/dates)?',
+              initialValue: true,
+            },
+            {
               name: 'maxPerOrder',
               title: 'Max per order',
               type: 'number',
@@ -261,20 +262,17 @@ export default {
               price: 'price',
               stock: 'stock',
               description: 'description',
-              details: 'details',
             },
             prepare({
               title,
               price,
               stock,
               description,
-              details,
             }: {
               title: string
               price: number
               stock: number
               description?: string
-              details?: string
             }) {
               let subtitle = `${price} XOF`
               if (stock !== undefined && stock !== null) {
@@ -282,7 +280,7 @@ export default {
               } else {
                 subtitle += ` - Unlimited`
               }
-              const previewDesc = description || details || ''
+              const previewDesc = description || ''
               subtitle += ` | ${previewDesc}`.trim()
               return {
                 title: title,
@@ -346,17 +344,19 @@ export default {
               validation: (Rule: Rule) => Rule.integer().min(0),
             },
             {
-              name: 'paymentLink',
-              title: 'Direct payment link',
-              type: 'url',
-              description: 'URL for direct purchase of this specific bundle.',
-            },
-            {
               name: 'active',
               title: 'Active',
               type: 'boolean',
               description: 'Is this bundle currently active for sale?',
               initialValue: true,
+            },
+            {
+              name: 'maxPerOrder',
+              title: 'Max per order',
+              type: 'number',
+              initialValue: 10,
+              description: 'Maximum number of this bundle that can be purchased in a single order.',
+              validation: (Rule: Rule) => Rule.integer().min(1),
             },
             {
               name: 'salesStart',
@@ -376,20 +376,17 @@ export default {
               title: 'name',
               price: 'price',
               description: 'description',
-              details: 'details',
             },
             prepare({
               title,
               price,
               description,
-              details,
             }: {
               title: string
               price: number
               description?: string
-              details?: string
             }) {
-              const subtitle = `${price} XOF | ${description || details || ''}`.trim()
+              const subtitle = `${price} XOF | ${description || ''}`.trim()
               return {
                 title: title,
                 subtitle: subtitle.substring(0, 80) + (subtitle.length > 80 ? '...' : ''),
