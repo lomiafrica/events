@@ -115,7 +115,7 @@ export default {
           title: 'Yango Ride URL',
           type: 'url',
           description:
-            'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link).',
+            'Direct URL to open Yango app for a ride to the venue (e.g., a pre-filled destination link). The format should be: https://yango.go.link/route?end-lat={latitude}&end-lon={longitude}',
         },
       ],
     },

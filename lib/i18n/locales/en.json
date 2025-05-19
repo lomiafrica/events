@@ -165,13 +165,15 @@
       "soldOut": "Sold Out",
       "salesStart": "Sales start {startDate}",
       "salesEnded": "Sales have ended",
-      "unavailable": "Unavailable"
+      "unavailable": "Unavailable",
+      "misconfigured": "Ticketing system error."
     },
     "tickets": {
       "salesClosedGlobal": "Ticket sales are currently closed for this event.",
       "noItemsListed": "No tickets or bundles are currently listed for this event.",
       "title": "Tickets",
       "buyNow": "Buy now",
+      "getETicket": "Get E-Ticket",
       "currencySuffix": " FCFA"
     },
     "bundles": {
@@ -184,9 +186,14 @@
       "title": "Lineup"
     },
     "venueSection": {
-      "title": "Venue"
+      "title": "Venue",
+      "mapTitleDefault": "Map of event location",
+      "mapTitleNamed": "Map of {locationName}"
     },
-    "hostedBy": "Hosted by {name}"
+    "hostedBy": "Hosted by {name}",
+    "errors": {
+      "supabaseNotInitialized": "Online ticketing is temporarily unavailable. Please try again later."
+    }
   },
   "floatingPromo": {
     "getTicket": "Get your ticket"
@@ -202,5 +209,43 @@
     "inputPlaceholder": "Loading link...",
     "copyButtonCopied": "Copied!",
     "copyButtonCopy": "Copy link"
+  },
+  "artistCard": {
+    "imageAlt": "{artistName}'s image",
+    "residentBadge": "Resident",
+    "socialAriaLabel": "{artistName}'s social media",
+    "noBio": "No bio available.",
+    "noDetails": "No additional details available."
+  },
+  "purchaseModal": {
+    "titlePrefix": "Purchase",
+    "description": "Enter your details to purchase tickets for {eventName}.",
+    "labels": {
+      "quantity": "Quantity",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "optional": "Optional"
+    },
+    "placeholders": {
+      "name": "e.g., Ada Lovelace",
+      "email": "e.g., ada@example.com",
+      "phone": "e.g., +221771234567"
+    },
+    "totalPrice": "Total Price",
+    "buttons": {
+      "cancel": "Cancel",
+      "proceedToPayment": "Proceed to Payment",
+      "processing": "Processing..."
+    },
+    "errors": {
+      "nameRequired": "Full name is required.",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "quantityInvalid": "Quantity must be at least 1.",
+      "functionError": "Could not initiate payment. Please try again.",
+      "lomiUrlMissing": "Payment URL not received. Please try again.",
+      "submitError": "An error occurred. Please try again."
+    }
   }
 }

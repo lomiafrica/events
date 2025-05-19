@@ -165,13 +165,15 @@
       "soldOut": "Épuisé",
       "salesStart": "Les ventes commencent le {startDate}",
       "salesEnded": "Les ventes sont terminées",
-      "unavailable": "Indisponible"
+      "unavailable": "Indisponible",
+      "misconfigured": "Erreur du système de billetterie."
     },
     "tickets": {
       "salesClosedGlobal": "La billetterie pour cet événement est actuellement fermée.",
       "noItemsListed": "Aucun billet ou pack n'est actuellement listé pour cet événement.",
       "title": "Billets",
       "buyNow": "Acheter",
+      "getETicket": "Obtenir E-ticket",
       "currencySuffix": " FCFA"
     },
     "bundles": {
@@ -184,9 +186,14 @@
       "title": "Line-up"
     },
     "venueSection": {
-      "title": "Lieu"
+      "title": "Lieu",
+      "mapTitleDefault": "Carte du lieu de l'événement",
+      "mapTitleNamed": "Carte de {locationName}"
     },
-    "hostedBy": "Organisé par {name}"
+    "hostedBy": "Organisé par {name}",
+    "errors": {
+      "supabaseNotInitialized": "La billetterie en ligne est temporairement indisponible. Veuillez réessayer plus tard."
+    }
   },
   "floatingPromo": {
     "getTicket": "Prends ton ticket"
@@ -202,5 +209,43 @@
     "inputPlaceholder": "Chargement du lien...",
     "copyButtonCopied": "Copié !",
     "copyButtonCopy": "Copier le lien"
+  },
+  "artistCard": {
+    "imageAlt": "Image de {artistName}",
+    "residentBadge": "Résident",
+    "socialAriaLabel": "Réseaux sociaux de {artistName}",
+    "noBio": "Aucune biographie disponible.",
+    "noDetails": "Aucun détail supplémentaire disponible."
+  },
+  "purchaseModal": {
+    "titlePrefix": "Acheter",
+    "description": "Entrez vos coordonnées pour acheter des billets pour {eventName}.",
+    "labels": {
+      "quantity": "Quantité",
+      "name": "Nom complet",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "optional": "Optionnel"
+    },
+    "placeholders": {
+      "name": "ex: Gandhi Diop",
+      "email": "ex: ada@example.com",
+      "phone": "ex: +2250771234567"
+    },
+    "totalPrice": "Prix total",
+    "buttons": {
+      "cancel": "Annuler",
+      "proceedToPayment": "Procéder au paiement",
+      "processing": "Traitement..."
+    },
+    "errors": {
+      "nameRequired": "Le nom complet est requis.",
+      "emailRequired": "L'e-mail est requis.",
+      "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
+      "quantityInvalid": "La quantité doit être d'au moins 1.",
+      "functionError": "Impossible d'initier le paiement. Veuillez réessayer.",
+      "lomiUrlMissing": "URL de paiement non reçue. Veuillez réessayer.",
+      "submitError": "Une erreur est survenue. Veuillez réessayer."
+    }
   }
 }
