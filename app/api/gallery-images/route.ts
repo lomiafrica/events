@@ -10,6 +10,7 @@ interface CloudinaryResource {
   format: string;
   height: string | number; // Allow string or number initially
   width: string | number; // Allow string or number initially
+  tags?: string[]; // Added tags property
   // Add other properties if needed
 }
 
@@ -53,6 +54,7 @@ export async function GET() {
       .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
       .sort_by("public_id", "desc")
       .max_results(400) // Adjust max_results as needed
+      .with_field("tags") // Added to fetch tags
       .execute();
 
     console.log(
@@ -95,6 +97,7 @@ export async function GET() {
           width: width.toString(), // Convert back to string
           public_id: result.public_id,
           format: result.format,
+          tags: result.tags || [], // Add tags, defaulting to empty array
         };
       },
     );
@@ -106,8 +109,24 @@ export async function GET() {
       (img): img is ImageProps => img !== null,
     );
 
+    // Sort images: tagged images first, then by original recency (id)
+    finalImages.sort((a, b) => {
+      const aHasTags = a.tags && a.tags.length > 0;
+      const bHasTags = b.tags && b.tags.length > 0;
+
+      if (aHasTags && !bHasTags) {
+        return -1; // a (tagged) comes before b (untagged)
+      }
+      if (!aHasTags && bHasTags) {
+        return 1;  // b (tagged) comes before a (untagged)
+      }
+      // If both are tagged or both are untagged, maintain original sort order (recency)
+      // Lower id means it was earlier in the Cloudinary 'public_id', 'desc' sorted list (more recent)
+      return a.id - b.id;
+    });
+
     console.log(
-      `[API Route] Processed ${finalImages.length} images successfully (without blur).`,
+      `[API Route] Processed and sorted ${finalImages.length} images successfully (without blur).`,
     );
     return NextResponse.json(finalImages);
   } catch (error: unknown) {

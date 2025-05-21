@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import type { ImageProps } from "@/lib/utils/types";
 import LoadingSpinner from "@/components/ui/Bouncer";
 
@@ -12,6 +12,10 @@ export default function GalleryClientComponent() {
   const [error, setError] = useState<string | null>(null);
   const [zoomedImageId, setZoomedImageId] = useState<number | null>(null); // State for zoomed image ID
   const [isFurtherZoomed, setIsFurtherZoomed] = useState(false); // State for secondary zoom
+
+  // Memoize filtered image lists
+  const taggedImages = useMemo(() => images.filter(img => img.tags && img.tags.length > 0), [images]);
+  const untaggedImages = useMemo(() => images.filter(img => !img.tags || img.tags.length === 0), [images]);
 
   // Fetch images from the API route
   useEffect(() => {
@@ -125,38 +129,101 @@ export default function GalleryClientComponent() {
         {images.length === 0 && !isLoading && !error && (
           <p className="text-center">No images found. Check API route logs.</p>
         )}
-        <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-          {images.map(({ id, public_id, format, width, height }, index) => {
-            // Parse width/height strings back to numbers for the Image component
-            const numericWidth = parseInt(width, 10);
-            const numericHeight = parseInt(height, 10);
 
-            return (
-              <div
-                key={id}
-                onClick={() => setZoomedImageId(id)} // Set the ID on click
-                className={`
-                                    relative mb-5 block w-full cursor-zoom-in
-                                    after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-md after:shadow-highlight
-                                `}
-              >
-                <Image
-                  alt="Gallery photo"
-                  className="transform rounded-md brightness-90 transition will-change-auto group-hover:brightness-110"
-                  style={{ transform: "translate3d(0, 0, 0)" }}
-                  src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
-                  width={!isNaN(numericWidth) ? numericWidth : 720}
-                  height={!isNaN(numericHeight) ? numericHeight : 480}
-                  sizes="(max-width: 640px) 100vw,
-                                      (max-width: 1280px) 50vw,
-                                      (max-width: 1536px) 33vw,
-                                      25vw"
-                  priority={index < 3} // Add priority to the first 3 images
-                />
-              </div>
-            );
-          })}
-        </div>
+        {/* Tagged Images Section */}
+        {taggedImages.length > 0 && (
+          <section className="mb-12">
+            {/* <h2 className="text-3xl font-bold mb-6 text-white tracking-tight">
+              Highlights
+            </h2> */}
+            <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
+              {taggedImages.map(({ id, public_id, format, width, height, tags }, index) => {
+                const numericWidth = parseInt(width, 10);
+                const numericHeight = parseInt(height, 10);
+                // console.log(`Tagged Image ${public_id} tags:`, tags); 
+                return (
+                  <div
+                    key={`tagged-${id}`}
+                    onClick={() => setZoomedImageId(id)}
+                    className={`
+                                        relative 
+                                        mb-5 block w-full cursor-zoom-in
+                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-md after:shadow-highlight
+                                    `}
+                  >
+                    <Image
+                      alt="Gallery photo - Highlight"
+                      className="transform rounded-md brightness-90 transition will-change-auto group-hover:brightness-110"
+                      style={{ transform: "translate3d(0, 0, 0)" }}
+                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
+                      width={!isNaN(numericWidth) ? numericWidth : 720}
+                      height={!isNaN(numericHeight) ? numericHeight : 480}
+                      sizes="(max-width: 640px) 100vw,
+                                          (max-width: 1280px) 50vw,
+                                          (max-width: 1536px) 33vw,
+                                          25vw"
+                      priority={index < 3} // Priority for first few tagged images
+                    />
+                    {tags && tags.length > 0 && (
+                      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
+                        {tags[0]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Untagged Images Section */}
+        {untaggedImages.length > 0 && (
+          <section>
+            {taggedImages.length > 0 && ( // Only show this title if there was a tagged section
+              <h2 className="text-2xl font-semibold mb-6 text-slate-200 tracking-tight">
+                More shots
+              </h2>
+            )}
+            {taggedImages.length === 0 && images.length > 0 && ( // If only untagged, use a more general title
+              <h2 className="text-3xl font-bold mb-6 text-white tracking-tight">
+                Gallery
+              </h2>
+            )}
+            <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
+              {untaggedImages.map(({ id, public_id, format, width, height }, index) => {
+                const numericWidth = parseInt(width, 10);
+                const numericHeight = parseInt(height, 10);
+                // console.log(`Untagged Image ${public_id} tags:`, tags);
+                return (
+                  <div
+                    key={`untagged-${id}`}
+                    onClick={() => setZoomedImageId(id)}
+                    className={`
+                                        relative 
+                                        mb-5 block w-full cursor-zoom-in
+                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-md after:shadow-highlight
+                                    `}
+                  >
+                    <Image
+                      alt="Gallery photo"
+                      className="transform rounded-md brightness-90 transition will-change-auto group-hover:brightness-110"
+                      style={{ transform: "translate3d(0, 0, 0)" }}
+                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
+                      width={!isNaN(numericWidth) ? numericWidth : 720}
+                      height={!isNaN(numericHeight) ? numericHeight : 480}
+                      sizes="(max-width: 640px) 100vw,
+                                          (max-width: 1280px) 50vw,
+                                          (max-width: 1536px) 33vw,
+                                          25vw"
+                      priority={index < 3 && taggedImages.length === 0} // Priority only if no tagged images were prioritized
+                    />
+                    {/* No tag display for untagged images, or could be an empty placeholder if design requires */}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
       {/* Zoomed Image Modal / Backdrop */}
@@ -199,23 +266,36 @@ export default function GalleryClientComponent() {
             const imageSizes = `(max-width: 767px) 95vw, ${isLandscape ? "80vw" : "50vw"}`;
 
             return (
-              <div
+              <div // This is containerClasses (outermost modal content box)
                 className={containerClasses}
-                onClick={(e) => e.stopPropagation()} // Stop backdrop click
+                onClick={(e) => e.stopPropagation()} // Stop backdrop click from closing if click is on padding of containerClasses
               >
-                <Image
-                  alt={`Zoomed gallery photo ${zoomedImage.id}`}
+                {/* New scaling and clickable wrapper */}
+                <div
                   className={`
-                                        object-contain w-full h-full rounded-md cursor-zoom-in 
-                                        transition-transform duration-300 ease-in-out 
-                                        ${isFurtherZoomed ? "scale-125" : "scale-100"} 
-                                    `}
-                  onClick={handleImageClick} // Handle further zoom click
-                  src={imageSrc}
-                  width={baseWidth}
-                  height={baseHeight}
-                  sizes={imageSizes}
-                />
+                    relative cursor-zoom-in 
+                    transition-transform duration-300 ease-in-out
+                    ${isFurtherZoomed ? "scale-125" : "scale-100"}
+                  `}
+                  style={{ transformOrigin: 'center center' }} // Ensure scaling is from the center
+                  onClick={handleImageClick} // Click this whole area to further zoom/unzoom
+                >
+                  <Image
+                    alt={`Zoomed gallery photo ${zoomedImage.id}`}
+                    className="object-contain w-full h-full rounded-md" // Transform class removed
+                    style={{ transform: "translate3d(0, 0, 0)" }} // Keep for potential GPU layer promotion
+                    src={imageSrc}
+                    width={baseWidth}
+                    height={baseHeight}
+                    sizes={imageSizes}
+                  />
+                  {/* Tag is now relative to this scaling wrapper */}
+                  {zoomedImage.tags && zoomedImage.tags.length > 0 && (
+                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
+                      {zoomedImage.tags[0]}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })()}
