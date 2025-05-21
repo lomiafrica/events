@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
 import { cn } from "@/lib/actions/utils";
+import Image from "next/image";
 
 const codeItemsData = [
   {
@@ -89,9 +90,15 @@ export default function OurCodeSection() {
   return (
     <section className="relative bg-gradient-to-b from-sidebar to-background text-white py-8 md:py-12 lg:py-16">
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase tracking-wider text-center mb-8 md:mb-12 text-white">
-          {t(currentLanguage, "djaouliCode.sectionTitle")}
-        </h2>
+        <div className="flex justify-center mb-8 md:mb-12">
+          <Image
+            src="/code.webp"
+            alt="Djaouli Code"
+            width={450}
+            height={50}
+            className="object-contain"
+          />
+        </div>
         <div className="py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {itemsToRender}
