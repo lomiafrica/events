@@ -351,6 +351,9 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                         eventDetails={{
                                           id: event._id,
                                           title: event.title,
+                                          dateText: formattedDate,
+                                          timeText: formattedTime,
+                                          venueName: event.location?.venueName,
                                         }}
                                         globallyTicketsOnSale={globallyTicketsOnSale}
                                         currentLanguage={currentLanguage}
@@ -453,6 +456,9 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                         eventDetails={{
                                           id: event._id,
                                           title: event.title,
+                                          dateText: formattedDate,
+                                          timeText: formattedTime,
+                                          venueName: event.location?.venueName,
                                         }}
                                         globallyTicketsOnSale={globallyTicketsOnSale}
                                         currentLanguage={currentLanguage}

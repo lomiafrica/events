@@ -39,6 +39,9 @@ interface CheckoutButtonProps {
     eventDetails: {
         id: string;
         title: string;
+        dateText?: string;
+        timeText?: string;
+        venueName?: string;
     };
     globallyTicketsOnSale: boolean;
     currentLanguage: string;
@@ -154,7 +157,9 @@ export default function CheckoutButton({
                             eventDetails={{
                                 id: eventDetails.id,
                                 title: eventDetails.title,
-                                currentLanguage: currentLanguage,
+                                dateText: eventDetails.dateText,
+                                timeText: eventDetails.timeText,
+                                venueName: eventDetails.venueName,
                             }}
                             supabaseClient={supabase}
                         />

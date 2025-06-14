@@ -10,7 +10,7 @@ const sendTicketEmailFunctionUrl = process.env.SEND_TICKET_EMAIL_FUNCTION_URL; /
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY; // For invoking Supabase functions if needed with anon key and RLS
 
 if (!supabaseUrl || !supabaseServiceKey || !lomiWebhookSecret || !sendTicketEmailFunctionUrl || !supabaseAnonKey) {
-    console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_EVENTS_WEBHOOK_SECRET, SEND_TICKET_EMAIL_FUNCTION_URL, SUPABASE_ANON_KEY.");
+    console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_WEBHOOK_SECRET, SEND_TICKET_EMAIL_FUNCTION_URL, SUPABASE_ANON_KEY.");
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -23,7 +23,7 @@ async function verifyLomiWebhook(rawBody, signatureHeader) {
         throw new Error("Missing Lomi signature header (X-Lomi-Signature).");
     }
     if (!lomiWebhookSecret) {
-        console.error("LOMI_EVENTS_WEBHOOK_SECRET is not set. Cannot verify webhook.");
+        console.error("LOMI_WEBHOOK_SECRET is not set. Cannot verify webhook.");
         throw new Error("Webhook secret not configured internally.");
     }
     const expectedSignature = crypto.createHmac("sha256", lomiWebhookSecret).update(rawBody).digest("hex");
@@ -42,11 +42,19 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // Vercel provides body as a stream/buffer, need to parse it
-    let rawBody = '';
+    // Vercel provides body as a parsed object or string, not a stream
+    let rawBody;
     try {
-        for await (const chunk of req) {
-            rawBody += chunk.toString();
+        if (req.body) {
+            // If body is already parsed, stringify it
+            rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+        } else {
+            // If body is not available, read from req
+            const chunks = [];
+            for await (const chunk of req) {
+                chunks.push(chunk);
+            }
+            rawBody = Buffer.concat(chunks).toString();
         }
     } catch (bodyError) {
         console.error('Events Webhook: Error reading request body:', bodyError);

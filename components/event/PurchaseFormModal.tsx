@@ -52,6 +52,9 @@ interface CreateCheckoutSessionPayload {
     productId?: string;
     allowCouponCode?: boolean;
     allowQuantity?: boolean;
+    eventDateText?: string;
+    eventTimeText?: string;
+    eventVenueName?: string;
 }
 
 interface PurchaseFormModalProps {
@@ -61,6 +64,9 @@ interface PurchaseFormModalProps {
     eventDetails: {
         id: string; // Event Sanity _id
         title: string;
+        dateText?: string;
+        timeText?: string;
+        venueName?: string;
     };
     supabaseClient: SupabaseClient; // Pass the Supabase client instance
 }
@@ -216,6 +222,9 @@ export default function PurchaseFormModal({
             productId: item.productId,
             allowCouponCode: true, // Enable coupon codes by default
             allowQuantity: shouldAllowQuantity,
+            eventDateText: eventDetails.dateText,
+            eventTimeText: eventDetails.timeText,
+            eventVenueName: eventDetails.venueName,
         };
 
         let successfullyInitiatedRedirect = false;
