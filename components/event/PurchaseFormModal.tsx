@@ -280,7 +280,7 @@ export default function PurchaseFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] max-w-[450px] bg-background border-slate-700 rounded-sm mx-auto my-4 max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[90vw] max-w-[400px] bg-background border-slate-700 rounded-sm mx-auto my-2 max-h-[85vh] overflow-y-auto">
                 <DialogHeader className="pb-3 space-y-1">
                     <DialogTitle className="text-lg pr-8 leading-tight text-left">
                         {item.name}

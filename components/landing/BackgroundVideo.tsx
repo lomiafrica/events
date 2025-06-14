@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, TouchEvent } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons
 
 // Define props interface
@@ -15,7 +15,6 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
   const [isPortrait, setIsPortrait] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null); // Create a ref for the video element
   const bgVideoRef = useRef<HTMLVideoElement>(null);
-  const touchStartX = useRef<number | null>(null);
 
   // Detect aspect ratio on video load
   function handleLoadedMetadata() {
@@ -54,20 +53,6 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
   function next() { goTo(current + 1); }
   function prev() { goTo(current - 1); }
 
-  // Touch/swipe handlers for mobile
-  function handleTouchStart(e: TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
-  }
-  function handleTouchEnd(e: TouchEvent) {
-    if (touchStartX.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(deltaX) > 40) {
-      if (deltaX < 0) next();
-      else prev();
-    }
-    touchStartX.current = null;
-  }
-
   // No videos: render nothing
   if (!videoUrls || videoUrls.length === 0) {
     console.warn("Homepage background video URLs not provided.");
@@ -84,8 +69,6 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
   return (
     <div
       className="absolute inset-0 w-full h-full overflow-hidden"
-      onTouchStart={showNav ? handleTouchStart : undefined}
-      onTouchEnd={showNav ? handleTouchEnd : undefined}
     >
       {/* Blurred background for portrait on desktop only */}
       <div className="hidden md:block absolute inset-0 w-full h-full z-0 pointer-events-none">
@@ -132,14 +115,14 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
       </button>
 
-      {/* Navigation Arrows (desktop/large screens) */}
+      {/* Navigation Arrows (now visible on all screen sizes) */}
       {showNav && (
         <>
           {/* Show left arrow only if current > 0 */}
           {current > 0 && (
             <button
               onClick={prev}
-              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
+              className="flex absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
               aria-label="Previous video"
               tabIndex={0}
             >
@@ -150,7 +133,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
           {current < videoUrls.length - 1 && (
             <button
               onClick={next}
-              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
+              className="flex absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
               aria-label="Next video"
               tabIndex={0}
             >
@@ -160,14 +143,14 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
         </>
       )}
 
-      {/* Dot Indicator */}
+      {/* Dot Indicator - now square with rounded-sm */}
       {showNav && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {videoUrls.map((_, idx) => (
             <button
               key={idx}
               onClick={() => goTo(idx)}
-              className={`w-2 h-2 rounded-full border border-white transition-all duration-200 ${idx === current ? 'bg-white' : 'bg-white/30'}`}
+              className={`w-2 h-2 rounded-sm border border-white transition-all duration-200 ${idx === current ? 'bg-white' : 'bg-white/30'}`}
               aria-label={`Go to video ${idx + 1}`}
               tabIndex={0}
             />
