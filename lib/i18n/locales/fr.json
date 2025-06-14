@@ -21,7 +21,7 @@
       "events": "Events",
       "gallery": "Galerie",
       "shop": "Boutique",
-      "blog": "Blog",
+      "blog": "News",
       "soon": "SOON"
     },
     "mobileMenu": {
@@ -218,8 +218,7 @@
     "noDetails": "Aucun détail supplémentaire disponible."
   },
   "purchaseModal": {
-    "titlePrefix": "Acheter",
-    "description": "Entrez vos coordonnées pour acheter des billets pour {eventName}.",
+    "description": "Entrez vos coordonnées pour acheter des tickets pour {eventName}.",
     "labels": {
       "quantity": "Quantité",
       "name": "Nom complet",
@@ -228,14 +227,14 @@
       "optional": "Optionnel"
     },
     "placeholders": {
-      "name": "ex: Gandhi Diop",
-      "email": "ex: ada@example.com",
+      "name": "ex: Aïssata Diop",
+      "email": "ex: aissata@gmail.com",
       "phone": "ex: +2250771234567"
     },
     "totalPrice": "Prix total",
     "buttons": {
       "cancel": "Annuler",
-      "proceedToPayment": "Procéder au paiement",
+      "pay": "Payer",
       "processing": "Traitement..."
     },
     "errors": {
@@ -247,5 +246,37 @@
       "lomiUrlMissing": "URL de paiement non reçue. Veuillez réessayer.",
       "submitError": "Une erreur est survenue. Veuillez réessayer."
     }
+  },
+  "paymentSuccess": {
+    "title": "Paiement réussi !",
+    "description": "Votre achat de ticket a été complété avec succès.",
+    "orderId": "ID commande : {orderId}",
+    "whatsNext": {
+      "title": "Et maintenant ?",
+      "checkEmail": "Vérifiez votre e-mail pour votre e-ticket",
+      "presentTicket": "Présentez votre e-ticket QR code à l'événement",
+      "arriveEarly": "Arrivez tôt pour éviter les files d'attente"
+    },
+    "buttons": {
+      "backToEvents": "Retour aux événements",
+      "browseGallery": "Parcourir la galerie"
+    },
+    "support": "Besoin d'aide ? Contactez notre équipe de support"
+  },
+  "paymentCancel": {
+    "title": "Paiement annulé",
+    "description": "Votre paiement a été annulé et aucun frais n'a été prélevé.",
+    "orderId": "ID commande : {orderId}",
+    "whatsNext": {
+      "title": "Et maintenant ?",
+      "tryAgain": "Vous pouvez essayer d'acheter des tickets à nouveau",
+      "differentMethod": "Choisissez un moyen de paiement différent",
+      "contactSupport": "Contactez le support si vous avez besoin d'aide"
+    },
+    "buttons": {
+      "backToEvents": "Retour aux événements",
+      "browseGallery": "Parcourir la galerie"
+    },
+    "support": "Besoin d'aide ? Contactez notre équipe de support"
   }
 }

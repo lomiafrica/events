@@ -21,7 +21,7 @@
       "events": "Events",
       "gallery": "Gallery",
       "shop": "Shop",
-      "blog": "Blog",
+      "blog": "News",
       "soon": "Soon"
     },
     "mobileMenu": {
@@ -235,7 +235,7 @@
     "totalPrice": "Total Price",
     "buttons": {
       "cancel": "Cancel",
-      "proceedToPayment": "Proceed to Payment",
+      "pay": "Pay",
       "processing": "Processing..."
     },
     "errors": {
@@ -247,5 +247,37 @@
       "lomiUrlMissing": "Payment URL not received. Please try again.",
       "submitError": "An error occurred. Please try again."
     }
+  },
+  "paymentSuccess": {
+    "title": "Payment Successful!",
+    "description": "Your ticket purchase has been completed successfully.",
+    "orderId": "Order ID: {orderId}",
+    "whatsNext": {
+      "title": "What's Next?",
+      "checkEmail": "Check your email for your e-ticket",
+      "presentTicket": "Present your e-ticket QR code at the event",
+      "arriveEarly": "Arrive early to avoid queues"
+    },
+    "buttons": {
+      "backToEvents": "Back to Events",
+      "browseGallery": "Browse Gallery"
+    },
+    "support": "Need help? Contact our support team"
+  },
+  "paymentCancel": {
+    "title": "Payment Cancelled",
+    "description": "Your payment was cancelled and no charges were made.",
+    "orderId": "Order ID: {orderId}",
+    "whatsNext": {
+      "title": "What's Next?",
+      "tryAgain": "You can try purchasing tickets again",
+      "differentMethod": "Choose a different payment method",
+      "contactSupport": "Contact support if you need help"
+    },
+    "buttons": {
+      "backToEvents": "Back to Events",
+      "browseGallery": "Browse Gallery"
+    },
+    "support": "Need help? Contact our support team"
   }
 }
