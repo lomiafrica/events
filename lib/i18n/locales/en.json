@@ -279,5 +279,60 @@
       "browseGallery": "Browse Gallery"
     },
     "support": "Need help? Contact our support team"
+  },
+  "ticketVerification": {
+    "pageTitle": "Ticket verification",
+    "staffVerification": "Staff verification",
+    "eventDetails": "Event details",
+    "noTicketId": {
+      "description": "Please scan a QR code or visit with a valid ticket ID.",
+      "howToVerify": {
+        "title": "How to verify tickets",
+        "scanQr": "Scan QR code with your phone camera",
+        "enterPin": "Enter staff PIN to access verification",
+        "reviewDetails": "Review customer details and admit entry"
+      },
+      "backToEvents": "Back to events",
+      "needHelp": "Need help? Contact event organizers."
+    },
+    "pinEntry": {
+      "description": "Enter 4-digit PIN to access ticket details",
+      "ticketIdLabel": "Ticket ID:",
+      "pinPlaceholder": "Enter 4-digit PIN",
+      "verifyButton": "Verify PIN",
+      "verifying": "Verifying...",
+      "staffOnly": "Staff access only. Unauthorized access is prohibited."
+    },
+    "status": {
+      "invalid": "Invalid ticket",
+      "alreadyUsed": "Already checked in",
+      "valid": "Ready for entry"
+    },
+    "badges": {
+      "invalid": "❌ INVALID",
+      "alreadyUsed": "⚠️ ALREADY USED",
+      "valid": "✅ VALID"
+    },
+    "loading": {
+      "ticketDetails": "Loading ticket details...",
+      "autoAdmitting": "⚡ Automatically admitting entry..."
+    },
+    "errors": {
+      "ticketNotFound": "❌ Ticket not found, invalid, or not paid",
+      "invalidPin": "❌ Invalid PIN. Access denied."
+    },
+    "warnings": {
+      "alreadyUsed": "⚠️ This ticket has already been used",
+      "entryNotPermitted": "Entry not permitted unless customer shows proof of previous entrance"
+    },
+    "success": {
+      "admitted": "✅ Successfully admitted!",
+      "entryGranted": "Entry granted for {quantity} {people}"
+    },
+    "quantity": {
+      "people": "people",
+      "person": "person"
+    },
+    "checkedInLabel": "Checked in:"
   }
 }

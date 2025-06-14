@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Loader2, CheckCircle, XCircle, Shield, User, Calendar, MapPin, Ticket, AlertCircle, QrCode } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import Link from "next/link";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 interface TicketData {
     purchase_id: string;
@@ -37,11 +38,13 @@ interface VerifyClientProps {
 }
 
 export function VerifyClient({ ticketId }: VerifyClientProps) {
+    const { currentLanguage } = useTranslation();
     const [pin, setPin] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [ticketData, setTicketData] = useState<TicketData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isVerified, setIsVerified] = useState(false);
+    const [wasJustAdmitted, setWasJustAdmitted] = useState(false);
 
     // Check for cached PIN on component mount
     useEffect(() => {
@@ -75,9 +78,10 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         if (ticketId && isVerified && !ticketData) {
             verifyTicket(ticketId);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ticketId, isVerified, ticketData]);
 
-    const verifyTicket = async (ticketIdentifier: string) => {
+    const verifyTicket = useCallback(async (ticketIdentifier: string) => {
         setIsLoading(true);
         setError(null);
         setTicketData(null);
@@ -92,7 +96,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
             }
 
             if (!data || data.length === 0) {
-                setError("❌ Ticket not found, invalid, or not paid");
+                setError(t(currentLanguage, "ticketVerification.errors.ticketNotFound"));
                 return;
             }
 
@@ -102,7 +106,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         } finally {
             setIsLoading(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setIsLoading, setError, setTicketData]);
 
     const handlePinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,7 +140,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                 setError(null);
                 setPin("");
             } else {
-                setError("❌ Invalid PIN. Access denied.");
+                setError(t(currentLanguage, "ticketVerification.errors.invalidPin"));
                 setPin("");
             }
         } catch (err) {
@@ -146,7 +151,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         }
     };
 
-    const markTicketAsUsed = async () => {
+    const markTicketAsUsed = useCallback(async () => {
         if (!ticketData || !ticketId) return;
 
         setIsLoading(true);
@@ -160,6 +165,9 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                 throw new Error(error.message);
             }
 
+            // Set flag to show "Successfully Admitted" instead of "Already Used"
+            setWasJustAdmitted(true);
+
             // Refresh ticket data
             await verifyTicket(ticketId.trim());
         } catch (err) {
@@ -167,43 +175,51 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [ticketData, ticketId, setIsLoading, setWasJustAdmitted, setError, verifyTicket]);
+
+    // Auto-admit valid tickets
+    useEffect(() => {
+        if (ticketData && !ticketData.is_used && !isLoading && !wasJustAdmitted) {
+            // Automatically mark ticket as used when it's valid and not already used
+            markTicketAsUsed();
+        }
+    }, [ticketData, isLoading, wasJustAdmitted, markTicketAsUsed]);
 
     // Get status colors and icons based on ticket state
     const getTicketStatus = () => {
         if (error) {
             return {
-                bgColor: 'bg-red-50',
-                borderColor: 'border-red-200',
-                textColor: 'text-red-700',
-                icon: <XCircle className="h-8 w-8 text-red-500" />,
+                bgColor: 'bg-red-50/50 dark:bg-red-900/10',
+                borderColor: 'border-red-200 dark:border-red-800',
+                textColor: 'text-red-800 dark:text-red-200',
+                icon: <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />,
                 badgeVariant: 'destructive' as const,
-                badgeText: '❌ INVALID',
-                statusText: 'Invalid Ticket'
+                badgeText: t(currentLanguage, "ticketVerification.badges.invalid"),
+                statusText: t(currentLanguage, "ticketVerification.status.invalid")
             };
         }
 
         if (ticketData?.is_used) {
             return {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-700',
-                icon: <AlertCircle className="h-8 w-8 text-orange-500" />,
+                bgColor: 'bg-orange-50/50 dark:bg-orange-900/10',
+                borderColor: 'border-orange-200 dark:border-orange-800',
+                textColor: 'text-orange-800 dark:text-orange-200',
+                icon: <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />,
                 badgeVariant: 'secondary' as const,
-                badgeText: '⚠️ ALREADY USED',
-                statusText: 'Already Checked In'
+                badgeText: t(currentLanguage, "ticketVerification.badges.alreadyUsed"),
+                statusText: t(currentLanguage, "ticketVerification.status.alreadyUsed")
             };
         }
 
         if (ticketData) {
             return {
-                bgColor: 'bg-green-50',
-                borderColor: 'border-green-200',
-                textColor: 'text-green-700',
-                icon: <CheckCircle className="h-8 w-8 text-green-500" />,
+                bgColor: 'bg-green-50/50 dark:bg-green-900/10',
+                borderColor: 'border-green-200 dark:border-green-800',
+                textColor: 'text-green-800 dark:text-green-200',
+                icon: <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />,
                 badgeVariant: 'default' as const,
-                badgeText: '✅ VALID',
-                statusText: 'Ready for Entry'
+                badgeText: t(currentLanguage, "ticketVerification.badges.valid"),
+                statusText: t(currentLanguage, "ticketVerification.status.valid")
             };
         }
 
@@ -214,7 +230,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     if (!ticketId) {
         return (
             <>
-                <Header />
                 <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4">
                     <div className="max-w-md mx-auto">
                         <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
@@ -223,25 +238,25 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                     <QrCode className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <CardTitle className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                                    Ticket Verification
+                                    {t(currentLanguage, "ticketVerification.pageTitle")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="text-center text-gray-600 dark:text-gray-300">
-                                    <p className="text-sm">Please scan a QR code or visit with a valid ticket ID.</p>
+                                    <p className="text-sm">{t(currentLanguage, "ticketVerification.noTicketId.description")}</p>
                                 </div>
 
                                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm p-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                         <h3 className="font-semibold text-blue-800 dark:text-blue-200">
-                                            How to verify tickets
+                                            {t(currentLanguage, "ticketVerification.noTicketId.howToVerify.title")}
                                         </h3>
                                     </div>
                                     <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                                        <li>• Scan QR code with your phone camera</li>
-                                        <li>• Enter staff PIN to access verification</li>
-                                        <li>• Review customer details and admit entry</li>
+                                        <li>• {t(currentLanguage, "ticketVerification.noTicketId.howToVerify.scanQr")}</li>
+                                        <li>• {t(currentLanguage, "ticketVerification.noTicketId.howToVerify.enterPin")}</li>
+                                        <li>• {t(currentLanguage, "ticketVerification.noTicketId.howToVerify.reviewDetails")}</li>
                                     </ul>
                                 </div>
 
@@ -249,13 +264,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                     <Button asChild className="w-full">
                                         <Link href="/">
                                             <Calendar className="w-4 h-4 mr-2" />
-                                            Back to Events
+                                            {t(currentLanguage, "ticketVerification.noTicketId.backToEvents")}
                                         </Link>
                                     </Button>
                                 </div>
 
                                 <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                                    Need help? Contact event organizers.
+                                    {t(currentLanguage, "ticketVerification.noTicketId.needHelp")}
                                 </div>
                             </CardContent>
                         </Card>
@@ -270,7 +285,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     if (!isVerified) {
         return (
             <>
-                <Header />
                 <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4">
                     <div className="max-w-md mx-auto">
                         <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
@@ -279,21 +293,21 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                     <Shield className="w-8 h-8 text-amber-600 dark:text-amber-400" />
                                 </div>
                                 <CardTitle className="text-2xl font-bold text-amber-800 dark:text-amber-200">
-                                    Staff Verification
+                                    {t(currentLanguage, "ticketVerification.staffVerification")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="text-center text-gray-600 dark:text-gray-300">
-                                    <p className="text-lg mb-2">Enter 4-digit PIN to access ticket details</p>
+                                    <p className="text-lg mb-2">{t(currentLanguage, "ticketVerification.pinEntry.description")}</p>
                                     <p className="text-sm font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded-sm">
-                                        Ticket ID: {ticketId.substring(0, 8)}...
+                                        {t(currentLanguage, "ticketVerification.pinEntry.ticketIdLabel")} {ticketId.substring(0, 8)}...
                                     </p>
                                 </div>
 
                                 <form onSubmit={handlePinSubmit} className="space-y-4">
                                     <Input
                                         type="password"
-                                        placeholder="Enter 4-digit PIN"
+                                        placeholder={t(currentLanguage, "ticketVerification.pinEntry.pinPlaceholder")}
                                         value={pin}
                                         onChange={(e) => setPin(e.target.value)}
                                         maxLength={4}
@@ -309,12 +323,12 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                         {isLoading ? (
                                             <>
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Verifying...
+                                                {t(currentLanguage, "ticketVerification.pinEntry.verifying")}
                                             </>
                                         ) : (
                                             <>
                                                 <Shield className="mr-2 h-4 w-4" />
-                                                Verify PIN
+                                                {t(currentLanguage, "ticketVerification.pinEntry.verifyButton")}
                                             </>
                                         )}
                                     </Button>
@@ -329,7 +343,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                 )}
 
                                 <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                                    Staff access only. Unauthorized access is prohibited.
+                                    {t(currentLanguage, "ticketVerification.pinEntry.staffOnly")}
                                 </div>
                             </CardContent>
                         </Card>
@@ -345,7 +359,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     // Show ticket details after PIN verification
     return (
         <>
-            <Header />
             <div className="min-h-screen bg-background py-8 px-4">
                 <div className="max-w-md mx-auto space-y-6">
                     {/* Loading State */}
@@ -353,7 +366,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <Card>
                             <CardContent className="pt-6 text-center">
                                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                                <p>Loading ticket details...</p>
+                                <p>{t(currentLanguage, "ticketVerification.loading.ticketDetails")}</p>
                             </CardContent>
                         </Card>
                     )}
@@ -362,11 +375,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     {status && (
                         <Card className={`border-2 ${status.borderColor} ${status.bgColor}`}>
                             <CardContent className="pt-6 text-center">
-                                <div className="flex flex-col items-center space-y-3">
+                                <div className="flex flex-col items-center space-y-4">
                                     {status.icon}
-                                    <Badge variant={status.badgeVariant} className="text-sm px-3 py-1">
-                                        {status.badgeText}
-                                    </Badge>
                                     <h2 className={`text-xl font-bold ${status.textColor}`}>
                                         {status.statusText}
                                     </h2>
@@ -376,23 +386,39 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                                 {ticketData.customer_name}
                                             </p>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {ticketData.quantity} {ticketData.quantity > 1 ? 'people' : 'person'} • {ticketData.ticket_name}
+                                                {ticketData.quantity} {ticketData.quantity > 1 ? t(currentLanguage, "ticketVerification.quantity.people") : t(currentLanguage, "ticketVerification.quantity.person")} • {ticketData.ticket_name}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {error && (
+                                        <p className="text-red-700 dark:text-red-300 mt-2">{error}</p>
+                                    )}
+                                    {ticketData?.is_used && !wasJustAdmitted && (
+                                        <div className="text-center mt-3">
+                                            <p className="text-orange-800 dark:text-orange-200 font-medium">
+                                                {t(currentLanguage, "ticketVerification.warnings.alreadyUsed")}
+                                            </p>
+                                            <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                                                {t(currentLanguage, "ticketVerification.warnings.entryNotPermitted")}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {wasJustAdmitted && (
+                                        <div className="text-center mt-3">
+                                            <p className="text-green-800 dark:text-green-200 font-medium">
+                                                {t(currentLanguage, "ticketVerification.success.admitted")}
+                                            </p>
+                                            <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                                {t(currentLanguage, "ticketVerification.success.entryGranted", {
+                                                    quantity: ticketData?.quantity,
+                                                    people: ticketData?.quantity && ticketData.quantity > 1
+                                                        ? t(currentLanguage, "ticketVerification.quantity.people")
+                                                        : t(currentLanguage, "ticketVerification.quantity.person")
+                                                })}
                                             </p>
                                         </div>
                                     )}
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Error Display */}
-                    {error && !ticketData && (
-                        <Card className="border-2 border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800">
-                            <CardContent className="pt-6 text-center">
-                                <XCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-                                <Badge variant="destructive" className="mb-3">❌ INVALID</Badge>
-                                <h2 className="text-xl font-bold text-red-700 dark:text-red-300 mb-2">Invalid Ticket</h2>
-                                <p className="text-red-600 dark:text-red-400">{error}</p>
                             </CardContent>
                         </Card>
                     )}
@@ -403,17 +429,17 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
                                     <Ticket className="h-5 w-5" />
-                                    Event Details
+                                    {t(currentLanguage, "ticketVerification.eventDetails")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {/* Customer Contact Info */}
-                                <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-gray-500" />
-                                    <div>
-                                        <p className="text-sm text-gray-500">{ticketData.customer_email}</p>
+                                <div className="flex items-start gap-2">
+                                    <User className="h-4 w-4 text-gray-500 mt-0.5" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{ticketData.customer_email}</p>
                                         {ticketData.customer_phone && (
-                                            <p className="text-sm text-gray-500">{ticketData.customer_phone}</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{ticketData.customer_phone}</p>
                                         )}
                                     </div>
                                 </div>
@@ -439,7 +465,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                                 {ticketData.is_used && ticketData.used_at && (
                                     <div className="pt-2 border-t">
                                         <p className="text-sm text-orange-600">
-                                            <span className="font-medium">Checked in:</span> {new Date(ticketData.used_at).toLocaleString()}
+                                            <span className="font-medium">{t(currentLanguage, "ticketVerification.checkedInLabel")}</span> {new Date(ticketData.used_at).toLocaleString()}
                                         </p>
                                     </div>
                                 )}
@@ -447,67 +473,22 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         </Card>
                     )}
 
-                    {/* Action Button */}
-                    {ticketData && !ticketData.is_used && (
-                        <Button
-                            onClick={markTicketAsUsed}
-                            className="w-full bg-green-600 hover:bg-green-700"
-                            disabled={isLoading}
-                            size="lg"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processing...
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                    ✅ ADMIT ENTRY ({ticketData.quantity} {ticketData.quantity > 1 ? 'people' : 'person'})
-                                </>
-                            )}
-                        </Button>
-                    )}
-
-                    {/* Already Used Warning */}
-                    {ticketData?.is_used && (
-                        <Card className="border-2 border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+                    {/* Automatic Admission Status */}
+                    {ticketData && !ticketData.is_used && isLoading && (
+                        <Card className="border-2 border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
                             <CardContent className="pt-6 text-center">
-                                <AlertCircle className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                                <p className="text-orange-700 dark:text-orange-300 font-medium">
-                                    ⚠️ This ticket has already been used
-                                </p>
-                                <p className="text-sm text-orange-600 dark:text-orange-400">
-                                    Entry not permitted
+                                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600 dark:text-blue-400" />
+                                <p className="text-blue-700 dark:text-blue-300 font-medium">
+                                    {t(currentLanguage, "ticketVerification.loading.autoAdmitting")}
                                 </p>
                             </CardContent>
                         </Card>
                     )}
 
-                    {/* Quick Actions */}
-                    <Card className="bg-zinc-50 border-zinc-200 dark:bg-zinc-900/20 dark:border-zinc-800">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                                    ✅ PIN verified - cached for 30 min
-                                </span>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                        sessionStorage.removeItem(PIN_CACHE_KEY);
-                                        setIsVerified(false);
-                                        setTicketData(null);
-                                    }}
-                                    className="text-xs h-7 px-2"
-                                >
-                                    Clear PIN
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+
+
                 </div>
-            </div>
+            </div >
             <Footer />
         </>
     );

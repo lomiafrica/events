@@ -278,5 +278,60 @@
       "browseGallery": "Parcourir la galerie"
     },
     "support": "Besoin d'aide ? Contactez notre équipe de support"
+  },
+  "ticketVerification": {
+    "pageTitle": "Vérification de ticket",
+    "staffVerification": "Vérification du personnel",
+    "eventDetails": "Détails de l'événement",
+    "noTicketId": {
+      "description": "Veuillez scanner un code QR ou visiter avec un ID de ticket valide.",
+      "howToVerify": {
+        "title": "Comment vérifier les tickets",
+        "scanQr": "Scannez le code QR avec l'appareil photo de votre téléphone",
+        "enterPin": "Entrez le PIN du personnel pour accéder à la vérification",
+        "reviewDetails": "Examinez les détails du client et autorisez l'entrée"
+      },
+      "backToEvents": "Retour aux événements",
+      "needHelp": "Besoin d'aide ? Contactez les organisateurs de l'événement."
+    },
+    "pinEntry": {
+      "description": "Entrez le PIN à 4 chiffres pour accéder aux détails du ticket",
+      "ticketIdLabel": "ID du Ticket :",
+      "pinPlaceholder": "Entrez le PIN à 4 chiffres",
+      "verifyButton": "Vérifier le PIN",
+      "verifying": "Vérification...",
+      "staffOnly": "Accès personnel uniquement. L'accès non autorisé est interdit."
+    },
+    "status": {
+      "invalid": "Ticket invalide",
+      "alreadyUsed": "Déjà enregistré",
+      "valid": "Prêt pour l'entrée"
+    },
+    "badges": {
+      "invalid": "❌ INVALIDE",
+      "alreadyUsed": "⚠️ DÉJÀ UTILISÉ",
+      "valid": "✅ VALIDE"
+    },
+    "loading": {
+      "ticketDetails": "Chargement des détails du ticket...",
+      "autoAdmitting": "⚡ Admission automatique en cours..."
+    },
+    "errors": {
+      "ticketNotFound": "❌ Ticket introuvable, invalide ou non payé",
+      "invalidPin": "❌ PIN invalide. Accès refusé."
+    },
+    "warnings": {
+      "alreadyUsed": "⚠️ Ce ticket a déjà été utilisé",
+      "entryNotPermitted": "Entrée non autorisée sauf si le client montre une preuve d'entrée précédente"
+    },
+    "success": {
+      "admitted": "✅ Admission réussie !",
+      "entryGranted": "Entrée accordée pour {quantity} {people}"
+    },
+    "quantity": {
+      "people": "personnes",
+      "person": "personne"
+    },
+    "checkedInLabel": "Enregistré :"
   }
 }
