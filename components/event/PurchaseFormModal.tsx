@@ -24,6 +24,7 @@ interface PurchaseItem {
     isBundle: boolean;
     maxPerOrder?: number;
     stock?: number | null;
+    productId?: string;
 }
 
 // Define the expected payload for the Supabase function
@@ -40,6 +41,8 @@ interface CreateCheckoutSessionPayload {
     userPhone?: string;
     successUrlPath?: string;
     cancelUrlPath?: string;
+    productId?: string;
+    allowCouponCode?: boolean;
 }
 
 interface PurchaseFormModalProps {
@@ -125,6 +128,8 @@ export default function PurchaseFormModal({
 
         setIsLoading(true);
 
+        console.log("PurchaseFormModal - item.productId:", item.productId);
+
         const payload: CreateCheckoutSessionPayload = {
             eventId: eventDetails.id,
             eventTitle: eventDetails.title,
@@ -138,6 +143,8 @@ export default function PurchaseFormModal({
             currencyCode: "XOF", // Assuming XOF, make dynamic if needed
             successUrlPath: "/payment/success", // Or from config
             cancelUrlPath: "/payment/cancel",   // Or from config
+            productId: item.productId,
+            allowCouponCode: true, // Enable coupon codes by default
         };
 
         let successfullyInitiatedRedirect = false;

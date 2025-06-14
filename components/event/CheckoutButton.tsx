@@ -21,6 +21,7 @@ export interface CheckoutItemData {
     active?: boolean;
     salesStart?: string | null;
     salesEnd?: string | null;
+    productId?: string;
 }
 
 interface PurchaseItemForModal {
@@ -30,6 +31,7 @@ interface PurchaseItemForModal {
     isBundle: boolean;
     maxPerOrder?: number;
     stock?: number | null;
+    productId?: string;
 }
 
 interface CheckoutButtonProps {
@@ -118,6 +120,7 @@ export default function CheckoutButton({
         isBundle: item.isBundle,
         maxPerOrder: item.maxPerOrder,
         stock: item.stock,
+        productId: item.productId,
     };
 
     if (globallyTicketsOnSale && availabilityStatus.available) {

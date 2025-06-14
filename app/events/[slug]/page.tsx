@@ -25,6 +25,7 @@ interface TicketTypeData {
   salesEnd?: string | null; // Allow null
   paymentLink?: string;
   active: boolean; // <-- ADDED active field
+  productId?: string;
 }
 
 // Define specific type for Bundle
@@ -41,6 +42,7 @@ interface BundleData {
   salesStart?: string | null; // Added salesStart for bundles
   salesEnd?: string | null; // Added salesEnd for bundles
   maxPerOrder?: number; // <-- ADDED maxPerOrder field
+  productId?: string;
 }
 
 // Updated EventData type
@@ -265,6 +267,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                     {hasDefinedTickets && (
                       <div className="space-y-3">
                         {event.ticketTypes?.map((ticket) => {
+                          console.log("Event page - ticket.productId:", ticket.productId, "for ticket:", ticket.name);
                           return (
                             <Card
                               key={ticket._key}
@@ -343,6 +346,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                           active: ticket.active,
                                           salesStart: ticket.salesStart,
                                           salesEnd: ticket.salesEnd,
+                                          productId: ticket.productId,
                                         }}
                                         eventDetails={{
                                           id: event._id,
@@ -366,6 +370,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                       <div className="space-y-3">
                         <h3 className="font-medium text-lg">{t(currentLanguage, "eventSlugPage.bundles.title")}</h3>
                         {event.bundles?.map((bundle) => {
+                          console.log("Event page - bundle.productId:", bundle.productId, "for bundle:", bundle.name);
                           return (
                             <Card
                               key={bundle._key}
@@ -443,6 +448,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                           active: bundle.active,
                                           salesStart: bundle.salesStart,
                                           salesEnd: bundle.salesEnd,
+                                          productId: bundle.productId,
                                         }}
                                         eventDetails={{
                                           id: event._id,

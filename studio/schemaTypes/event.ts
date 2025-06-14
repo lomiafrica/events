@@ -217,6 +217,12 @@ export default {
               validation: (Rule: Rule) => Rule.required().min(0),
             },
             {
+              name: 'productId',
+              title: 'lomi. Product ID',
+              type: 'string',
+              description: 'Optional lomi.africa product ID for this ticket type (UUID format). Leave empty if not this event is not tied to a specific product.',
+            },
+            {
               name: 'description',
               title: 'Short description',
               type: 'string',
@@ -332,6 +338,12 @@ export default {
               title: 'Bundle price (XOF)',
               type: 'number',
               validation: (Rule: Rule) => Rule.required().min(0),
+            },
+            {
+              name: 'productId',
+              title: 'lomi. Product ID',
+              type: 'string',
+              description: 'Optional lomi. product ID for this bundle (UUID format). Leave empty if not this event is not tied to a specific product.',
             },
             {
               name: 'description',

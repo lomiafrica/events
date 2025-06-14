@@ -68,7 +68,8 @@ export async function getEventBySlug(slug: string) {
         paymentLink,
         salesStart,
         salesEnd,
-        active
+        active,
+        productId
       },
       lineup[]->{
         _id,
@@ -95,7 +96,8 @@ export async function getEventBySlug(slug: string) {
         paymentLink,
         salesStart,
         salesEnd,
-        maxPerOrder
+        maxPerOrder,
+        productId
       }
     }
   `,
