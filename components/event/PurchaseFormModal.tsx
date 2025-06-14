@@ -272,7 +272,7 @@ export default function PurchaseFormModal({
         return userName.trim().length > 0 &&
             userEmail.trim().length > 0 &&
             validateEmail(userEmail) &&
-            userPhone.trim().length > 0 && // Phone is now required
+            userPhone.trim().length > 4 && // Phone is now required
             quantity > 0;
     };
 
