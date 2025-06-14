@@ -228,11 +228,11 @@
       "optional": "Optional"
     },
     "placeholders": {
-      "name": "e.g., Ada Lovelace",
-      "email": "e.g., ada@example.com",
+      "name": "e.g., Aissata Diop",
+      "email": "e.g., aissata@gmail.com",
       "phone": "e.g., +221771234567"
     },
-    "totalPrice": "Total Price",
+    "totalPrice": "Total",
     "buttons": {
       "cancel": "Cancel",
       "pay": "Pay",
