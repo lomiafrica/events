@@ -228,9 +228,9 @@
       "optional": "Optional"
     },
     "placeholders": {
-      "name": "e.g., Aissata Diop",
-      "email": "e.g., aissata@gmail.com",
-      "phone": "e.g., +221771234567"
+      "name": "Aissata Diop",
+      "email": "aissata@gmail.com",
+      "phone": "+221771234567"
     },
     "totalPrice": "Total",
     "buttons": {
