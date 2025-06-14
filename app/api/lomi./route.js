@@ -35,33 +35,21 @@ async function verifyLomiWebhook(rawBody, signatureHeader) {
     return JSON.parse(rawBody.toString("utf8"));
 }
 
-// --- Main Handler for Vercel ---
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', 'POST');
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
-
-    // Vercel provides body as a parsed object or string, not a stream
+// --- POST Handler for App Router ---
+export async function POST(request) {
+    // Read the raw body
     let rawBody;
     try {
-        if (req.body) {
-            // If body is already parsed, stringify it
-            rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-        } else {
-            // If body is not available, read from req
-            const chunks = [];
-            for await (const chunk of req) {
-                chunks.push(chunk);
-            }
-            rawBody = Buffer.concat(chunks).toString();
-        }
+        rawBody = await request.text();
     } catch (bodyError) {
         console.error('Events Webhook: Error reading request body:', bodyError);
-        return res.status(500).json({ error: 'Failed to read request body' });
+        return new Response(JSON.stringify({ error: 'Failed to read request body' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
-    const signature = req.headers['x-lomi-signature'];
+    const signature = request.headers.get('x-lomi-signature');
     let eventPayload;
 
     try {
@@ -69,7 +57,10 @@ export default async function handler(req, res) {
         console.log('Events Webhook: Lomi event verified:', eventPayload?.event || 'Event type missing');
     } catch (err) {
         console.error('Events Webhook: Lomi signature verification failed:', err.message);
-        return res.status(400).json({ error: `Webhook verification failed: ${err.message}` });
+        return new Response(JSON.stringify({ error: `Webhook verification failed: ${err.message}` }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
     // --- Event Processing ---
@@ -79,7 +70,10 @@ export default async function handler(req, res) {
 
         if (!lomiEventType || !eventData) {
             console.warn('Events Webhook: Event type or data missing in Lomi payload.', eventPayload);
-            return res.status(400).json({ error: 'Event type or data missing.' });
+            return new Response(JSON.stringify({ error: 'Event type or data missing.' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         console.log('Events Webhook: Received Lomi event type:', lomiEventType);
@@ -93,7 +87,10 @@ export default async function handler(req, res) {
 
         if (!purchaseId) {
             console.error('Events Webhook Error: Missing internal_purchase_id in Lomi webhook metadata.', { lomiEventData: eventData });
-            return res.status(400).json({ error: 'Missing internal_purchase_id in Lomi webhook metadata.' });
+            return new Response(JSON.stringify({ error: 'Missing internal_purchase_id in Lomi webhook metadata.' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         let paymentStatusForDb = 'unknown';
@@ -107,7 +104,10 @@ export default async function handler(req, res) {
             paymentStatusForDb = 'payment_failed';
         } else {
             console.log('Events Webhook: Lomi event type not handled for direct payment status update:', lomiEventType);
-            return res.status(200).json({ received: true, message: "Webhook event type not handled for payment update." });
+            return new Response(JSON.stringify({ received: true, message: "Webhook event type not handled for payment update." }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         // 1. Record Payment Outcome
@@ -124,7 +124,10 @@ export default async function handler(req, res) {
         if (rpcError) {
             console.error('Events Webhook Error: Failed to call record_event_lomi_payment RPC:', rpcError);
             // Potentially retry or alert, but respond to Lomi to avoid Lomi retries for DB issues.
-            return res.status(500).json({ error: 'Failed to process payment update in DB.' });
+            return new Response(JSON.stringify({ error: 'Failed to process payment update in DB.' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
         console.log(`Events Webhook: Payment for purchase ${purchaseId} (status: ${paymentStatusForDb}) processed.`);
 
@@ -167,10 +170,16 @@ export default async function handler(req, res) {
             }
         }
 
-        return res.status(200).json({ received: true, message: "Webhook processed." });
+        return new Response(JSON.stringify({ received: true, message: "Webhook processed." }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
 
     } catch (error) {
         console.error('Events Webhook - Uncaught error during event processing:', error);
-        return res.status(500).json({ error: 'Internal server error processing webhook event.' });
+        return new Response(JSON.stringify({ error: 'Internal server error processing webhook event.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 } 
