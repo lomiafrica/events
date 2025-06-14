@@ -2,31 +2,16 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { Buffer } from 'node:buffer';
 
-// --- Environment Variables ---
-const supabaseUrl = process.env.SUPABASE_URL; // General Supabase URL for Vercel
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // General Supabase Service Key for Vercel
-const lomiWebhookSecret = process.env.LOMI_WEBHOOK_SECRET;
-const sendTicketEmailFunctionUrl = process.env.SEND_TICKET_EMAIL_FUNCTION_URL; // e.g., https://<project_ref>.supabase.co/functions/v1/send-ticket-email
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY; // For invoking Supabase functions if needed with anon key and RLS
-
-if (!supabaseUrl || !supabaseServiceKey || !lomiWebhookSecret || !sendTicketEmailFunctionUrl || !supabaseAnonKey) {
-    console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_WEBHOOK_SECRET, SEND_TICKET_EMAIL_FUNCTION_URL, SUPABASE_ANON_KEY.");
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false, autoRefreshToken: false }
-});
-
 // --- Helper: Verify Lomi Webhook Signature ---
-async function verifyLomiWebhook(rawBody, signatureHeader) {
+async function verifyLomiWebhook(rawBody, signatureHeader, webhookSecret) {
     if (!signatureHeader) {
         throw new Error("Missing Lomi signature header (X-Lomi-Signature).");
     }
-    if (!lomiWebhookSecret) {
+    if (!webhookSecret) {
         console.error("LOMI_WEBHOOK_SECRET is not set. Cannot verify webhook.");
         throw new Error("Webhook secret not configured internally.");
     }
-    const expectedSignature = crypto.createHmac("sha256", lomiWebhookSecret).update(rawBody).digest("hex");
+    const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
     const sigBuffer = Buffer.from(signatureHeader);
     const expectedSigBuffer = Buffer.from(expectedSignature);
     if (sigBuffer.length !== expectedSigBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedSigBuffer)) {
@@ -37,6 +22,27 @@ async function verifyLomiWebhook(rawBody, signatureHeader) {
 
 // --- POST Handler for App Router ---
 export async function POST(request) {
+    // --- Environment Variables (moved inside function) ---
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const lomiWebhookSecret = process.env.LOMI_WEBHOOK_SECRET;
+    const sendTicketEmailFunctionUrl = process.env.SEND_TICKET_EMAIL_FUNCTION_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+    // Check for required environment variables
+    if (!supabaseUrl || !supabaseServiceKey || !lomiWebhookSecret || !sendTicketEmailFunctionUrl || !supabaseAnonKey) {
+        console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_WEBHOOK_SECRET, SEND_TICKET_EMAIL_FUNCTION_URL, SUPABASE_ANON_KEY.");
+        return new Response(JSON.stringify({ error: 'Missing required environment variables' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    // Initialize Supabase client inside the function
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { persistSession: false, autoRefreshToken: false }
+    });
+
     // Read the raw body
     let rawBody;
     try {
@@ -53,7 +59,7 @@ export async function POST(request) {
     let eventPayload;
 
     try {
-        eventPayload = await verifyLomiWebhook(rawBody, signature);
+        eventPayload = await verifyLomiWebhook(rawBody, signature, lomiWebhookSecret);
         console.log('Events Webhook: Lomi event verified:', eventPayload?.event || 'Event type missing');
     } catch (err) {
         console.error('Events Webhook: Lomi signature verification failed:', err.message);
