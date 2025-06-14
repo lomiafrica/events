@@ -94,8 +94,8 @@ export default function OurCodeSection() {
           <Image
             src="/code.webp"
             alt="Djaouli Code"
-            width={450}
-            height={50}
+            width={300}
+            height={40}
             className="object-contain"
           />
         </div>
