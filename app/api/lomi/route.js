@@ -22,16 +22,22 @@ async function verifyLomiWebhook(rawBody, signatureHeader, webhookSecret) {
 
 // --- POST Handler for App Router ---
 export async function POST(request) {
+    console.log('🚀 Events Webhook: Received request at', new Date().toISOString());
+    console.log('📧 Request headers:', Object.fromEntries(request.headers.entries()));
+
     // --- Environment Variables (moved inside function) ---
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const lomiWebhookSecret = process.env.LOMI_WEBHOOK_SECRET;
-    const sendTicketEmailFunctionUrl = process.env.SEND_TICKET_EMAIL_FUNCTION_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+    console.log('🔧 Environment check:');
+    console.log(`  - SUPABASE_URL: ${supabaseUrl ? '✅ Set' : '❌ Missing'}`);
+    console.log(`  - SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? '✅ Set' : '❌ Missing'}`);
+    console.log(`  - LOMI_WEBHOOK_SECRET: ${lomiWebhookSecret ? '✅ Set' : '❌ Missing'}`);
 
     // Check for required environment variables
-    if (!supabaseUrl || !supabaseServiceKey || !lomiWebhookSecret || !sendTicketEmailFunctionUrl || !supabaseAnonKey) {
-        console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_WEBHOOK_SECRET, SEND_TICKET_EMAIL_FUNCTION_URL, SUPABASE_ANON_KEY.");
+    if (!supabaseUrl || !supabaseServiceKey || !lomiWebhookSecret) {
+        console.error("Events Webhook: Missing critical environment variables. Check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, LOMI_WEBHOOK_SECRET.");
         return new Response(JSON.stringify({ error: 'Missing required environment variables' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
@@ -150,28 +156,20 @@ export async function POST(request) {
             } else {
                 console.log(`Events Webhook: Purchase ${purchaseId} prepared for email dispatch.`);
 
-                // 3. Asynchronously Trigger Send Ticket Email Function
-                if (sendTicketEmailFunctionUrl) {
-                    fetch(sendTicketEmailFunctionUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${supabaseAnonKey}` // Supabase Edge Functions are typically protected
-                        },
-                        body: JSON.stringify({ purchase_id: purchaseId })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                response.text().then(text => console.error(`Events Webhook: Error triggering send-ticket-email for ${purchaseId}. Status: ${response.status}, Body: ${text}`));
-                            } else {
-                                console.log(`Events Webhook: Successfully triggered send-ticket-email for ${purchaseId}.`);
-                            }
-                        })
-                        .catch(fetchError => {
-                            console.error(`Events Webhook: Network error triggering send-ticket-email for ${purchaseId}:`, fetchError);
-                        });
-                } else {
-                    console.warn("Events Webhook: SEND_TICKET_EMAIL_FUNCTION_URL not set. Cannot trigger email sending.");
+                // 3. Trigger Send Ticket Email Function directly via Supabase client
+                console.log(`📧 Events Webhook: Triggering send-ticket-email for ${purchaseId} via Supabase client`);
+                try {
+                    const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-ticket-email', {
+                        body: { purchase_id: purchaseId }
+                    });
+
+                    if (emailError) {
+                        console.error(`❌ Events Webhook: Error triggering send-ticket-email for ${purchaseId}:`, emailError);
+                    } else {
+                        console.log(`✅ Events Webhook: Successfully triggered send-ticket-email for ${purchaseId}:`, emailResult);
+                    }
+                } catch (functionError) {
+                    console.error(`❌ Events Webhook: Exception calling send-ticket-email for ${purchaseId}:`, functionError);
                 }
             }
         }
