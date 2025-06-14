@@ -165,11 +165,34 @@ export async function POST(request) {
 
                     if (emailError) {
                         console.error(`❌ Events Webhook: Error triggering send-ticket-email for ${purchaseId}:`, emailError);
+                        // Log the specific error details
+                        console.error(`❌ Email Error Details:`, {
+                            message: emailError.message,
+                            context: emailError.context,
+                            details: emailError.details
+                        });
                     } else {
                         console.log(`✅ Events Webhook: Successfully triggered send-ticket-email for ${purchaseId}:`, emailResult);
                     }
                 } catch (functionError) {
                     console.error(`❌ Events Webhook: Exception calling send-ticket-email for ${purchaseId}:`, functionError);
+                    // Log additional context about the error
+                    console.error(`❌ Function Error Details:`, {
+                        name: functionError.name,
+                        message: functionError.message,
+                        stack: functionError.stack
+                    });
+
+                    // Try to update purchase status to indicate email dispatch failed
+                    try {
+                        await supabase.rpc('update_email_dispatch_status', {
+                            p_purchase_id: purchaseId,
+                            p_email_dispatch_status: 'DISPATCH_FAILED',
+                            p_email_dispatch_error: `Function invocation error: ${functionError.message}`
+                        });
+                    } catch (updateError) {
+                        console.error(`❌ Failed to update email dispatch status after function error:`, updateError);
+                    }
                 }
             }
         }
