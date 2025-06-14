@@ -280,20 +280,20 @@ export default function PurchaseFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] max-w-[500px] bg-background border-slate-700 rounded-sm mx-auto my-4 max-h-[95vh] overflow-y-auto">
-                <DialogHeader className="pb-2 sm:pb-4 space-y-2">
-                    <DialogTitle className="text-lg sm:text-xl md:text-2xl pr-8 leading-tight text-left">
+            <DialogContent className="w-[95vw] max-w-[450px] bg-background border-slate-700 rounded-sm mx-auto my-4 max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="pb-3 space-y-1">
+                    <DialogTitle className="text-lg pr-8 leading-tight text-left">
                         {item.name}
                     </DialogTitle>
-                    <DialogDescription className="text-sm sm:text-base text-muted-foreground leading-relaxed text-left">
+                    <DialogDescription className="text-sm text-muted-foreground leading-relaxed text-left">
                         {t(currentLanguage, "purchaseModal.description", { eventName: eventDetails.title })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="rounded-sm">
-                    <div className="space-y-4 sm:space-y-5 py-2">
+                    <div className="space-y-3 py-2">
                         {/* Name Field */}
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                             <Label htmlFor="name" className="text-sm font-medium block">
                                 {t(currentLanguage, "purchaseModal.labels.name")}
                             </Label>
@@ -302,14 +302,14 @@ export default function PurchaseFormModal({
                                 name="userName"
                                 value={userName}
                                 onChange={(e) => setUserName(e.target.value)}
-                                className="rounded-sm h-11 text-base w-full"
+                                className="rounded-sm h-10 text-base w-full"
                                 placeholder={t(currentLanguage, "purchaseModal.placeholders.name")}
                                 required
                             />
                         </div>
 
                         {/* Email Field */}
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                             <Label htmlFor="email" className="text-sm font-medium block">
                                 {t(currentLanguage, "purchaseModal.labels.email")}
                             </Label>
@@ -319,14 +319,14 @@ export default function PurchaseFormModal({
                                 type="email"
                                 value={userEmail}
                                 onChange={(e) => setUserEmail(e.target.value)}
-                                className="rounded-sm h-11 text-base w-full"
+                                className="rounded-sm h-10 text-base w-full"
                                 placeholder={t(currentLanguage, "purchaseModal.placeholders.email")}
                                 required
                             />
                         </div>
 
-                        {/* Phone Field - Now Mandatory */}
-                        <div className="space-y-2">
+                        {/* Phone Field */}
+                        <div className="space-y-1.5">
                             <Label className="text-sm font-medium block">
                                 {t(currentLanguage, "purchaseModal.labels.phone")}
                             </Label>
@@ -337,21 +337,21 @@ export default function PurchaseFormModal({
                             />
                         </div>
 
-                        {/* Quantity Field - Moved to Last */}
-                        <div className="space-y-2">
+                        {/* Quantity Field */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="quantity" className="text-sm font-medium block">
                                 {t(currentLanguage, "purchaseModal.labels.quantity")}
                             </Label>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={handleQuantityDecrement}
                                     disabled={quantity <= 1}
-                                    className="rounded-sm h-12 w-12 p-0 flex-shrink-0 touch-manipulation"
+                                    className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
                                 >
-                                    <Minus className="h-5 w-5" />
+                                    <Minus className="h-4 w-4" />
                                 </Button>
                                 <Input
                                     id="quantity"
@@ -362,7 +362,7 @@ export default function PurchaseFormModal({
                                     value={quantityDisplay}
                                     onChange={handleQuantityChange}
                                     onBlur={handleQuantityBlur}
-                                    className="rounded-sm h-12 text-base text-center flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="rounded-sm h-10 text-base text-center flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     required
                                 />
                                 <Button
@@ -371,9 +371,9 @@ export default function PurchaseFormModal({
                                     size="sm"
                                     onClick={handleQuantityIncrement}
                                     disabled={quantity >= maxQuantity}
-                                    className="rounded-sm h-12 w-12 p-0 flex-shrink-0 touch-manipulation"
+                                    className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
                                 >
-                                    <Plus className="h-5 w-5" />
+                                    <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
                             {maxQuantity < 20 && (
@@ -385,25 +385,25 @@ export default function PurchaseFormModal({
 
                         {/* Error Display */}
                         {error && (
-                            <div className="text-sm text-red-400 text-center px-3 py-3 bg-red-900/20 rounded-sm border border-red-700/50 leading-relaxed">
+                            <div className="text-sm text-red-400 text-center px-3 py-2 bg-red-900/20 rounded-sm border border-red-700/50 leading-relaxed">
                                 {error}
                             </div>
                         )}
 
                         {/* Total Price */}
-                        <div className="pt-2 sm:pt-4 border-t border-border">
+                        <div className="pt-3 border-t border-border">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm sm:text-base font-medium text-muted-foreground">
+                                <span className="text-sm font-medium text-muted-foreground">
                                     {t(currentLanguage, "purchaseModal.totalPrice")}:
                                 </span>
-                                <span className="text-primary font-semibold text-xl whitespace-nowrap">
+                                <span className="text-primary font-semibold text-lg whitespace-nowrap">
                                     {formatPrice(totalPrice)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <DialogFooter className="flex justify-center pt-4 sm:pt-6">
+                    <DialogFooter className="flex justify-center pt-4">
                         <Button
                             type="submit"
                             disabled={isLoading || !isFormValid()}
