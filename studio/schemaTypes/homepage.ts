@@ -17,13 +17,17 @@ export default defineType({
       readOnly: true, // Make title read-only for singleton
     }),
     defineField({
-      name: 'backgroundVideo',
-      title: 'Background video',
-      type: 'file',
-      options: {
-        accept: 'video/*', // Accept only video files
-      },
-      description: 'Upload a video to play in the background of the homepage.',
+      name: 'backgroundVideos',
+      title: 'Background Videos',
+      type: 'array',
+      of: [
+        {
+          type: 'file',
+          options: { accept: 'video/*' },
+        },
+      ],
+      validation: Rule => Rule.max(5),
+      description: 'Upload up to 5 videos to play in the background of the homepage. Users can swipe or use arrows to switch.',
     }),
     defineField({
       name: 'promoEvent',
@@ -38,7 +42,7 @@ export default defineType({
   preview: {
     select: {
       title: 'title',
-      media: 'backgroundVideo',
+      media: 'backgroundVideos.0',
       promoEventTitle: 'promoEvent.title',
     },
     prepare({title, media, promoEventTitle}) {

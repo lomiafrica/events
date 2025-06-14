@@ -3,7 +3,7 @@ import Header from "@/components/landing/header";
 import BackgroundVideo from "@/components/landing/BackgroundVideo";
 import Footer from "@/components/landing/footer";
 import OurCodeSection from "@/components/landing/djaouli-code";
-import { getHomepageVideoUrl, getHomepagePromoEvent } from "@/lib/sanity/queries";
+import { getHomepageVideoUrls, getHomepagePromoEvent } from "@/lib/sanity/queries";
 import FloatingPromo from '@/components/landing/floating-promo';
 
 // Use the general site metadata for the home page
@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const videoUrl = await getHomepageVideoUrl();
+  const videoUrls = await getHomepageVideoUrls();
   const promoEventData = await getHomepagePromoEvent();
 
   return (
     <>
       <div className="relative h-screen overflow-hidden">
-        <BackgroundVideo videoUrl={videoUrl} />
+        <BackgroundVideo videoUrls={videoUrls} />
         <div className="relative z-10 h-full flex flex-col">
           <Header />
         </div>

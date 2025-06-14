@@ -267,15 +267,15 @@ export const getEventsForScroller = async (
 
 // ================================= Homepage ================================
 
-// Fetch the URL of the background video from the singleton homepage document
-export const getHomepageVideoUrl = async (): Promise<string | null> => {
+// Fetch the URLs of up to 5 background videos from the singleton homepage document
+export const getHomepageVideoUrls = async (): Promise<string[]> => {
   // Query the single document of type 'homepage'
-  // Select only the URL of the asset linked in the backgroundVideo field
+  // Select the URLs of the assets linked in the backgroundVideos array (up to 5)
   const query = `*[_type == "homepage"][0] {
-    "videoUrl": backgroundVideo.asset->url
+    "videoUrls": backgroundVideos[].asset->url
   }`;
-  const result = await client.fetch<{ videoUrl: string | null }>(query);
-  return result?.videoUrl ?? null;
+  const result = await client.fetch<{ videoUrls?: string[] }>(query);
+  return result?.videoUrls?.filter(Boolean) ?? [];
 };
 
 // ================================= Homepage Promo Event ================================
