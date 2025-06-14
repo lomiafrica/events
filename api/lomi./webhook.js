@@ -36,7 +36,7 @@ async function verifyLomiWebhook(rawBody, signatureHeader) {
 }
 
 // --- Main Handler for Vercel ---
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ error: 'Method Not Allowed' });
@@ -173,4 +173,4 @@ module.exports = async (req, res) => {
         console.error('Events Webhook - Uncaught error during event processing:', error);
         return res.status(500).json({ error: 'Internal server error processing webhook event.' });
     }
-}; 
+} 

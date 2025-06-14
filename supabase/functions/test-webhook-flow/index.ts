@@ -9,7 +9,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const webhookSecret = Deno.env.get("LOMI_WEBHOOK_SECRET");
-const webhookUrl = Deno.env.get("WEBHOOK_URL") || "https://djaoulient.com/api/lomi/webhook";
+const webhookUrl = Deno.env.get("WEBHOOK_URL") || "https://www.djaoulient.com/api/lomi./webhook";
 
 if (!supabaseUrl || !supabaseServiceRoleKey || !webhookSecret) {
   console.error("Missing required environment variables");
