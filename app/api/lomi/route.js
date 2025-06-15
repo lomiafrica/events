@@ -89,6 +89,7 @@ export async function POST(request) {
         }
 
         console.log('Events Webhook: Received Lomi event type:', lomiEventType);
+        console.log('Events Webhook: Full event payload:', JSON.stringify(eventPayload, null, 2));
 
         // Assuming Lomi sends metadata.internal_purchase_id as set in create-lomi-checkout-session
         const purchaseId = eventData.metadata?.internal_purchase_id;
@@ -156,21 +157,39 @@ export async function POST(request) {
             } else {
                 console.log(`Events Webhook: Purchase ${purchaseId} prepared for email dispatch.`);
 
-                // 3. Trigger Send Ticket Email Function directly via Supabase client
-                console.log(`📧 Events Webhook: Triggering send-ticket-email for ${purchaseId} via Supabase client`);
+                // 3. Trigger Send Ticket Email Function via direct HTTP call
+                console.log(`📧 Events Webhook: Triggering send-ticket-email for ${purchaseId} via HTTP call`);
                 try {
-                    const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-ticket-email', {
-                        body: { purchase_id: purchaseId }
+                    const functionUrl = `${supabaseUrl}/functions/v1/send-ticket-email`;
+
+                    const emailResponse = await fetch(functionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${supabaseServiceKey}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ purchase_id: purchaseId })
                     });
 
-                    if (emailError) {
-                        console.error(`❌ Events Webhook: Error triggering send-ticket-email for ${purchaseId}:`, emailError);
-                        // Log the specific error details
-                        console.error(`❌ Email Error Details:`, {
-                            message: emailError.message,
-                            context: emailError.context,
-                            details: emailError.details
+                    const emailResult = await emailResponse.text();
+
+                    if (!emailResponse.ok) {
+                        console.error(`❌ Events Webhook: Error triggering send-ticket-email for ${purchaseId}:`, {
+                            status: emailResponse.status,
+                            statusText: emailResponse.statusText,
+                            response: emailResult
                         });
+
+                        // Try to update purchase status to indicate email dispatch failed
+                        try {
+                            await supabase.rpc('update_email_dispatch_status', {
+                                p_purchase_id: purchaseId,
+                                p_email_dispatch_status: 'DISPATCH_FAILED',
+                                p_email_dispatch_error: `HTTP call failed: ${emailResponse.status} - ${emailResult}`
+                            });
+                        } catch (updateError) {
+                            console.error(`❌ Failed to update email dispatch status after HTTP error:`, updateError);
+                        }
                     } else {
                         console.log(`✅ Events Webhook: Successfully triggered send-ticket-email for ${purchaseId}:`, emailResult);
                     }
