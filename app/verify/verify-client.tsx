@@ -33,6 +33,80 @@ interface TicketData {
 const PIN_CACHE_KEY = "staff_verification_pin";
 const PIN_CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 
+// Enhanced storage with fallbacks for mobile compatibility
+interface StaffCache {
+    [key: string]: unknown;
+}
+
+declare global {
+    interface Window {
+        __staffCache?: StaffCache;
+    }
+}
+
+const storage = {
+    set: (key: string, value: unknown): boolean => {
+        const data = JSON.stringify(value);
+        try {
+            // Try localStorage first (persists across browser sessions)
+            localStorage.setItem(key, data);
+            return true;
+        } catch {
+            try {
+                // Fallback to sessionStorage
+                sessionStorage.setItem(key, data);
+                return true;
+            } catch {
+                // If both fail, store in memory (less reliable but better than nothing)
+                window.__staffCache = window.__staffCache || {};
+                window.__staffCache[key] = value;
+                return true;
+            }
+        }
+    },
+    get: (key: string): unknown => {
+        try {
+            // Try localStorage first
+            const data = localStorage.getItem(key);
+            if (data) return JSON.parse(data);
+        } catch {
+            // Ignore parse errors
+        }
+
+        try {
+            // Try sessionStorage
+            const data = sessionStorage.getItem(key);
+            if (data) return JSON.parse(data);
+        } catch {
+            // Ignore parse errors
+        }
+
+        try {
+            // Try memory cache
+            return window.__staffCache?.[key] || null;
+        } catch {
+            // Ignore access errors
+        }
+
+        return null;
+    },
+    remove: (key: string): void => {
+        try { localStorage.removeItem(key); } catch {
+            // Ignore errors
+        }
+        try { sessionStorage.removeItem(key); } catch {
+            // Ignore errors
+        }
+        try {
+            if (window.__staffCache) {
+                delete window.__staffCache[key];
+            }
+        } catch {
+            // Ignore errors
+        }
+    }
+};
+
 interface VerifyClientProps {
     ticketId?: string;
 }
@@ -50,23 +124,22 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     useEffect(() => {
         const checkCachedPin = () => {
             try {
-                const cached = sessionStorage.getItem(PIN_CACHE_KEY);
-                if (cached) {
-                    const { timestamp } = JSON.parse(cached);
+                const cached = storage.get(PIN_CACHE_KEY) as { timestamp: number } | null;
+                if (cached && cached.timestamp) {
                     const now = Date.now();
 
                     // Check if cached PIN is still valid (within duration)
-                    if (now - timestamp < PIN_CACHE_DURATION) {
+                    if (now - cached.timestamp < PIN_CACHE_DURATION) {
                         setIsVerified(true);
                         return;
                     } else {
                         // Clear expired cache
-                        sessionStorage.removeItem(PIN_CACHE_KEY);
+                        storage.remove(PIN_CACHE_KEY);
                     }
                 }
             } catch {
                 // If there's any error reading cache, just ignore it
-                sessionStorage.removeItem(PIN_CACHE_KEY);
+                storage.remove(PIN_CACHE_KEY);
             }
         };
 
@@ -125,14 +198,14 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
             }
 
             if (isValidPin) {
-                // Cache the PIN for future use
+                // Cache the PIN for future use with enhanced storage
                 try {
                     const cacheData = {
                         timestamp: Date.now()
                     };
-                    sessionStorage.setItem(PIN_CACHE_KEY, JSON.stringify(cacheData));
+                    storage.set(PIN_CACHE_KEY, cacheData);
                 } catch {
-                    // If sessionStorage fails, continue anyway
+                    // If storage fails, continue anyway
                     console.warn("Failed to cache PIN, but continuing...");
                 }
 
