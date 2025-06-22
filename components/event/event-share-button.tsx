@@ -123,7 +123,8 @@ export function EventShareButton({
         <DialogContent className="sm:max-w-[425px] p-4 rounded-[5px] border border-border/40 bg-background backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Share2 className="h-5 w-5 mr-2" /> {t(currentLanguage, "eventShare.modalTitle")}
+              <Share2 className="h-5 w-5 mr-2" />{" "}
+              {t(currentLanguage, "eventShare.modalTitle")}
             </DialogTitle>
             <DialogDescription>
               {t(currentLanguage, "eventShare.modalDescription")}
@@ -190,7 +191,9 @@ export function EventShareButton({
                   <Copy className="h-4 w-4" />
                 )}
                 <span className="sr-only">
-                  {copied ? t(currentLanguage, "eventShare.copyButtonCopied") : t(currentLanguage, "eventShare.copyButtonCopy")}
+                  {copied
+                    ? t(currentLanguage, "eventShare.copyButtonCopied")
+                    : t(currentLanguage, "eventShare.copyButtonCopy")}
                 </span>
               </Button>
             </div>

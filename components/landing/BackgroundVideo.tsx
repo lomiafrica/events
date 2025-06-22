@@ -44,14 +44,18 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
   function goTo(idx: number) {
     if (!videoUrls.length) return;
     // On mobile, allow seamless looping; on desktop, clamp between 0 and last
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
       setCurrent((idx + videoUrls.length) % videoUrls.length);
     } else {
       setCurrent(Math.max(0, Math.min(idx, videoUrls.length - 1)));
     }
   }
-  function next() { goTo(current + 1); }
-  function prev() { goTo(current - 1); }
+  function next() {
+    goTo(current + 1);
+  }
+  function prev() {
+    goTo(current - 1);
+  }
 
   // No videos: render nothing
   if (!videoUrls || videoUrls.length === 0) {
@@ -67,9 +71,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
   // We'll use a wrapper div to conditionally render the blurred background
 
   return (
-    <div
-      className="absolute inset-0 w-full h-full overflow-hidden"
-    >
+    <div className="absolute inset-0 w-full h-full overflow-hidden">
       {/* Blurred background for portrait on desktop only */}
       <div className="hidden md:block absolute inset-0 w-full h-full z-0 pointer-events-none">
         {isPortrait && (
@@ -96,7 +98,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
         muted={isMuted}
         playsInline
         className={`absolute top-0 left-0 w-full h-full z-10
-          ${isPortrait ? 'object-contain md:object-contain' : 'object-cover'}
+          ${isPortrait ? "object-contain md:object-contain" : "object-cover"}
           object-cover md:object-cover
         `}
         src={videoUrls[current]}
@@ -150,7 +152,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
             <button
               key={idx}
               onClick={() => goTo(idx)}
-              className={`w-2 h-2 rounded-sm border border-white transition-all duration-200 ${idx === current ? 'bg-white' : 'bg-white/30'}`}
+              className={`w-2 h-2 rounded-sm border border-white transition-all duration-200 ${idx === current ? "bg-white" : "bg-white/30"}`}
               aria-label={`Go to video ${idx + 1}`}
               tabIndex={0}
             />

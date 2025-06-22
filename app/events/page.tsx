@@ -19,7 +19,11 @@ const getPageLocale = (params?: { locale?: string }): string => {
   return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 };
 
-export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params: paramsPromise,
+}: {
+  params: Promise<{ locale?: string }>;
+}): Promise<Metadata> {
   const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   return {
@@ -28,7 +32,11 @@ export async function generateMetadata({ params: paramsPromise }: { params: Prom
   };
 }
 
-export default async function EventsPage({ params: paramsPromise }: { params: Promise<{ locale?: string }> }) {
+export default async function EventsPage({
+  params: paramsPromise,
+}: {
+  params: Promise<{ locale?: string }>;
+}) {
   const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const events: EventImageData[] = await getEventsForScroller(10);
@@ -38,7 +46,9 @@ export default async function EventsPage({ params: paramsPromise }: { params: Pr
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="container mx-auto py-20 px-4 flex-grow">
-          <h1 className="text-4xl font-bold mb-8">{t(currentLanguage, "eventsPage.title")}</h1>
+          <h1 className="text-4xl font-bold mb-8">
+            {t(currentLanguage, "eventsPage.title")}
+          </h1>
           <p>{t(currentLanguage, "eventsPage.noEvents")}</p>
         </main>
         <Footer />

@@ -3,8 +3,11 @@ import Header from "@/components/landing/header";
 import BackgroundVideo from "@/components/landing/BackgroundVideo";
 import Footer from "@/components/landing/footer";
 import OurCodeSection from "@/components/landing/djaouli-code";
-import { getHomepageVideoUrls, getHomepagePromoEvent } from "@/lib/sanity/queries";
-import FloatingPromo from '@/components/landing/floating-promo';
+import {
+  getHomepageVideoUrls,
+  getHomepagePromoEvent,
+} from "@/lib/sanity/queries";
+import FloatingPromo from "@/components/landing/floating-promo";
 
 // Use the general site metadata for the home page
 export const metadata: Metadata = {
@@ -32,8 +35,8 @@ export default async function Home() {
         <FloatingPromo
           imageUrl={promoEventData.flyerUrl}
           href={`/events/${promoEventData.slug}`}
-          title={promoEventData.title || 'View Event'} // Use event title for alt text or a default
-        // onClose can be implemented here if needed, e.g., to set a cookie to not show again
+          title={promoEventData.title || "View Event"} // Use event title for alt text or a default
+          // onClose can be implemented here if needed, e.g., to set a cookie to not show again
         />
       )}
     </>

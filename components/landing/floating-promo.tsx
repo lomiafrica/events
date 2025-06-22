@@ -17,8 +17,8 @@ interface FloatingPromoProps {
 
 export default function FloatingPromo({
   imageUrl = "/placeholder.svg?height=180&width=320",
-  onClose = () => { },
-  onButtonClick = () => { },
+  onClose = () => {},
+  onButtonClick = () => {},
   href,
   title = "Promotional event flyer",
   buttonText = "Get your ticket",

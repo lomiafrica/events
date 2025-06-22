@@ -285,14 +285,17 @@ interface HomepagePromoEventData {
   title?: string; // Added for potential use, e.g. alt text or title attribute
 }
 
-export const getHomepagePromoEvent = async (): Promise<HomepagePromoEventData | null> => {
-  const query = `*[_type == "homepage"][0] {
+export const getHomepagePromoEvent =
+  async (): Promise<HomepagePromoEventData | null> => {
+    const query = `*[_type == "homepage"][0] {
     promoEvent->{
       "slug": slug.current,
       "flyerUrl": flyer.asset->url,
       title
     }
   }`;
-  const result = await client.fetch<{ promoEvent?: HomepagePromoEventData }>(query);
-  return result?.promoEvent ?? null;
-};
+    const result = await client.fetch<{ promoEvent?: HomepagePromoEventData }>(
+      query,
+    );
+    return result?.promoEvent ?? null;
+  };

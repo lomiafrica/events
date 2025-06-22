@@ -71,7 +71,7 @@ export default function PhoneNumberInput({
       <div
         className={cn(
           "flex w-full rounded-sm border border-input bg-transparent shadow-xs transition-[color,box-shadow]",
-          isFocused && "border-ring ring-ring/50 ring-[3px]"
+          isFocused && "border-ring ring-ring/50 ring-[3px]",
         )}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
@@ -137,12 +137,14 @@ const CountrySelect = ({
   };
 
   return (
-    <div className={cn(
-      "PhoneInputCountry relative inline-flex items-center self-stretch bg-transparent text-foreground outline-none",
-      "flex h-11 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-sm rounded-r-none",
-      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
-      disabled && "pointer-events-none cursor-not-allowed opacity-50"
-    )}>
+    <div
+      className={cn(
+        "PhoneInputCountry relative inline-flex items-center self-stretch bg-transparent text-foreground outline-none",
+        "flex h-11 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-sm rounded-r-none",
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
+        disabled && "pointer-events-none cursor-not-allowed opacity-50",
+      )}
+    >
       <div className="inline-flex items-center gap-1.5" aria-hidden="true">
         <FlagComponent country={value} countryName={value} aria-hidden="true" />
         <span className="text-muted-foreground/80">

@@ -36,11 +36,15 @@ export default async function BlogPage() {
         <div className="container mx-auto py-26 px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post: BlogPost) => (
-              <Card key={post._id} className="overflow-hidden flex flex-col h-full">
+              <Card
+                key={post._id}
+                className="overflow-hidden flex flex-col h-full"
+              >
                 <div className="relative h-60">
                   <Image
                     src={
-                      post.mainImage?.url || "/placeholder.webp?height=400&width=600"
+                      post.mainImage?.url ||
+                      "/placeholder.webp?height=400&width=600"
                     }
                     alt={post.title}
                     fill

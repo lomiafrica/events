@@ -220,7 +220,8 @@ export default {
               name: 'productId',
               title: 'lomi. Product ID',
               type: 'string',
-              description: 'Optional lomi.africa product ID for this ticket type (UUID format). Leave empty if not this event is not tied to a specific product.',
+              description:
+                'Optional lomi.africa product ID for this ticket type (UUID format). Leave empty if not this event is not tied to a specific product.',
             },
             {
               name: 'description',
@@ -245,7 +246,8 @@ export default {
               name: 'active',
               title: 'Active for Sale',
               type: 'boolean',
-              description: 'Is this ticket type currently available for sale (independent of stock/dates)?',
+              description:
+                'Is this ticket type currently available for sale (independent of stock/dates)?',
               initialValue: true,
             },
             {
@@ -259,13 +261,13 @@ export default {
               name: 'salesStart',
               title: 'Sales Start Date/Time',
               type: 'datetime',
-              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
+              options: {dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm'},
             },
             {
               name: 'salesEnd',
               title: 'Sales End Date/Time',
               type: 'datetime',
-              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
+              options: {dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm'},
             },
           ],
           preview: {
@@ -343,7 +345,8 @@ export default {
               name: 'productId',
               title: 'lomi. Product ID',
               type: 'string',
-              description: 'Optional lomi. product ID for this bundle (UUID format). Leave empty if not this event is not tied to a specific product.',
+              description:
+                'Optional lomi. product ID for this bundle (UUID format). Leave empty if not this event is not tied to a specific product.',
             },
             {
               name: 'description',
@@ -389,13 +392,13 @@ export default {
               name: 'salesStart',
               title: 'Sales Start Date/Time',
               type: 'datetime',
-              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
+              options: {dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm'},
             },
             {
               name: 'salesEnd',
               title: 'Sales End Date/Time',
               type: 'datetime',
-              options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
+              options: {dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm'},
             },
           ],
           preview: {

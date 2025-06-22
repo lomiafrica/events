@@ -118,7 +118,7 @@ export async function GET() {
         return -1; // a (tagged) comes before b (untagged)
       }
       if (!aHasTags && bHasTags) {
-        return 1;  // b (tagged) comes before a (untagged)
+        return 1; // b (tagged) comes before a (untagged)
       }
       // If both are tagged or both are untagged, maintain original sort order (recency)
       // Lower id means it was earlier in the Cloudinary 'public_id', 'desc' sorted list (more recent)

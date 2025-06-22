@@ -23,11 +23,12 @@ export default defineType({
       of: [
         {
           type: 'file',
-          options: { accept: 'video/*' },
+          options: {accept: 'video/*'},
         },
       ],
-      validation: Rule => Rule.max(5),
-      description: 'Upload up to 5 videos to play in the background of the homepage. Users can swipe or use arrows to switch.',
+      validation: (Rule) => Rule.max(5),
+      description:
+        'Upload up to 5 videos to play in the background of the homepage. Users can swipe or use arrows to switch.',
     }),
     defineField({
       name: 'promoEvent',

@@ -81,7 +81,11 @@ const getPageLocale = (params?: { slug?: string; locale?: string }): string => {
   return params?.locale || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 };
 
-export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
+export async function generateMetadata({
+  params: paramsPromise,
+}: {
+  params: Promise<{ slug: string; locale?: string }>;
+}) {
   const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const { slug } = params;
@@ -105,7 +109,11 @@ const formatPrice = (price: number): string => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
 };
 
-export default async function EventPage({ params: paramsPromise }: { params: Promise<{ slug: string; locale?: string }> }) {
+export default async function EventPage({
+  params: paramsPromise,
+}: {
+  params: Promise<{ slug: string; locale?: string }>;
+}) {
   const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
   const { slug } = params;
@@ -121,7 +129,7 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
     if (event.location.venueName) queryParts.push(event.location.venueName);
     if (event.location.address) queryParts.push(event.location.address);
 
-    const Sanequery = queryParts.join(', ').trim();
+    const Sanequery = queryParts.join(", ").trim();
     if (Sanequery) {
       const encodedQuery = encodeURIComponent(Sanequery);
       mapEmbedSrc = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
@@ -235,7 +243,9 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                 <div className="flex items-center gap-3">
                   <Users className="h-6 w-6 text-primary flex-shrink-0" />
                   <span className="text-lg text-gray-200">
-                    {t(currentLanguage, "eventSlugPage.hostedBy", { name: event.hostedBy })}
+                    {t(currentLanguage, "eventSlugPage.hostedBy", {
+                      name: event.hostedBy,
+                    })}
                   </span>
                 </div>
               )}
@@ -248,7 +258,10 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
               {!globallyTicketsOnSale ? (
                 <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
                   <p className="font-medium">
-                    {t(currentLanguage, "eventSlugPage.tickets.salesClosedGlobal")}
+                    {t(
+                      currentLanguage,
+                      "eventSlugPage.tickets.salesClosedGlobal",
+                    )}
                   </p>
                 </div>
               ) : !hasAnyDefinedItems ? (
@@ -267,7 +280,12 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                     {hasDefinedTickets && (
                       <div className="space-y-3">
                         {event.ticketTypes?.map((ticket) => {
-                          console.log("Event page - ticket.productId:", ticket.productId, "for ticket:", ticket.name);
+                          console.log(
+                            "Event page - ticket.productId:",
+                            ticket.productId,
+                            "for ticket:",
+                            ticket.name,
+                          );
                           return (
                             <Card
                               key={ticket._key}
@@ -285,51 +303,86 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                             "",
                                           )}
                                         </h4>
-                                        <span className="mx-2 text-gray-400 text-lg">|</span>
+                                        <span className="mx-2 text-gray-400 text-lg">
+                                          |
+                                        </span>
                                         <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                          {formatPrice(ticket.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
+                                          {formatPrice(ticket.price)}
+                                          {t(
+                                            currentLanguage,
+                                            "eventSlugPage.tickets.currencySuffix",
+                                          )}
                                         </p>
                                       </div>
                                       {ticket.description && (
                                         <div className="text-sm mb-1 space-y-1">
-                                          {ticket.description.split('\n').map((line, index) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={index} />;
-                                            }
-                                            if (trimmedLine.startsWith("⚠️")) {
+                                          {ticket.description
+                                            .split("\n")
+                                            .map((line, index) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={index} />;
+                                              }
+                                              if (
+                                                trimmedLine.startsWith("⚠️")
+                                              ) {
+                                                return (
+                                                  <p
+                                                    key={index}
+                                                    className="text-amber-400 font-medium"
+                                                  >
+                                                    {trimmedLine}
+                                                  </p>
+                                                );
+                                              }
                                               return (
-                                                <p key={index} className="text-amber-400 font-medium">
+                                                <p
+                                                  key={index}
+                                                  className="text-gray-400 leading-relaxed"
+                                                >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            }
-                                            return <p key={index} className="text-gray-400 leading-relaxed">{trimmedLine}</p>;
-                                          })}
+                                            })}
                                         </div>
                                       )}
                                       {ticket.details && (
                                         <div className="text-xs text-gray-400/80 my-2 space-y-1">
-                                          {ticket.details.split('\n').map((line, idx) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={idx} />;
-                                            }
-                                            const match = trimmedLine.match(/^(✅|✔|•|-|\*)\s*(.*)/);
-                                            if (match && match[2]) {
+                                          {ticket.details
+                                            .split("\n")
+                                            .map((line, idx) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={idx} />;
+                                              }
+                                              const match =
+                                                trimmedLine.match(
+                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
+                                                );
+                                              if (match && match[2]) {
+                                                return (
+                                                  <div
+                                                    key={idx}
+                                                    className="flex items-start pl-5"
+                                                  >
+                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                    <span className="leading-snug">
+                                                      {match[2]}
+                                                    </span>
+                                                  </div>
+                                                );
+                                              }
                                               return (
-                                                <div key={idx} className="flex items-start pl-5">
-                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                  <span className="leading-snug">{match[2]}</span>
-                                                </div>
+                                                <p
+                                                  key={idx}
+                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                                >
+                                                  {" "}
+                                                  {/* Indent non-list items slightly if preferred or remove ml for full width */}
+                                                  {trimmedLine}
+                                                </p>
                                               );
-                                            }
-                                            return (
-                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly if preferred or remove ml for full width */}
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
+                                            })}
                                         </div>
                                       )}
                                     </div>
@@ -355,7 +408,9 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                           timeText: formattedTime,
                                           venueName: event.location?.venueName,
                                         }}
-                                        globallyTicketsOnSale={globallyTicketsOnSale}
+                                        globallyTicketsOnSale={
+                                          globallyTicketsOnSale
+                                        }
                                         currentLanguage={currentLanguage}
                                       />
                                     </div>
@@ -371,9 +426,16 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                     {/* List Bundles */}
                     {hasDefinedBundles && (
                       <div className="space-y-3">
-                        <h3 className="font-medium text-lg">{t(currentLanguage, "eventSlugPage.bundles.title")}</h3>
+                        <h3 className="font-medium text-lg">
+                          {t(currentLanguage, "eventSlugPage.bundles.title")}
+                        </h3>
                         {event.bundles?.map((bundle) => {
-                          console.log("Event page - bundle.productId:", bundle.productId, "for bundle:", bundle.name);
+                          console.log(
+                            "Event page - bundle.productId:",
+                            bundle.productId,
+                            "for bundle:",
+                            bundle.name,
+                          );
                           return (
                             <Card
                               key={bundle._key}
@@ -390,51 +452,86 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                             "",
                                           )}
                                         </h4>
-                                        <span className="mx-2 text-gray-400 text-lg">/</span>
+                                        <span className="mx-2 text-gray-400 text-lg">
+                                          /
+                                        </span>
                                         <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                          {formatPrice(bundle.price)}{t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
+                                          {formatPrice(bundle.price)}
+                                          {t(
+                                            currentLanguage,
+                                            "eventSlugPage.tickets.currencySuffix",
+                                          )}
                                         </p>
                                       </div>
                                       {bundle.description && (
                                         <div className="text-sm mb-1 space-y-1">
-                                          {bundle.description.split('\n').map((line, index) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={index} />;
-                                            }
-                                            if (trimmedLine.startsWith("⚠️")) {
+                                          {bundle.description
+                                            .split("\n")
+                                            .map((line, index) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={index} />;
+                                              }
+                                              if (
+                                                trimmedLine.startsWith("⚠️")
+                                              ) {
+                                                return (
+                                                  <p
+                                                    key={index}
+                                                    className="text-amber-400 font-medium"
+                                                  >
+                                                    {trimmedLine}
+                                                  </p>
+                                                );
+                                              }
                                               return (
-                                                <p key={index} className="text-amber-400 font-medium">
+                                                <p
+                                                  key={index}
+                                                  className="text-gray-400 leading-relaxed"
+                                                >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            }
-                                            return <p key={index} className="text-gray-400 leading-relaxed">{trimmedLine}</p>;
-                                          })}
+                                            })}
                                         </div>
                                       )}
                                       {bundle.details && (
                                         <div className="text-xs text-gray-400/80 my-2 space-y-1">
-                                          {bundle.details.split('\n').map((line, idx) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={idx} />;
-                                            }
-                                            const match = trimmedLine.match(/^(✅|✔|•|-|\*)\s*(.*)/);
-                                            if (match && match[2]) {
+                                          {bundle.details
+                                            .split("\n")
+                                            .map((line, idx) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={idx} />;
+                                              }
+                                              const match =
+                                                trimmedLine.match(
+                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
+                                                );
+                                              if (match && match[2]) {
+                                                return (
+                                                  <div
+                                                    key={idx}
+                                                    className="flex items-start pl-5"
+                                                  >
+                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                    <span className="leading-snug">
+                                                      {match[2]}
+                                                    </span>
+                                                  </div>
+                                                );
+                                              }
                                               return (
-                                                <div key={idx} className="flex items-start pl-5">
-                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                  <span className="leading-snug">{match[2]}</span>
-                                                </div>
+                                                <p
+                                                  key={idx}
+                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                                >
+                                                  {" "}
+                                                  {/* Indent non-list items slightly */}
+                                                  {trimmedLine}
+                                                </p>
                                               );
-                                            }
-                                            return (
-                                              <p key={idx} className="leading-snug ml-[calc(0.375rem+0.875rem)]"> {/* Indent non-list items slightly */}
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
+                                            })}
                                         </div>
                                       )}
                                     </div>
@@ -460,7 +557,9 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                                           timeText: formattedTime,
                                           venueName: event.location?.venueName,
                                         }}
-                                        globallyTicketsOnSale={globallyTicketsOnSale}
+                                        globallyTicketsOnSale={
+                                          globallyTicketsOnSale
+                                        }
                                         currentLanguage={currentLanguage}
                                       />
                                     </div>
@@ -500,7 +599,10 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
                   <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-none">
                     {event.lineup.map((artist) => (
                       <div key={artist._id} className="flex-shrink-0">
-                        <ArtistCard artist={artist} currentLanguage={currentLanguage} />
+                        <ArtistCard
+                          artist={artist}
+                          currentLanguage={currentLanguage}
+                        />
                       </div>
                     ))}
                   </div>
@@ -512,54 +614,62 @@ export default async function EventPage({ params: paramsPromise }: { params: Pro
             {(event.location?.venueName ||
               event.location?.address ||
               event.venueDetails) && (
-                <div className="mb-10 pt-6">
-                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                    {t(currentLanguage, "eventSlugPage.venueSection.title")}
-                  </h2>
-                  {event.location?.venueName && (
-                    <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
-                      {event.location.venueName}
-                    </p>
-                  )}
-                  {event.location?.address && (
-                    <p className="text-slate-400 mb-4">
-                      {event.location.address}
-                    </p>
-                  )}
-                  {/* Embedded Map ADDED HERE */}
-                  {mapEmbedSrc && (
-                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-md shadow-lg border border-slate-700 overflow-hidden">
-                      <iframe
-                        src={mapEmbedSrc}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen={false}
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title={(() => {
-                          const locationNameForMap = event.location?.venueName || event.location?.address;
-                          return locationNameForMap
-                            ? t(currentLanguage, "eventSlugPage.venueSection.mapTitleNamed", { locationName: locationNameForMap })
-                            : t(currentLanguage, "eventSlugPage.venueSection.mapTitleDefault");
-                        })()}
-                        className="absolute top-0 left-0 w-full h-full"
-                      ></iframe>
-                    </div>
-                  )}
-                  {event.venueDetails && (
-                    <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                      {event.venueDetails.split('\n').map((line, index) => {
-                        const trimmedLine = line.trim();
-                        if (trimmedLine === "") {
-                          return <br key={index} />;
-                        }
-                        return <p key={index}>{trimmedLine}</p>;
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="mb-10 pt-6">
+                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                  {t(currentLanguage, "eventSlugPage.venueSection.title")}
+                </h2>
+                {event.location?.venueName && (
+                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
+                    {event.location.venueName}
+                  </p>
+                )}
+                {event.location?.address && (
+                  <p className="text-slate-400 mb-4">
+                    {event.location.address}
+                  </p>
+                )}
+                {/* Embedded Map ADDED HERE */}
+                {mapEmbedSrc && (
+                  <div className="my-6 relative w-full h-[300px] bg-muted rounded-md shadow-lg border border-slate-700 overflow-hidden">
+                    <iframe
+                      src={mapEmbedSrc}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen={false}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={(() => {
+                        const locationNameForMap =
+                          event.location?.venueName || event.location?.address;
+                        return locationNameForMap
+                          ? t(
+                              currentLanguage,
+                              "eventSlugPage.venueSection.mapTitleNamed",
+                              { locationName: locationNameForMap },
+                            )
+                          : t(
+                              currentLanguage,
+                              "eventSlugPage.venueSection.mapTitleDefault",
+                            );
+                      })()}
+                      className="absolute top-0 left-0 w-full h-full"
+                    ></iframe>
+                  </div>
+                )}
+                {event.venueDetails && (
+                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                    {event.venueDetails.split("\n").map((line, index) => {
+                      const trimmedLine = line.trim();
+                      if (trimmedLine === "") {
+                        return <br key={index} />;
+                      }
+                      return <p key={index}>{trimmedLine}</p>;
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||
