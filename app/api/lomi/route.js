@@ -93,8 +93,16 @@ export async function POST(request) {
 
         // Assuming Lomi sends metadata.internal_purchase_id as set in create-lomi-checkout-session
         const purchaseId = eventData.metadata?.internal_purchase_id;
-        const lomiCheckoutSessionId = eventData.id; // ID of the CheckoutSession object for CHECKOUT_COMPLETED
-        const lomiTransactionId = eventData.transaction_id; // ID of the Transaction object for PAYMENT_SUCCEEDED
+        const lomiTransactionId = eventData.transaction_id || eventData.id; // Transaction ID
+
+        // For checkout.completed events, eventData.id is the checkout session ID
+        // For payment.succeeded events, we need to get checkout session ID from metadata.linkId
+        let lomiCheckoutSessionId;
+        if (lomiEventType === 'checkout.completed' || lomiEventType === 'CHECKOUT_COMPLETED') {
+            lomiCheckoutSessionId = eventData.id; // Checkout session ID for checkout events
+        } else {
+            lomiCheckoutSessionId = eventData.metadata?.linkId || eventData.id; // Get from metadata for payment events
+        }
         const amount = eventData.amount || eventData.gross_amount; // Amount from Lomi
         const currency = eventData.currency_code;
 
