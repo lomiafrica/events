@@ -12,12 +12,13 @@
 }
 
 .imageScroller {
-  height: 37%;
+  height: 45%;
   overflow-y: auto;
   overflow-x: hidden;
   width: 58px;
   height: 100px;
   padding-right: 1px;
+  padding-bottom: 10px;
   align-self: center;
   margin-left: auto;
   margin-top: 46px;
@@ -31,6 +32,10 @@
   right: -15px;
   top: 45%;
   transform: translateY(-50%);
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  z-index: 10;
+  outline: none;
 }
 
 .imageScroller::-webkit-scrollbar {
@@ -153,10 +158,15 @@
   height: 55px;
   position: relative;
   opacity: 0.6;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
   margin-bottom: 10px;
   border-radius: 7px;
   overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.li:last-child {
+  margin-bottom: 20px;
 }
 
 .li.active {
@@ -540,12 +550,13 @@
   .imageScroller {
     flex-basis: 70px; /* Adjust width */
     width: 70px;
-    height: auto;
-    max-height: 80vh; /* Adjust height */
+    min-height: 110px;
+    max-height: 20vh; /* Adjust height */
     overflow-y: auto;
     position: static; /* Override default absolute */
     transform: none; /* Override default transform */
     padding: 10px 5px;
+    padding-bottom: 20px;
     align-self: center;
     margin: 0; /* Reset margins */
     right: auto; /* Override default right */

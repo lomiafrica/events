@@ -109,6 +109,79 @@ const formatPrice = (price: number): string => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
 };
 
+// Enhanced text renderer for better formatting
+const renderFormattedText = (text: string) => {
+  return text.split("\n").map((line, index, array) => {
+    const trimmedLine = line.trim();
+
+    // Handle empty lines with better spacing
+    if (trimmedLine === "") {
+      const nextLine = array[index + 1];
+      if (nextLine && nextLine.trim() === "") {
+        return <div key={index} className="h-4" />; // Larger spacing for multiple breaks
+      }
+      return <div key={index} className="h-2" />; // Smaller spacing for single breaks
+    }
+
+    // Detect headings (all caps, short lines, or lines ending with :)
+    const isHeading = trimmedLine.length < 60 &&
+      (trimmedLine === trimmedLine.toUpperCase() ||
+        trimmedLine.endsWith(':') ||
+        trimmedLine.match(/^[A-Z][A-Z\s&-]{3,}$/));
+
+    // Detect list items
+    const isListItem = trimmedLine.match(/^[-•*→]\s/) || trimmedLine.match(/^\d+\.\s/);
+
+    // Detect emphasis (special characters, quotes, warnings)
+    const hasEmphasis = trimmedLine.includes('**') || trimmedLine.includes('*') ||
+      trimmedLine.startsWith('"') || trimmedLine.startsWith('⚠️') ||
+      trimmedLine.startsWith('✨') || trimmedLine.startsWith('🎵') ||
+      trimmedLine.startsWith('💫') || trimmedLine.startsWith('🔥');
+
+    // Detect important venue info
+    const isImportant = trimmedLine.startsWith('⚠️') || trimmedLine.startsWith('🅿️') ||
+      trimmedLine.startsWith('♿') || trimmedLine.startsWith('📍') ||
+      trimmedLine.toLowerCase().includes('parking') ||
+      trimmedLine.toLowerCase().includes('entrance') ||
+      trimmedLine.toLowerCase().includes('access');
+
+    if (isHeading) {
+      return (
+        <h4 key={index} className="text-gray-100 font-semibold text-base mt-4 mb-2 tracking-wide">
+          {trimmedLine.replace(/[:]*$/, '')}
+        </h4>
+      );
+    }
+
+    if (isListItem) {
+      return (
+        <p key={index} className="mb-1 ml-4 relative">
+          <span className="absolute -ml-4 text-primary">•</span>
+          {trimmedLine.replace(/^[-•*→]\s/, '').replace(/^\d+\.\s/, '')}
+        </p>
+      );
+    }
+
+    if (isImportant) {
+      return (
+        <p key={index} className="mb-1 font-medium text-orange-300">
+          {trimmedLine}
+        </p>
+      );
+    }
+
+    if (hasEmphasis) {
+      return (
+        <p key={index} className="mb-1 font-medium text-gray-200">
+          {trimmedLine}
+        </p>
+      );
+    }
+
+    return <p key={index} className="mb-1 text-gray-300">{trimmedLine}</p>;
+  });
+};
+
 export default async function EventPage({
   params: paramsPromise,
 }: {
@@ -126,11 +199,17 @@ export default async function EventPage({
   let mapEmbedSrc = null;
   if (event.location && (event.location.venueName || event.location.address)) {
     const queryParts = [];
-    if (event.location.venueName) queryParts.push(event.location.venueName);
-    if (event.location.address) queryParts.push(event.location.address);
+    // Only add non-empty, meaningful location data
+    if (event.location.venueName && event.location.venueName.trim().length > 2) {
+      queryParts.push(event.location.venueName.trim());
+    }
+    if (event.location.address && event.location.address.trim().length > 2) {
+      queryParts.push(event.location.address.trim());
+    }
 
-    const Sanequery = queryParts.join(", ").trim();
-    if (Sanequery) {
+    const Sanequery = queryParts.join(", ");
+    // Only create map embed if we have meaningful location data (more than just a few characters)
+    if (Sanequery && Sanequery.length > 2) {
       const encodedQuery = encodeURIComponent(Sanequery);
       mapEmbedSrc = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
     }
@@ -585,7 +664,7 @@ export default async function EventPage({
                   {t(currentLanguage, "eventSlugPage.detailsSection.title")}
                 </h2>
                 <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                  <p>{event.description}</p>
+                  {renderFormattedText(event.description)}
                 </div>
               </div>
             )}
@@ -614,62 +693,56 @@ export default async function EventPage({
             {(event.location?.venueName ||
               event.location?.address ||
               event.venueDetails) && (
-              <div className="mb-10 pt-6">
-                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                  {t(currentLanguage, "eventSlugPage.venueSection.title")}
-                </h2>
-                {event.location?.venueName && (
-                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
-                    {event.location.venueName}
-                  </p>
-                )}
-                {event.location?.address && (
-                  <p className="text-slate-400 mb-4">
-                    {event.location.address}
-                  </p>
-                )}
-                {/* Embedded Map ADDED HERE */}
-                {mapEmbedSrc && (
-                  <div className="my-6 relative w-full h-[300px] bg-muted rounded-md shadow-lg border border-slate-700 overflow-hidden">
-                    <iframe
-                      src={mapEmbedSrc}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen={false}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={(() => {
-                        const locationNameForMap =
-                          event.location?.venueName || event.location?.address;
-                        return locationNameForMap
-                          ? t(
+                <div className="mb-10 pt-6">
+                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                    {t(currentLanguage, "eventSlugPage.venueSection.title")}
+                  </h2>
+                  {event.location?.venueName && (
+                    <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
+                      {event.location.venueName}
+                    </p>
+                  )}
+                  {event.location?.address && (
+                    <p className="text-slate-400 mb-4">
+                      {event.location.address}
+                    </p>
+                  )}
+                  {/* Embedded Map ADDED HERE */}
+                  {mapEmbedSrc && (
+                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-md shadow-lg border border-slate-700 overflow-hidden">
+                      <iframe
+                        src={mapEmbedSrc}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={false}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title={(() => {
+                          const locationNameForMap =
+                            event.location?.venueName || event.location?.address;
+                          return locationNameForMap
+                            ? t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleNamed",
                               { locationName: locationNameForMap },
                             )
-                          : t(
+                            : t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleDefault",
                             );
-                      })()}
-                      className="absolute top-0 left-0 w-full h-full"
-                    ></iframe>
-                  </div>
-                )}
-                {event.venueDetails && (
-                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                    {event.venueDetails.split("\n").map((line, index) => {
-                      const trimmedLine = line.trim();
-                      if (trimmedLine === "") {
-                        return <br key={index} />;
-                      }
-                      return <p key={index}>{trimmedLine}</p>;
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+                        })()}
+                        className="absolute top-0 left-0 w-full h-full"
+                      ></iframe>
+                    </div>
+                  )}
+                  {event.venueDetails && (
+                    <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                      {renderFormattedText(event.venueDetails)}
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||

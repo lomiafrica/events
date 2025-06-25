@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useRef,
   useState,
-  WheelEvent,
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -58,11 +57,11 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
       setImageStyle(
         isMobileView
           ? {
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-            }
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+          }
           : {},
       );
       setActiveImageIndex((prevIndex) =>
@@ -77,24 +76,24 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
   const handleScroll = useCallback(() => {
     if (scrollerRef.current && images.length > 0) {
       const scroller = scrollerRef.current;
-      const scrollPosition = isMobile
-        ? scroller.scrollLeft
-        : scroller.scrollTop;
-      const scrollSize = isMobile
-        ? scroller.scrollWidth
-        : scroller.scrollHeight;
-      const clientSize = isMobile
-        ? scroller.clientWidth
-        : scroller.clientHeight;
-      const maxScroll = scrollSize - clientSize;
-      const scrollPercentage = scrollPosition / maxScroll;
 
-      let index = Math.round(scrollPercentage * (images.length - 1));
-      index = Math.min(Math.max(index, 0), images.length - 1);
-
-      setActiveImageIndex(index);
+      if (isMobile) {
+        // Mobile horizontal scrolling
+        const scrollPosition = scroller.scrollLeft;
+        const itemWidth = 85; // thumbnail width + margin
+        const index = Math.round(scrollPosition / itemWidth);
+        const clampedIndex = Math.min(Math.max(index, 0), images.length - 1);
+        setActiveImageIndex(clampedIndex);
+      } else {
+        // Desktop vertical scrolling - more precise
+        const scrollPosition = scroller.scrollTop;
+        const itemHeight = 65; // li height (55px) + margin (10px)
+        const index = Math.round(scrollPosition / itemHeight);
+        const clampedIndex = Math.min(Math.max(index, 0), images.length - 1);
+        setActiveImageIndex(clampedIndex);
+      }
     }
-  }, [isMobile, images.length, setActiveImageIndex]);
+  }, [isMobile, images.length]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -109,21 +108,12 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       initImageScroller();
-    }, 100);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (scrollerRef.current) {
-      if (isMobile) {
-        scrollerRef.current.scrollLeft += e.deltaY;
-      } else {
-        scrollerRef.current.scrollTop += e.deltaY;
-      }
-    }
-  };
+
 
   const handleImageClick = (index: number) => {
     setActiveImageIndex(index);
@@ -173,14 +163,16 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
               alt={activeImage.title}
               className={`${styles.mainImg} mainImg`}
               onClick={handleMainImageClick}
-              onWheel={handleWheel}
               style={{
                 cursor: "pointer",
                 ...imageStyle,
               }}
               width={800}
               height={600}
-              priority={activeImageIndex === 0}
+              priority={true}
+              quality={85}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
           </div>
         </main>
@@ -206,9 +198,11 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
                         src={image.featuredImage || "/placeholder.webp"}
                         alt={image.title}
                         className={styles.liImg}
-                        loading="lazy"
+                        loading={index <= 5 ? "eager" : "lazy"}
                         width={55}
                         height={55}
+                        quality={75}
+                        sizes="55px"
                       />
                       <span className={styles.asideSpan}>{image.title}</span>
                     </button>
