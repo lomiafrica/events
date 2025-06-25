@@ -20,11 +20,11 @@ export async function getLatestEvents(limit = 3) {
   `,
     { limit },
     {
-      next: { 
+      next: {
         revalidate: 3600, // Cache for 1 hour
-        tags: ['events'] 
-      }
-    }
+        tags: ["events"],
+      },
+    },
   );
 }
 
@@ -109,11 +109,11 @@ export async function getEventBySlug(slug: string) {
   `,
     { slug },
     {
-      next: { 
+      next: {
         revalidate: 3600, // Cache for 1 hour
-        tags: [`event-${slug}`, 'events'] 
-      }
-    }
+        tags: [`event-${slug}`, "events"],
+      },
+    },
   );
 
   return event;
@@ -286,12 +286,16 @@ export const getHomepageVideoUrls = async (): Promise<string[]> => {
   const query = `*[_type == "homepage"][0] {
     "videoUrls": backgroundVideos[].asset->url
   }`;
-  const result = await client.fetch<{ videoUrls?: string[] }>(query, {}, {
-    next: { 
-      revalidate: 7200, // Cache for 2 hours
-      tags: ['homepage', 'videos'] 
-    }
-  });
+  const result = await client.fetch<{ videoUrls?: string[] }>(
+    query,
+    {},
+    {
+      next: {
+        revalidate: 7200, // Cache for 2 hours
+        tags: ["homepage", "videos"],
+      },
+    },
+  );
   return result?.videoUrls?.filter(Boolean) ?? [];
 };
 
@@ -315,11 +319,11 @@ export const getHomepagePromoEvent =
       query,
       {},
       {
-        next: { 
+        next: {
           revalidate: 3600, // Cache for 1 hour
-          tags: ['homepage', 'events'] 
-        }
-      }
+          tags: ["homepage", "events"],
+        },
+      },
     );
     return result?.promoEvent ?? null;
   };

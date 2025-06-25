@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/lib/styles/ImageScroller.module.css";
 import Image from "next/image";
@@ -57,11 +52,11 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
       setImageStyle(
         isMobileView
           ? {
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
-          }
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+            }
           : {},
       );
       setActiveImageIndex((prevIndex) =>
@@ -112,8 +107,6 @@ const ImageScroller: React.FC<ImageScrollerProps> = ({ images }) => {
 
     return () => clearTimeout(timer);
   }, []);
-
-
 
   const handleImageClick = (index: number) => {
     setActiveImageIndex(index);

@@ -414,13 +414,6 @@ export default function PurchaseFormModal({
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              {maxQuantity < 20 && (
-                <p className="text-xs text-muted-foreground">
-                  {t(currentLanguage, "purchaseModal.maxQuantityInfo", {
-                    max: maxQuantity,
-                  })}
-                </p>
-              )}
             </div>
 
             {/* Error Display */}

@@ -51,7 +51,7 @@ export default function Barcode() {
         </span>
       </div>
       <a
-        href="https://github.com/lomiafrica/events"
+        href="https://github.com/djaoulient/djaoulient.com"
         target="_blank"
         rel="noopener noreferrer"
         className="absolute -bottom-6 right-0 text-xs text-white font-mono hover:underline"
