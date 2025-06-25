@@ -11,17 +11,49 @@ async function verifySignature(body: string, signature: string): Promise<boolean
     return false;
   }
 
+  // Sanity sends signature in format "sha256=<hash>"
   const expectedSignature = createHmac('sha256', SANITY_WEBHOOK_SECRET)
-    .update(body)
+    .update(body, 'utf8')
     .digest('hex');
 
-  return signature === expectedSignature;
+  // Remove sha256= prefix if present
+  const cleanSignature = signature.replace(/^sha256=/, '');
+  
+  // Use timingSafeEqual for constant-time comparison
+  try {
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    const actualBuffer = Buffer.from(cleanSignature, 'hex');
+    
+    if (expectedBuffer.length !== actualBuffer.length) {
+      return false;
+    }
+    
+    // Simple constant-time comparison for security
+    let result = 0;
+    for (let i = 0; i < expectedBuffer.length; i++) {
+      result |= expectedBuffer[i] ^ actualBuffer[i];
+    }
+    return result === 0;
+  } catch (error) {
+    console.error('Error comparing signatures:', error);
+    return false;
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
     const signature = request.headers.get('sanity-webhook-signature') || '';
+
+    // Debug logging
+    console.log('Webhook debug info:', {
+      hasSecret: !!SANITY_WEBHOOK_SECRET,
+      secretLength: SANITY_WEBHOOK_SECRET?.length,
+      bodyLength: body.length,
+      signatureLength: signature.length,
+      signaturePrefix: signature.substring(0, 10),
+      headers: Object.fromEntries(request.headers.entries())
+    });
 
     // Verify webhook signature
     if (!await verifySignature(body, signature)) {
