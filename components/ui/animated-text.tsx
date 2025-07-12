@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 interface AnimatedTextCycleProps {
   words: string[];
@@ -40,7 +40,7 @@ export default function AnimatedTextCycle({
   }, [interval, words.length]);
 
   // Container animation for the whole word
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: {
       y: -20,
       opacity: 0,
@@ -52,7 +52,7 @@ export default function AnimatedTextCycle({
       filter: "blur(0px)",
       transition: {
         duration: 0.4,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1], // easeOut cubic-bezier
       },
     },
     exit: {
@@ -61,7 +61,7 @@ export default function AnimatedTextCycle({
       filter: "blur(8px)",
       transition: {
         duration: 0.3,
-        ease: "easeIn",
+        ease: [0.4, 0, 1, 1], // easeIn cubic-bezier
       },
     },
   };
