@@ -266,7 +266,7 @@ export default function PurchaseFormModal({
         console.error("Supabase function error:", functionError);
         setError(
           functionError.message ||
-          t(currentLanguage, "purchaseModal.errors.functionError"),
+            t(currentLanguage, "purchaseModal.errors.functionError"),
         );
         setIsLoading(false);
         return;
@@ -279,7 +279,7 @@ export default function PurchaseFormModal({
         console.error("Lomi checkout URL not found in response:", data);
         setError(
           data.error ||
-          t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
+            t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
         );
       }
     } catch (e: unknown) {
@@ -311,7 +311,9 @@ export default function PurchaseFormModal({
   };
 
   const totalPrice = item.price * quantity;
-  const actualTicketCount = item.isBundle ? quantity * (item.ticketsIncluded || 1) : quantity;
+  const actualTicketCount = item.isBundle
+    ? quantity * (item.ticketsIncluded || 1)
+    : quantity;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -335,7 +337,9 @@ export default function PurchaseFormModal({
                 {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                 {item.isBundle && (
                   <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {t(currentLanguage, "purchaseModal.includesTickets", { count: item.ticketsIncluded || 1 })}
+                    {t(currentLanguage, "purchaseModal.includesTickets", {
+                      count: item.ticketsIncluded || 1,
+                    })}
                   </span>
                 )}
               </p>
@@ -460,7 +464,8 @@ export default function PurchaseFormModal({
                     {t(currentLanguage, "purchaseModal.ticketsGenerated")}:
                   </span>
                   <span className="text-xs font-medium">
-                    {actualTicketCount} {actualTicketCount === 1 ? 'ticket' : 'tickets'}
+                    {actualTicketCount}{" "}
+                    {actualTicketCount === 1 ? "ticket" : "tickets"}
                   </span>
                 </div>
               )}
