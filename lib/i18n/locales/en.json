@@ -218,12 +218,14 @@
     "noDetails": "No additional details available."
   },
   "purchaseModal": {
-    "titlePrefix": "Purchase",
-    "description": "Enter your details to purchase tickets for {eventName}.",
+    "title": "Purchase tickets",
+    "description": "Enter your details to purchase tickets.",
+    "includesTickets": "Includes {count} ticket(s)",
+    "ticketsGenerated": "Tickets to be generated",
     "labels": {
       "quantity": "Quantity",
       "name": "Full Name",
-      "email": "Email",
+      "email": "E-mail",
       "phone": "Phone",
       "optional": "Optional"
     },

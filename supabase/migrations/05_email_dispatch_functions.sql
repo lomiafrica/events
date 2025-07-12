@@ -25,11 +25,13 @@ RETURNS TABLE(
     status TEXT,
     email_dispatch_status TEXT,
     email_dispatch_attempts INTEGER,
-    unique_ticket_identifier TEXT
+    unique_ticket_identifier TEXT,
+    is_bundle BOOLEAN,
+    tickets_per_bundle INTEGER
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     RETURN QUERY
@@ -53,7 +55,9 @@ BEGIN
         p.status,
         p.email_dispatch_status,
         p.email_dispatch_attempts,
-        p.unique_ticket_identifier
+        p.unique_ticket_identifier,
+        p.is_bundle,
+        p.tickets_per_bundle
     FROM public.purchases p
     INNER JOIN public.customers c ON p.customer_id = c.id
     WHERE p.id = p_purchase_id;
@@ -73,7 +77,7 @@ CREATE OR REPLACE FUNCTION public.update_email_dispatch_status(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     UPDATE public.purchases
@@ -100,7 +104,7 @@ GRANT EXECUTE ON FUNCTION public.update_email_dispatch_status(UUID, TEXT, TEXT, 
 
 -- Comments
 COMMENT ON FUNCTION public.get_purchase_for_email_dispatch(UUID)
-IS 'Retrieves purchase details with customer information for email dispatch processing';
+IS 'Retrieves purchase details with customer information for email dispatch processing, including bundle information';
 
 COMMENT ON FUNCTION public.update_email_dispatch_status(UUID, TEXT, TEXT, INTEGER, BOOLEAN, TIMESTAMPTZ, TEXT)
 IS 'Updates the email dispatch status and related fields for a purchase record'; 

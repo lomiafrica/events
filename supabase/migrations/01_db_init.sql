@@ -25,12 +25,19 @@ WITH CHECK (true);
 
 -- Create a function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION public.trigger_set_timestamp()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
+
+-- Comments
+COMMENT ON FUNCTION public.trigger_set_timestamp() IS 'Trigger function to update updated_at timestamp';
 
 -- Apply the trigger to the customers table for updates
 CREATE TRIGGER set_customer_updated_at

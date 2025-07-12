@@ -349,6 +349,15 @@ export default {
                 'Optional lomi. product ID for this bundle (UUID format). Leave empty if not this event is not tied to a specific product.',
             },
             {
+              name: 'ticketsIncluded',
+              title: 'Tickets included per bundle',
+              type: 'number',
+              description:
+                'Number of tickets included with each bundle purchase. For example, if set to 2, buying 1 bundle will generate 2 tickets.',
+              initialValue: 1,
+              validation: (Rule: Rule) => Rule.required().integer().min(1),
+            },
+            {
               name: 'description',
               title: 'Short description',
               type: 'string',

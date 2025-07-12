@@ -33,6 +33,7 @@ interface PurchaseItem {
   maxPerOrder?: number;
   stock?: number | null;
   productId?: string;
+  ticketsIncluded?: number; // Number of tickets included per bundle
 }
 
 // Define the expected payload for the Supabase function
@@ -55,6 +56,9 @@ interface CreateCheckoutSessionPayload {
   eventDateText?: string;
   eventTimeText?: string;
   eventVenueName?: string;
+  // Bundle-specific fields
+  isBundle?: boolean;
+  ticketsPerBundle?: number;
 }
 
 interface PurchaseFormModalProps {
@@ -244,6 +248,9 @@ export default function PurchaseFormModal({
       eventDateText: eventDetails.dateText,
       eventTimeText: eventDetails.timeText,
       eventVenueName: eventDetails.venueName,
+      // Bundle-specific fields
+      isBundle: item.isBundle,
+      ticketsPerBundle: item.ticketsIncluded || 1,
     };
 
     let successfullyInitiatedRedirect = false;
@@ -259,7 +266,7 @@ export default function PurchaseFormModal({
         console.error("Supabase function error:", functionError);
         setError(
           functionError.message ||
-            t(currentLanguage, "purchaseModal.errors.functionError"),
+          t(currentLanguage, "purchaseModal.errors.functionError"),
         );
         setIsLoading(false);
         return;
@@ -272,7 +279,7 @@ export default function PurchaseFormModal({
         console.error("Lomi checkout URL not found in response:", data);
         setError(
           data.error ||
-            t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
+          t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
         );
       }
     } catch (e: unknown) {
@@ -304,23 +311,36 @@ export default function PurchaseFormModal({
   };
 
   const totalPrice = item.price * quantity;
+  const actualTicketCount = item.isBundle ? quantity * (item.ticketsIncluded || 1) : quantity;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[90vw] max-w-[400px] bg-background border-slate-700 rounded-sm mx-auto my-2 max-h-[85vh] overflow-y-auto">
-        <DialogHeader className="pb-3 space-y-1">
-          <DialogTitle className="text-lg pr-8 leading-tight text-left">
-            {item.name}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] rounded-sm">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">
+            {t(currentLanguage, "purchaseModal.title")}
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground leading-relaxed text-left">
-            {t(currentLanguage, "purchaseModal.description", {
-              eventName: eventDetails.title,
-            })}
+          <DialogDescription>
+            {t(currentLanguage, "purchaseModal.description")}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="rounded-sm">
-          <div className="space-y-3 py-2">
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            {/* Item Details */}
+            <div className="bg-muted/50 p-3 rounded-sm">
+              <h4 className="font-medium text-sm mb-1">{item.name}</h4>
+              <p className="text-xs text-muted-foreground">
+                {formatPrice(item.price)}
+                {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
+                {item.isBundle && (
+                  <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {t(currentLanguage, "purchaseModal.includesTickets", { count: item.ticketsIncluded || 1 })}
+                  </span>
+                )}
+              </p>
+            </div>
+
             {/* Name Field */}
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-sm font-medium block">
@@ -434,6 +454,16 @@ export default function PurchaseFormModal({
                   {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                 </span>
               </div>
+              {item.isBundle && (
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-muted-foreground">
+                    {t(currentLanguage, "purchaseModal.ticketsGenerated")}:
+                  </span>
+                  <span className="text-xs font-medium">
+                    {actualTicketCount} {actualTicketCount === 1 ? 'ticket' : 'tickets'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

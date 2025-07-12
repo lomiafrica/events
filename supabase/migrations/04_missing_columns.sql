@@ -34,6 +34,15 @@ ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 -- Add comment to explain the whatsapp column
 COMMENT ON COLUMN public.customers.whatsapp IS 'WhatsApp number for customer communication.';
 
+-- Add bundle support to purchases table
+ALTER TABLE public.purchases 
+ADD COLUMN IF NOT EXISTS is_bundle BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS tickets_per_bundle INTEGER DEFAULT 1;
+
+-- Add comments for new columns
+COMMENT ON COLUMN public.purchases.is_bundle IS 'Whether this purchase is for a bundle (true) or individual tickets (false)';
+COMMENT ON COLUMN public.purchases.tickets_per_bundle IS 'Number of tickets included per bundle unit. For regular tickets, this is 1.';
+
 -- RPC Function to upsert customer (create or update)
 CREATE OR REPLACE FUNCTION public.upsert_customer(
     p_name TEXT,
@@ -44,7 +53,7 @@ CREATE OR REPLACE FUNCTION public.upsert_customer(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
     customer_id UUID;
@@ -87,12 +96,14 @@ CREATE OR REPLACE FUNCTION public.create_purchase(
     p_currency_code TEXT DEFAULT 'XOF',
     p_event_date_text TEXT DEFAULT NULL,
     p_event_time_text TEXT DEFAULT NULL,
-    p_event_venue_name TEXT DEFAULT NULL
+    p_event_venue_name TEXT DEFAULT NULL,
+    p_is_bundle BOOLEAN DEFAULT FALSE,
+    p_tickets_per_bundle INTEGER DEFAULT 1
 )
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
     purchase_id UUID;
@@ -110,6 +121,8 @@ BEGIN
         event_date_text,
         event_time_text,
         event_venue_name,
+        is_bundle,
+        tickets_per_bundle,
         status
     )
     VALUES (
@@ -125,6 +138,8 @@ BEGIN
         p_event_date_text,
         p_event_time_text,
         p_event_venue_name,
+        p_is_bundle,
+        p_tickets_per_bundle,
         'pending_payment'
     )
     RETURNING id INTO purchase_id;
@@ -143,7 +158,7 @@ CREATE OR REPLACE FUNCTION public.update_purchase_lomi_session(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     UPDATE public.purchases
@@ -162,15 +177,15 @@ $$;
 
 -- Grant execute permissions to service_role
 GRANT EXECUTE ON FUNCTION public.upsert_customer(TEXT, TEXT, TEXT, TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION public.create_purchase(UUID, TEXT, TEXT, TEXT, TEXT, INTEGER, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION public.create_purchase(UUID, TEXT, TEXT, TEXT, TEXT, INTEGER, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT, BOOLEAN, INTEGER) TO service_role;
 GRANT EXECUTE ON FUNCTION public.update_purchase_lomi_session(UUID, TEXT, TEXT, JSONB) TO service_role;
 
 -- Comments for the new functions
 COMMENT ON FUNCTION public.upsert_customer(TEXT, TEXT, TEXT, TEXT)
 IS 'Creates a new customer or updates existing customer by email. Returns customer ID.';
 
-COMMENT ON FUNCTION public.create_purchase(UUID, TEXT, TEXT, TEXT, TEXT, INTEGER, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT)
-IS 'Creates a new purchase record with pending_payment status. Returns purchase ID.';
+COMMENT ON FUNCTION public.create_purchase(UUID, TEXT, TEXT, TEXT, TEXT, INTEGER, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT, BOOLEAN, INTEGER)
+IS 'Creates a new purchase record with pending_payment status. Supports both regular tickets and bundles. Returns purchase ID.';
 
 COMMENT ON FUNCTION public.update_purchase_lomi_session(UUID, TEXT, TEXT, JSONB)
 IS 'Updates purchase record with lomi session details after checkout session creation.'; 

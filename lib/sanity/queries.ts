@@ -103,7 +103,8 @@ export async function getEventBySlug(slug: string) {
         salesStart,
         salesEnd,
         maxPerOrder,
-        productId
+        productId,
+        ticketsIncluded
       }
     }
   `,

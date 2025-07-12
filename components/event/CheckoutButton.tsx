@@ -22,6 +22,7 @@ export interface CheckoutItemData {
   salesStart?: string | null;
   salesEnd?: string | null;
   productId?: string;
+  ticketsIncluded?: number; // Number of tickets included per bundle
 }
 
 interface PurchaseItemForModal {
@@ -32,6 +33,7 @@ interface PurchaseItemForModal {
   maxPerOrder?: number;
   stock?: number | null;
   productId?: string;
+  ticketsIncluded?: number;
 }
 
 interface CheckoutButtonProps {
@@ -150,6 +152,7 @@ export default function CheckoutButton({
     maxPerOrder: item.maxPerOrder,
     stock: item.stock,
     productId: item.productId,
+    ticketsIncluded: item.ticketsIncluded,
   };
 
   if (globallyTicketsOnSale && availabilityStatus.available) {

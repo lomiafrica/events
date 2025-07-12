@@ -124,7 +124,7 @@
     "liability": {
       "title": "Limitation de Responsabilité",
       "p1": "Djaouli Entertainment, y compris ses fondateurs (Mask On, Seny.D, Dalight) et ses affiliés, ne sera pas responsable des dommages de toute nature résultant de l'utilisation de nos services ou de la participation à nos événements, y compris, mais sans s'y limiter, les dommages directs, indirects, accessoires, punitifs et consécutifs, sauf indication contraire écrite.",
-      "p2": "Votre participation à nos événements, en particulier ceux qui se déroulent dans des lieux non conventionnels, \"underground\" ou réaménagés (par exemple, Doraville, Guido's Pizzeria, La Grande Maison by Venus Room), est à vos propres risques. Bien que nous nous efforcions d'assurer la sécurité, vous reconnaissez que de tels lieux peuvent présenter des caractéristiques intrinsèques différentes des clubs traditionnels.",
+      "p2": "Votre participation à nos événements, en particulier ceux qui se déroulent dans des lieux non conventionnels, \"underground\" ou réaménagés (par exemple, La Grande Maison by Venus Room), est à vos propres risques. Bien que nous nous efforçons d'assurer la sécurité, vous reconnaissez que de tels lieux peuvent présenter des caractéristiques intrinsèques différentes des clubs traditionnels.",
       "p3": "Nous ne garantissons pas que notre site web, ses serveurs ou les e-mails envoyés par Djaouli Entertainment sont exempts de virus ou d'autres composants nuisibles. Nous nous efforçons de fournir un environnement en ligne sécurisé mais ne pouvons garantir une sécurité absolue."
     },
     "indemnification": {
@@ -218,7 +218,10 @@
     "noDetails": "Aucun détail supplémentaire disponible."
   },
   "purchaseModal": {
-    "description": "Entrez vos coordonnées pour acheter des tickets pour {eventName}.",
+    "title": "Acheter des tickets",
+    "description": "Entrez vos coordonnées pour acheter des tickets.",
+    "includesTickets": "Inclut {count} ticket(s)",
+    "ticketsGenerated": "Tickets à générer",
     "labels": {
       "quantity": "Quantité",
       "name": "Nom complet",

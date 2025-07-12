@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.record_event_lomi_payment(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     UPDATE public.purchases

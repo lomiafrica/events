@@ -25,6 +25,24 @@ CREATE TABLE IF NOT EXISTS public.verification_config (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Enable Row Level Security (RLS) on the verification_config table
+ALTER TABLE public.verification_config ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policy for verification_config
+CREATE POLICY "Allow service_role full access on verification_config"
+ON public.verification_config
+FOR ALL
+TO service_role
+USING (true)
+WITH CHECK (true);
+
+-- Allow authenticated users to read verification config (needed for staff PIN verification)
+CREATE POLICY "Allow authenticated read on verification_config"
+ON public.verification_config
+FOR SELECT
+TO authenticated
+USING (true);
+
 -- Insert the verification PIN (can be updated later)
 INSERT INTO public.verification_config (config_key, config_value) 
 VALUES ('staff_verification_pin', '2603')
@@ -39,7 +57,7 @@ CREATE OR REPLACE FUNCTION public.verify_staff_pin(
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
     stored_pin TEXT;
@@ -81,7 +99,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     RETURN QUERY
@@ -120,7 +138,7 @@ CREATE OR REPLACE FUNCTION public.mark_ticket_used(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     UPDATE public.purchases
@@ -151,7 +169,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     RETURN QUERY
@@ -196,7 +214,9 @@ COMMENT ON FUNCTION public.get_event_verification_stats(TEXT)
 IS 'Returns verification statistics for an event (total, used, unused tickets)';
 
 -- Create a view for easy ticket verification queries
-CREATE OR REPLACE VIEW public.ticket_verification_view AS
+CREATE VIEW public.ticket_verification_view
+WITH (security_invoker=on)
+AS
 SELECT 
     p.id as purchase_id,
     p.unique_ticket_identifier,
@@ -208,20 +228,27 @@ SELECT
     p.event_date_text,
     p.event_time_text,
     p.event_venue_name,
+    p.ticket_type_id,
     p.ticket_name,
     p.quantity,
+    p.price_per_ticket,
+    p.total_amount,
+    p.currency_code,
     p.status,
     p.is_used,
     p.used_at,
     p.verified_by,
-    p.created_at as purchased_at
+    p.created_at
 FROM public.purchases p
 INNER JOIN public.customers c ON p.customer_id = c.id
-WHERE p.status = 'paid'
-ORDER BY p.created_at DESC;
+WHERE p.status = 'paid'; -- Only show paid tickets
 
--- Grant select on view to authenticated users (staff)
+-- Grant access to the view
+GRANT SELECT ON public.ticket_verification_view TO service_role;
 GRANT SELECT ON public.ticket_verification_view TO authenticated;
 
 COMMENT ON VIEW public.ticket_verification_view
-IS 'Simplified view for ticket verification queries by staff'; 
+IS 'View for ticket verification queries without security definer';
+
+-- Comments
+COMMENT ON TABLE public.verification_config IS 'Configuration settings for ticket verification system'; 

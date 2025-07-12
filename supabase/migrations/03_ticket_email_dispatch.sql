@@ -24,22 +24,67 @@ COMMENT ON COLUMN public.purchases.unique_ticket_identifier IS 'A unique identif
 CREATE OR REPLACE FUNCTION public.prepare_purchase_for_email_dispatch(
     p_purchase_id UUID
 )
-RETURNS VOID
+RETURNS TABLE(
+    purchase_id UUID,
+    customer_name TEXT,
+    customer_email TEXT,
+    customer_phone TEXT,
+    event_id TEXT,
+    event_title TEXT,
+    event_date_text TEXT,
+    event_time_text TEXT,
+    event_venue_name TEXT,
+    ticket_type_id TEXT,
+    ticket_name TEXT,
+    quantity INTEGER,
+    price_per_ticket NUMERIC,
+    total_amount NUMERIC,
+    currency_code TEXT,
+    unique_ticket_identifier TEXT,
+    qr_code_data TEXT
+)
 LANGUAGE plpgsql
-SECURITY DEFINER -- Using SECURITY DEFINER if the calling role might not have direct update perms on all these columns
+SECURITY DEFINER
+SET search_path = ''
 AS $$
 BEGIN
+    -- Update email dispatch status to IN_PROGRESS
     UPDATE public.purchases
     SET 
-        email_dispatch_status = 'PENDING_DISPATCH',
-        updated_at = NOW() -- Ensure updated_at is modified by this action
-    WHERE id = p_purchase_id AND status = 'paid'; -- Crucially, only prepare 'paid' purchases
+        email_dispatch_status = 'DISPATCH_IN_PROGRESS',
+        email_dispatch_attempts = COALESCE(email_dispatch_attempts, 0) + 1,
+        updated_at = NOW()
+    WHERE id = p_purchase_id;
 
-    IF NOT FOUND THEN
-        RAISE WARNING 'Purchase ID % not found or not in "paid" status. No action taken for email dispatch preparation.', p_purchase_id;
-    END IF;
+    -- Return purchase data for email dispatch
+    RETURN QUERY
+    SELECT 
+        p.id as purchase_id,
+        c.name as customer_name,
+        c.email as customer_email,
+        c.phone as customer_phone,
+        p.event_id,
+        p.event_title,
+        p.event_date_text,
+        p.event_time_text,
+        p.event_venue_name,
+        p.ticket_type_id,
+        p.ticket_name,
+        p.quantity,
+        p.price_per_ticket,
+        p.total_amount,
+        p.currency_code,
+        p.unique_ticket_identifier,
+        p.unique_ticket_identifier as qr_code_data -- QR code contains the unique identifier
+    FROM public.purchases p
+    INNER JOIN public.customers c ON p.customer_id = c.id
+    WHERE p.id = p_purchase_id
+    AND p.status = 'paid';
 END;
 $$;
+
+COMMENT ON FUNCTION public.prepare_purchase_for_email_dispatch(UUID)
+IS 'Prepares purchase data for email dispatch with proper security';
 
 COMMENT ON FUNCTION public.prepare_purchase_for_email_dispatch(UUID)
 IS 'Updates a purchase record to mark it as "PENDING_DISPATCH" for its ticket email, typically after successful payment confirmation (status=''paid''). To be called by a server-side process (e.g., webhook handler Edge Function).';
