@@ -31,10 +31,10 @@ BEGIN
     WHERE 
       status = 'pending_payment' 
       AND created_at < expiry_threshold
-    RETURNING purchase_id
+    RETURNING id -- Corrected from purchase_id
   )
   SELECT 
-    ARRAY(SELECT purchase_id FROM updated_purchases),
+    ARRAY(SELECT id::text FROM updated_purchases), -- Corrected and cast to text
     (SELECT COUNT(*) FROM updated_purchases)
   INTO updated_ids, update_count;
   
