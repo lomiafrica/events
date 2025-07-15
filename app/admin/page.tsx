@@ -115,10 +115,12 @@ export default function AdminPage() {
       const csvContent = [
         headers.join(","),
         ...data.map((row: Record<string, unknown>) =>
-          headers.map(header =>
-            `"${String(row[header] || "").replace(/"/g, '""')}"`
-          ).join(",")
-        )
+          headers
+            .map(
+              (header) => `"${String(row[header] || "").replace(/"/g, '""')}"`,
+            )
+            .join(","),
+        ),
       ].join("\n");
 
       // Download file
@@ -126,7 +128,7 @@ export default function AdminPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `purchases-export-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `purchases-export-${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -553,12 +555,20 @@ export default function AdminPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-700">
-                        <th className="text-left p-3 text-gray-200">Customer</th>
+                        <th className="text-left p-3 text-gray-200">
+                          Customer
+                        </th>
                         <th className="text-left p-3 text-gray-200">Event</th>
                         <th className="text-left p-3 text-gray-200">Payment</th>
-                        <th className="text-left p-3 text-gray-200">Email Status</th>
-                        <th className="text-left p-3 text-gray-200">Email Sent</th>
-                        <th className="text-left p-3 text-gray-200">Verified</th>
+                        <th className="text-left p-3 text-gray-200">
+                          Email Status
+                        </th>
+                        <th className="text-left p-3 text-gray-200">
+                          Email Sent
+                        </th>
+                        <th className="text-left p-3 text-gray-200">
+                          Verified
+                        </th>
                         <th className="text-left p-3 text-gray-200">Actions</th>
                       </tr>
                     </thead>
@@ -594,7 +604,8 @@ export default function AdminPage() {
                                   {purchase.ticket_name} x {purchase.quantity}
                                 </div>
                                 <div className="text-sm text-gray-400">
-                                  {purchase.total_amount} {purchase.currency_code}
+                                  {purchase.total_amount}{" "}
+                                  {purchase.currency_code}
                                 </div>
                               </div>
                             </td>
@@ -621,7 +632,9 @@ export default function AdminPage() {
                             </td>
                             <td className="p-3">
                               <div className="text-sm text-gray-400">
-                                {formatRelativeTime(purchase.pdf_ticket_sent_at)}
+                                {formatRelativeTime(
+                                  purchase.pdf_ticket_sent_at,
+                                )}
                               </div>
                             </td>
                             <td className="p-3">
@@ -629,13 +642,19 @@ export default function AdminPage() {
                                 {purchase.is_used ? (
                                   <div>
                                     <div className="text-green-400">✓ Used</div>
-                                    <div>{formatRelativeTime(purchase.used_at)}</div>
+                                    <div>
+                                      {formatRelativeTime(purchase.used_at)}
+                                    </div>
                                     {purchase.verified_by && (
-                                      <div className="text-xs">by {purchase.verified_by}</div>
+                                      <div className="text-xs">
+                                        by {purchase.verified_by}
+                                      </div>
                                     )}
                                   </div>
                                 ) : (
-                                  <div className="text-orange-400">Not used</div>
+                                  <div className="text-orange-400">
+                                    Not used
+                                  </div>
                                 )}
                               </div>
                             </td>
@@ -662,7 +681,10 @@ export default function AdminPage() {
                   {filteredPurchases.map((purchase) => {
                     const EmailIcon = getEmailButtonIcon(purchase);
                     return (
-                      <Card key={purchase.purchase_id} className="rounded-sm border-slate-700 bg-background">
+                      <Card
+                        key={purchase.purchase_id}
+                        className="rounded-sm border-slate-700 bg-background"
+                      >
                         <CardContent className="p-4">
                           <div className="space-y-3">
                             {/* Customer Info */}
@@ -681,7 +703,8 @@ export default function AdminPage() {
                                 {purchase.event_title}
                               </div>
                               <div className="text-sm text-gray-400">
-                                {purchase.ticket_name} x {purchase.quantity} • {purchase.total_amount} {purchase.currency_code}
+                                {purchase.ticket_name} x {purchase.quantity} •{" "}
+                                {purchase.total_amount} {purchase.currency_code}
                               </div>
                             </div>
 
@@ -702,15 +725,27 @@ export default function AdminPage() {
                             <div className="grid grid-cols-2 gap-4 text-xs text-gray-400">
                               <div>
                                 <div className="font-medium">Email Sent</div>
-                                <div>{formatRelativeTime(purchase.pdf_ticket_sent_at)}</div>
+                                <div>
+                                  {formatRelativeTime(
+                                    purchase.pdf_ticket_sent_at,
+                                  )}
+                                </div>
                               </div>
                               <div>
                                 <div className="font-medium">Ticket Status</div>
-                                <div className={purchase.is_used ? "text-green-400" : "text-orange-400"}>
+                                <div
+                                  className={
+                                    purchase.is_used
+                                      ? "text-green-400"
+                                      : "text-orange-400"
+                                  }
+                                >
                                   {purchase.is_used ? "✓ Used" : "Not used"}
                                 </div>
                                 {purchase.is_used && (
-                                  <div>{formatRelativeTime(purchase.used_at)}</div>
+                                  <div>
+                                    {formatRelativeTime(purchase.used_at)}
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -752,8 +787,8 @@ export default function AdminPage() {
             <DialogHeader>
               <DialogTitle className="text-gray-100">
                 {selectedPurchase &&
-                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                    selectedPurchase.email_dispatch_attempts === 0)
+                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                  selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
@@ -841,7 +876,7 @@ export default function AdminPage() {
                       <>
                         {selectedPurchase.email_dispatch_status ===
                           "NOT_INITIATED" ||
-                          selectedPurchase.email_dispatch_attempts === 0 ? (
+                        selectedPurchase.email_dispatch_attempts === 0 ? (
                           <>
                             <Send className="h-4 w-4 mr-2" />
                             Send Email

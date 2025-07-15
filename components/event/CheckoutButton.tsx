@@ -173,14 +173,18 @@ export default function CheckoutButton({
         </Button>
       );
     } else if (supabase) {
+      const isBundle = item.isBundle;
+      const buttonText = isBundle
+        ? t(currentLanguage, "eventSlugPage.tickets.buyNow")
+        : t(currentLanguage, "eventSlugPage.tickets.getETicket");
+      const buttonClassName = isBundle
+        ? "sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm"
+        : "sm:w-auto bg-green-600 hover:bg-green-700 text-white rounded-sm";
       return (
         <>
-          <Button
-            onClick={handleOpenPurchaseModal}
-            className="sm:w-auto bg-green-600 hover:bg-green-700 text-white rounded-sm"
-          >
+          <Button onClick={handleOpenPurchaseModal} className={buttonClassName}>
             <Ticket className="mr-2 h-4 w-4" />
-            {t(currentLanguage, "eventSlugPage.tickets.getETicket")}
+            {buttonText}
           </Button>
           {isModalOpen && (
             <PurchaseFormModal

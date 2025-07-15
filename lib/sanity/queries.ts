@@ -42,7 +42,7 @@ export const getAllEvents = async (): Promise<Event[]> => {
   return await client.fetch(query);
 };
 
-export async function getEventBySlug(slug: string) {
+export async function getEventBySlug(slug: string, locale: string) {
   const event = await client.fetch(
     `
     *[_type == "event" && slug.current == $slug][0] {
@@ -57,8 +57,8 @@ export async function getEventBySlug(slug: string) {
       "flyer": {
         "url": flyer.asset->url
       },
-      description,
-      venueDetails,
+      "description": coalesce(description[$locale], description.en),
+      "venueDetails": coalesce(venueDetails[$locale], venueDetails.en),
       hostedBy,
       ticketsAvailable,
       paymentLink,
@@ -108,7 +108,7 @@ export async function getEventBySlug(slug: string) {
       }
     }
   `,
-    { slug },
+    { slug, locale },
     {
       next: {
         revalidate: 3600, // Cache for 1 hour

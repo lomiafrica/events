@@ -48,10 +48,10 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 BEGIN
-    -- Update email dispatch status to IN_PROGRESS
+    -- Update email dispatch status to PENDING_DISPATCH
     UPDATE public.purchases
     SET 
-        email_dispatch_status = 'DISPATCH_IN_PROGRESS',
+        email_dispatch_status = 'PENDING_DISPATCH',
         email_dispatch_attempts = COALESCE(email_dispatch_attempts, 0) + 1,
         updated_at = NOW()
     WHERE id = p_purchase_id;

@@ -86,8 +86,20 @@ export default {
     {
       name: 'description',
       title: 'Description',
-      type: 'text',
+      type: 'object',
       group: 'details',
+      fields: [
+        {
+          name: 'en',
+          title: 'English',
+          type: 'text',
+        },
+        {
+          name: 'fr',
+          title: 'French',
+          type: 'text',
+        },
+      ],
     },
     {
       name: 'hostedBy',
@@ -123,8 +135,20 @@ export default {
       name: 'venueDetails',
       title: 'Additional details',
       description: 'Info about parking, access, etc.',
-      type: 'text',
+      type: 'object',
       group: 'location',
+      fields: [
+        {
+          name: 'en',
+          title: 'English',
+          type: 'text',
+        },
+        {
+          name: 'fr',
+          title: 'French',
+          type: 'text',
+        },
+      ],
     },
     {
       name: 'flyer',

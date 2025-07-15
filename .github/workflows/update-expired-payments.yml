@@ -3,18 +3,18 @@ name: Update Expired Payments
 on:
   schedule:
     # Runs every 2 hours at minutes 15 (00:15, 02:15, 04:15, etc.)
-    - cron: '15 */2 * * *'
+    - cron: "15 */2 * * *"
   workflow_dispatch:
     # Allows manual triggering for testing
     inputs:
       dry_run:
-        description: 'Run in dry-run mode (no actual updates)'
+        description: "Run in dry-run mode (no actual updates)"
         required: false
-        default: 'false'
+        default: "false"
         type: choice
         options:
-          - 'true'
-          - 'false'
+          - "true"
+          - "false"
 
 jobs:
   update-expired-payments:
@@ -79,4 +79,4 @@ jobs:
         run: |
           echo "✅ Expired payments cleanup completed successfully"
           echo "🔄 Next run scheduled for 2 hours from now"
-          echo "📅 To run manually: Go to Actions → Update Expired Payments → Run workflow" 
+          echo "📅 To run manually: Go to Actions → Update Expired Payments → Run workflow"
