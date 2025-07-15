@@ -238,41 +238,41 @@ export default function AdminPage() {
     switch (status) {
       case "SENT_SUCCESSFULLY":
         return (
-          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm">
+          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm min-w-[80px] justify-center">
             <CheckCircle className="h-3 w-3 mr-1" />
             Sent
           </Badge>
         );
       case "DISPATCH_FAILED":
         return (
-          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-sm">
+          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-sm min-w-[80px] justify-center">
             <AlertCircle className="h-3 w-3 mr-1" />
             Failed
           </Badge>
         );
       case "DISPATCH_IN_PROGRESS":
         return (
-          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-sm">
+          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-sm min-w-[80px] justify-center">
             <Clock className="h-3 w-3 mr-1" />
             In Progress
           </Badge>
         );
       case "PENDING_DISPATCH":
         return (
-          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-sm">
+          <Badge className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 rounded-sm min-w-[80px] justify-center">
             <Clock className="h-3 w-3 mr-1" />
             Pending
           </Badge>
         );
       case "NOT_INITIATED":
         return (
-          <Badge className="bg-zinc-900/90 dark:bg-black/50 text-zinc-100 dark:text-sage-100 border-zinc-800 rounded-sm">
+          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-sm min-w-[80px] justify-center">
             Not Initiated
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-zinc-900/90 dark:bg-black/50 text-zinc-100 dark:text-sage-100 border-zinc-800 rounded-sm">
+          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-sm min-w-[80px] justify-center">
             Unknown
           </Badge>
         );
@@ -393,7 +393,7 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-100">Admin Panel</h1>
+            <h1 className="text-3xl font-bold text-gray-100">Admin panel</h1>
             <p className="text-gray-300">Manage purchases and email dispatch</p>
           </div>
           <Button
@@ -412,7 +412,7 @@ export default function AdminPage() {
             <div className="flex gap-4 items-end">
               <div className="flex-1">
                 <Label htmlFor="search" className="text-gray-200">
-                  Search Purchases
+                  Search purchases
                 </Label>
                 <div className="flex gap-2 mt-2">
                   <Input
@@ -520,7 +520,7 @@ export default function AdminPage() {
                             {getPaymentStatusBadge(purchase.status)}
                           </td>
                           <td className="p-3">
-                            <div className="space-y-1">
+                            <div className="flex items-center gap-2">
                               {getStatusBadge(purchase.email_dispatch_status)}
                               {purchase.email_dispatch_attempts > 0 && (
                                 <div className="text-xs text-gray-400">
@@ -528,8 +528,11 @@ export default function AdminPage() {
                                 </div>
                               )}
                               {purchase.email_dispatch_error && (
-                                <div className="text-xs text-red-400 max-w-xs truncate">
-                                  {purchase.email_dispatch_error}
+                                <div
+                                  className="w-4 h-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 cursor-help"
+                                  title={purchase.email_dispatch_error}
+                                >
+                                  <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
                                 </div>
                               )}
                             </div>
@@ -538,7 +541,7 @@ export default function AdminPage() {
                             <Button
                               size="sm"
                               onClick={() => openEmailDialog(purchase)}
-                              className="rounded-sm"
+                              className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
                               disabled={!canSendEmail(purchase)}
                             >
                               <EmailIcon className="h-4 w-4 mr-2" />
@@ -561,8 +564,8 @@ export default function AdminPage() {
             <DialogHeader>
               <DialogTitle className="text-gray-100">
                 {selectedPurchase &&
-                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                  selectedPurchase.email_dispatch_attempts === 0)
+                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                    selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
@@ -650,7 +653,7 @@ export default function AdminPage() {
                       <>
                         {selectedPurchase.email_dispatch_status ===
                           "NOT_INITIATED" ||
-                        selectedPurchase.email_dispatch_attempts === 0 ? (
+                          selectedPurchase.email_dispatch_attempts === 0 ? (
                           <>
                             <Send className="h-4 w-4 mr-2" />
                             Send Email
