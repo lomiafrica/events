@@ -1,0 +1,82 @@
+name: Update Expired Payments
+
+on:
+  schedule:
+    # Runs every 2 hours at minutes 15 (00:15, 02:15, 04:15, etc.)
+    - cron: '15 */2 * * *'
+  workflow_dispatch:
+    # Allows manual triggering for testing
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no actual updates)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  update-expired-payments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secret availability
+        run: |
+          if [ -n "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "✅ SUPABASE_SERVICE_ROLE_KEY is available"
+          else
+            echo "❌ SUPABASE_SERVICE_ROLE_KEY is NOT available"
+            exit 1
+          fi
+
+      - name: Update expired pending payments
+        run: |
+          echo "🔄 Starting expired payments update..."
+          echo "⏰ Current time: $(date)"
+
+          # Call the Edge Function to update expired payments
+          RESPONSE=$(curl -s -X POST "https://swhlekigmfdbwulrncot.supabase.co/functions/v1/update-expired-payments" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json")
+
+          echo "📊 Update Response: $RESPONSE"
+
+          # Check if the response indicates success
+          if echo "$RESPONSE" | grep -q '"success":true'; then
+            echo "✅ Expired payments update completed successfully"
+            
+            # Extract and display statistics from the response
+            PAYMENTS_UPDATED=$(echo "$RESPONSE" | grep -o '"payments_updated":[0-9]*' | cut -d':' -f2)
+            REMAINING_PENDING=$(echo "$RESPONSE" | grep -o '"remaining_pending":[0-9]*' | cut -d':' -f2)
+            
+            echo "📈 Statistics:"
+            echo "   - Payments updated to failed: ${PAYMENTS_UPDATED:-0}"
+            echo "   - Remaining pending payments: ${REMAINING_PENDING:-0}"
+            
+            # Alert if there are still many pending payments
+            if [ "${REMAINING_PENDING:-0}" -gt 50 ]; then
+              echo "⚠️  Warning: High number of pending payments (${REMAINING_PENDING})"
+            fi
+            
+          else
+            echo "❌ Expired payments update failed"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "🚨 Expired payments update job failed! Check the logs above for details."
+          echo "💡 This might indicate:"
+          echo "   - Network issues with Supabase"
+          echo "   - Database connectivity problems"
+          echo "   - Edge function deployment issues"
+          # In a real setup, you might want to send notifications to Slack, email, etc.
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Expired payments cleanup completed successfully"
+          echo "🔄 Next run scheduled for 2 hours from now"
+          echo "📅 To run manually: Go to Actions → Update Expired Payments → Run workflow" 

@@ -29,6 +29,7 @@ import {
   X,
   RefreshCw,
   Send,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -53,6 +54,10 @@ interface Purchase {
   email_dispatch_error: string;
   unique_ticket_identifier: string;
   created_at: string;
+  pdf_ticket_sent_at: string | null;
+  used_at: string | null;
+  is_used: boolean;
+  verified_by: string | null;
 }
 
 export default function AdminPage() {
@@ -70,6 +75,71 @@ export default function AdminPage() {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [emailActionLoading, setEmailActionLoading] = useState(false);
+
+  // Helper function to format relative time
+  const formatRelativeTime = (timestamp: string | null) => {
+    if (!timestamp) return "-";
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  // Download CSV function
+  const downloadCSV = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.rpc("export_admin_purchases_csv");
+
+      if (error) {
+        toast.error("Failed to export data");
+        console.error("Export error:", error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        toast.error("No data to export");
+        return;
+      }
+
+      // Convert to CSV
+      const headers = Object.keys(data[0]);
+      const csvContent = [
+        headers.join(","),
+        ...data.map((row: Record<string, unknown>) =>
+          headers.map(header =>
+            `"${String(row[header] || "").replace(/"/g, '""')}"`
+          ).join(",")
+        )
+      ].join("\n");
+
+      // Download file
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `purchases-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Data exported successfully!");
+    } catch (error) {
+      toast.error("Failed to export data");
+      console.error("Download error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check authentication on mount
   useEffect(() => {
@@ -424,7 +494,9 @@ export default function AdminPage() {
                   />
                   <Button
                     onClick={searchPurchases}
-                    className="rounded-sm"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800 h-10 px-3"
                     disabled={loading}
                   >
                     <Search className="h-4 w-4" />
@@ -441,6 +513,15 @@ export default function AdminPage() {
                   className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
                 />
                 Refresh
+              </Button>
+              <Button
+                onClick={downloadCSV}
+                variant="outline"
+                className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
+                disabled={loading}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
               </Button>
             </div>
           </CardContent>
@@ -460,7 +541,6 @@ export default function AdminPage() {
             {loading ? (
               <div className="text-center py-8">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-300">Loading purchases...</p>
               </div>
             ) : filteredPurchases.length === 0 ? (
               <div className="text-center py-8">
@@ -468,27 +548,124 @@ export default function AdminPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700">
-                      <th className="text-left p-3 text-gray-200">Customer</th>
-                      <th className="text-left p-3 text-gray-200">Event</th>
-                      <th className="text-left p-3 text-gray-200">Payment</th>
-                      <th className="text-left p-3 text-gray-200">
-                        Email Status
-                      </th>
-                      <th className="text-left p-3 text-gray-200">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPurchases.map((purchase) => {
-                      const EmailIcon = getEmailButtonIcon(purchase);
-                      return (
-                        <tr
-                          key={purchase.purchase_id}
-                          className="border-b border-slate-700 hover:bg-slate-800/50"
-                        >
-                          <td className="p-3">
+                {/* Desktop Table View */}
+                <div className="hidden lg:block">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-700">
+                        <th className="text-left p-3 text-gray-200">Customer</th>
+                        <th className="text-left p-3 text-gray-200">Event</th>
+                        <th className="text-left p-3 text-gray-200">Payment</th>
+                        <th className="text-left p-3 text-gray-200">Email Status</th>
+                        <th className="text-left p-3 text-gray-200">Email Sent</th>
+                        <th className="text-left p-3 text-gray-200">Verified</th>
+                        <th className="text-left p-3 text-gray-200">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPurchases.map((purchase) => {
+                        const EmailIcon = getEmailButtonIcon(purchase);
+                        return (
+                          <tr
+                            key={purchase.purchase_id}
+                            className="border-b border-slate-700 hover:bg-slate-800/50"
+                          >
+                            <td className="p-3">
+                              <div>
+                                <div className="font-medium text-gray-100">
+                                  {purchase.customer_name}
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                  {purchase.customer_email}
+                                </div>
+                                {purchase.customer_phone && (
+                                  <div className="text-sm text-gray-400">
+                                    {purchase.customer_phone}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div>
+                                <div className="font-medium text-gray-100">
+                                  {purchase.event_title}
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                  {purchase.ticket_name} x {purchase.quantity}
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                  {purchase.total_amount} {purchase.currency_code}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {getPaymentStatusBadge(purchase.status)}
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                {getStatusBadge(purchase.email_dispatch_status)}
+                                {purchase.email_dispatch_attempts > 0 && (
+                                  <div className="text-xs text-gray-400">
+                                    Attempts: {purchase.email_dispatch_attempts}
+                                  </div>
+                                )}
+                                {purchase.email_dispatch_error && (
+                                  <div
+                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 cursor-help"
+                                    title={purchase.email_dispatch_error}
+                                  >
+                                    <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="text-sm text-gray-400">
+                                {formatRelativeTime(purchase.pdf_ticket_sent_at)}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="text-sm text-gray-400">
+                                {purchase.is_used ? (
+                                  <div>
+                                    <div className="text-green-400">✓ Used</div>
+                                    <div>{formatRelativeTime(purchase.used_at)}</div>
+                                    {purchase.verified_by && (
+                                      <div className="text-xs">by {purchase.verified_by}</div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-orange-400">Not used</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <Button
+                                size="sm"
+                                onClick={() => openEmailDialog(purchase)}
+                                className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
+                                disabled={!canSendEmail(purchase)}
+                              >
+                                <EmailIcon className="h-4 w-4 mr-2" />
+                                {getEmailButtonText(purchase)}
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden space-y-4">
+                  {filteredPurchases.map((purchase) => {
+                    const EmailIcon = getEmailButtonIcon(purchase);
+                    return (
+                      <Card key={purchase.purchase_id} className="rounded-sm border-slate-700 bg-background">
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            {/* Customer Info */}
                             <div>
                               <div className="font-medium text-gray-100">
                                 {purchase.customer_name}
@@ -496,63 +673,74 @@ export default function AdminPage() {
                               <div className="text-sm text-gray-400">
                                 {purchase.customer_email}
                               </div>
-                              {purchase.customer_phone && (
-                                <div className="text-sm text-gray-400">
-                                  {purchase.customer_phone}
-                                </div>
-                              )}
                             </div>
-                          </td>
-                          <td className="p-3">
+
+                            {/* Event Info */}
                             <div>
-                              <div className="font-medium text-gray-100">
+                              <div className="font-medium text-gray-100 text-sm">
                                 {purchase.event_title}
                               </div>
                               <div className="text-sm text-gray-400">
-                                {purchase.ticket_name} x {purchase.quantity}
-                              </div>
-                              <div className="text-sm text-gray-400">
-                                {purchase.total_amount} {purchase.currency_code}
+                                {purchase.ticket_name} x {purchase.quantity} • {purchase.total_amount} {purchase.currency_code}
                               </div>
                             </div>
-                          </td>
-                          <td className="p-3">
-                            {getPaymentStatusBadge(purchase.status)}
-                          </td>
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              {getStatusBadge(purchase.email_dispatch_status)}
+
+                            {/* Status Row */}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                {getPaymentStatusBadge(purchase.status)}
+                                {getStatusBadge(purchase.email_dispatch_status)}
+                              </div>
                               {purchase.email_dispatch_attempts > 0 && (
                                 <div className="text-xs text-gray-400">
                                   Attempts: {purchase.email_dispatch_attempts}
                                 </div>
                               )}
+                            </div>
+
+                            {/* Timestamps */}
+                            <div className="grid grid-cols-2 gap-4 text-xs text-gray-400">
+                              <div>
+                                <div className="font-medium">Email Sent</div>
+                                <div>{formatRelativeTime(purchase.pdf_ticket_sent_at)}</div>
+                              </div>
+                              <div>
+                                <div className="font-medium">Ticket Status</div>
+                                <div className={purchase.is_used ? "text-green-400" : "text-orange-400"}>
+                                  {purchase.is_used ? "✓ Used" : "Not used"}
+                                </div>
+                                {purchase.is_used && (
+                                  <div>{formatRelativeTime(purchase.used_at)}</div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => openEmailDialog(purchase)}
+                                className="flex-1 rounded-sm bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={!canSendEmail(purchase)}
+                              >
+                                <EmailIcon className="h-4 w-4 mr-2" />
+                                {getEmailButtonText(purchase)}
+                              </Button>
                               {purchase.email_dispatch_error && (
                                 <div
-                                  className="w-4 h-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 cursor-help"
+                                  className="w-9 h-9 flex items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30 cursor-help"
                                   title={purchase.email_dispatch_error}
                                 >
-                                  <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
+                                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                                 </div>
                               )}
                             </div>
-                          </td>
-                          <td className="p-3">
-                            <Button
-                              size="sm"
-                              onClick={() => openEmailDialog(purchase)}
-                              className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
-                              disabled={!canSendEmail(purchase)}
-                            >
-                              <EmailIcon className="h-4 w-4 mr-2" />
-                              {getEmailButtonText(purchase)}
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </CardContent>
