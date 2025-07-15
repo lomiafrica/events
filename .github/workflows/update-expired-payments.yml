@@ -35,7 +35,7 @@ jobs:
           echo "⏰ Current time: $(date)"
 
           # Call the Edge Function to update expired payments
-          RESPONSE=$(curl -s -X POST "https://swhlekigmfdbwulrncot.supabase.co/functions/v1/update-expired-payments" \
+          RESPONSE=$(curl -s -X POST "https://ndrbkzfpbnitxkkwmsdf.supabase.co/functions/v1/update-expired-payments" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json")
 
