@@ -115,10 +115,10 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
             lineHeight: "0.8",
             fontWeight: "900", // Make it bold
             fontStyle: "italic", // Make it italic
-            color: "#ef4444", // Red color like the progress bar
+            color: "#ffffff", // White color
             textShadow: `
-              0 0 8px rgba(239, 68, 68, 0.4),
-              0 0 16px rgba(239, 68, 68, 0.2),
+              0 0 8px rgba(255, 255, 255, 0.4),
+              0 0 16px rgba(255, 255, 255, 0.2),
               2px 2px 4px rgba(0, 0, 0, 0.8)
             `,
           }}
@@ -134,7 +134,7 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
         </motion.div>
 
         <motion.div
-          className="fixed left-0 bottom-0 h-1 bg-red-500 z-[1000] origin-left"
+          className="fixed left-0 bottom-0 h-1 bg-white z-[1000] origin-left"
           style={{ width: progressWidth }}
         />
       </div>
