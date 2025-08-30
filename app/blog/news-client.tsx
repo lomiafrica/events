@@ -24,15 +24,14 @@ export default function NewsContent({ posts }: NewsContentProps) {
       {/* Header */}
       <div className="container mx-auto px-4 py-0 max-w-7xl">
         {/* Hero Section */}
-        <div className="relative pt-24 md:pt-32 pb-20">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight font-bold bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
+        <div className="relative pt-24 md:pt-32 pb-16">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6">
               {t(currentLanguage, "newsPage.title")}
             </h1>
-            <div className="text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            <div className="text-muted-foreground text-lg mt-4 mb-8 max-w-3xl mx-auto leading-relaxed">
               {t(currentLanguage, "newsPage.description")}
             </div>
-            <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto rounded-full"></div>
           </div>
         </div>
 
@@ -61,7 +60,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/50" />
                       <div className="absolute top-6 left-6">
-                        <span className="px-4 py-2 text-xs font-semibold bg-primary text-primary-foreground rounded-full shadow-lg">
+                        <span className="px-4 py-2 text-xs font-semibold bg-blue-900 text-blue-100 rounded-sm shadow-lg">
                           Featured
                         </span>
                       </div>
@@ -117,7 +116,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 text-xs bg-primary/90 text-primary-foreground rounded-full shadow-md">
+                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-sm shadow-md">
                           News
                         </span>
                       </div>
@@ -193,7 +192,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                         <span className="text-sm text-muted-foreground font-medium">
                           {format(new Date(post.publishedAt), "MMM d, yyyy")}
                         </span>
-                        <span className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-full font-medium">
+                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-sm font-medium">
                           News
                         </span>
                       </div>

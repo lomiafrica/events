@@ -281,7 +281,7 @@ export default function PurchaseFormModal({
         console.error("Supabase function error:", functionError);
         setError(
           functionError.message ||
-            t(currentLanguage, "purchaseModal.errors.functionError"),
+          t(currentLanguage, "purchaseModal.errors.functionError"),
         );
         setIsLoading(false);
         return;
@@ -294,7 +294,7 @@ export default function PurchaseFormModal({
         console.error("Lomi checkout URL not found in response:", data);
         setError(
           data.error ||
-            t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
+          t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
         );
       }
     } catch (e: unknown) {
@@ -525,11 +525,11 @@ export default function PurchaseFormModal({
               </div>
             </div>
 
-            <DialogFooter className="flex justify-center pt-6 px-0">
+            <DialogFooter className="flex justify-center px-0 -mt-4">
               <Button
                 type="submit"
                 disabled={isLoading || !isFormValid()}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-sm text-lg font-semibold w-full h-14 touch-manipulation active:scale-[0.98] transition-all shadow-lg hover:shadow-xl disabled:shadow-none"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white rounded-sm text-lg font-semibold w-full h-14 touch-manipulation active:scale-[0.98] transition-all shadow-lg hover:shadow-xl disabled:shadow-none"
                 style={{ fontSize: "18px", fontWeight: "600" }}
               >
                 {isLoading ? (
