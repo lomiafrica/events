@@ -7,9 +7,10 @@ CREATE OR REPLACE FUNCTION update_expired_pending_payments()
 RETURNS TABLE(
   affected_rows INTEGER,
   updated_purchase_ids TEXT[]
-) 
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   updated_ids TEXT[] := '{}';
@@ -57,13 +58,15 @@ Called automatically by scheduled job every 2 hours.
 Returns count of affected rows and list of updated purchase IDs.';
 
 -- Optional: Create a view to monitor payment statuses
-CREATE OR REPLACE VIEW payment_status_summary AS
-SELECT 
+CREATE OR REPLACE VIEW payment_status_summary
+WITH (security_invoker=on)
+AS
+SELECT
   status,
   COUNT(*) as count,
   MIN(created_at) as oldest_payment,
   MAX(created_at) as newest_payment
-FROM purchases 
+FROM purchases
 GROUP BY status
 ORDER BY count DESC;
 
