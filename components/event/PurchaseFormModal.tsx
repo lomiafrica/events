@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Ticket, Plus, Minus } from "lucide-react";
+import { Loader2, Ticket, Plus, Minus, X } from "lucide-react";
 import { t } from "@/lib/i18n/translations";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -333,12 +333,21 @@ export default function PurchaseFormModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto rounded-sm mx-4 sm:mx-auto p-4 sm:p-6">
-          <DialogHeader className="space-y-3 pb-4">
-            <DialogTitle className="text-xl font-semibold text-center sm:text-left">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-[425px] max-h-[65vh] sm:max-h-[90vh] overflow-y-auto scrollbar-hide rounded-sm mx-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3 pb-4 relative">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onClose}
+              className="absolute top-0 right-0 h-8 w-8 p-0 hover:bg-muted/50 rounded-full"
+              aria-label="Close modal"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <DialogTitle className="text-xl font-semibold text-left pr-8">
               {t(currentLanguage, "purchaseModal.title")}
             </DialogTitle>
-            <DialogDescription className="text-center sm:text-left text-sm leading-relaxed">
+            <DialogDescription className="text-left text-sm leading-relaxed">
               {t(currentLanguage, "purchaseModal.description")}
             </DialogDescription>
           </DialogHeader>
@@ -350,13 +359,9 @@ export default function PurchaseFormModal({
                 <h4 className="font-semibold text-base mb-2 text-center sm:text-left">
                   {item.name}
                 </h4>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <p className="text-lg font-bold text-primary">
-                    {formatPrice(item.price)}
-                    {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
-                  </p>
+                <div className="flex justify-center sm:justify-start">
                   {item.isBundle && (
-                    <span className="text-xs bg-teal-900/70 text-teal-300 px-3 py-1.5 rounded-sm font-medium border border-teal-600/50 text-center">
+                    <span className="text-xs bg-teal-900/70 text-teal-300 px-3 py-1.5 rounded-sm font-medium border border-teal-600/50">
                       {t(currentLanguage, "purchaseModal.includesTickets", {
                         count: item.ticketsIncluded || 1,
                       })}
@@ -478,15 +483,6 @@ export default function PurchaseFormModal({
                   >
                     <Plus className="h-6 w-6" />
                   </Button>
-                </div>
-                {/* Quantity feedback */}
-                <div className="text-xs text-center text-muted-foreground">
-                  {quantity > 1 && (
-                    <span>
-                      {quantity} × {formatPrice(item.price)} ={" "}
-                      {formatPrice(totalPrice)}
-                    </span>
-                  )}
                 </div>
               </div>
 

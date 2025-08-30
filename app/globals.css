@@ -117,6 +117,33 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Hide scrollbars globally */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
+  /* Hide scrollbars for all elements globally */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  html::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  body::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
   /* Remove focus outlines/borders for keyboard navigation */
   button:focus,
   a:focus,
@@ -126,10 +153,6 @@
   [tabindex]:focus {
     outline: none !important;
     box-shadow: none !important;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }
 
