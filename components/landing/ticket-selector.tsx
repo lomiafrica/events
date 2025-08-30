@@ -165,7 +165,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
                     <ul className="text-sm mt-2 space-y-1">
                       {bundle.includes.map((item, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-md bg-primary" />
+                          <div className="h-1.5 w-1.5 rounded-sm bg-primary" />
                           {item}
                         </li>
                       ))}
@@ -223,7 +223,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
       <Separator className="my-6" />
 
       {/* Order Summary */}
-      <div className="bg-muted p-4 rounded-md">
+      <div className="bg-muted p-4 rounded-sm">
         <h3 className="font-semibold mb-4">Summary</h3>
 
         {hasSelections() ? (
@@ -267,7 +267,7 @@ export default function TicketSelector({ event }: { event: EventProps }) {
               <span>{formatPrice(calculateTotal())} FCFA</span>
             </div>
 
-            <Button className="w-full rounded-md" size="lg">
+            <Button className="w-full rounded-sm" size="lg">
               <ShoppingCart className="mr-2 h-5 w-5" />
               Proceed to Checkout
             </Button>

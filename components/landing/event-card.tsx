@@ -24,7 +24,7 @@ type EventProps = {
 export default function EventCard({ event }: { event: EventProps }) {
   return (
     <motion.div
-      className="group relative rounded-md overflow-hidden shadow-md h-[400px]"
+      className="group relative rounded-sm overflow-hidden shadow-md h-[400px]"
       whileHover={{ y: -5 }}
     >
       <Link href={`/events/${event.slug}`} className="absolute inset-0 z-10">

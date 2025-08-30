@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ImageScroller from "@/components/ui/ImageScroller";
+import ParallaxGallery from "@/components/event/parallax";
 import { getEventsForScroller } from "@/lib/sanity/queries";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
@@ -39,7 +39,7 @@ export default async function EventsPage({
 }) {
   const params = await paramsPromise;
   const currentLanguage = getPageLocale(params);
-  const events: EventImageData[] = await getEventsForScroller(10);
+  const events: EventImageData[] = await getEventsForScroller();
 
   if (!events || events.length === 0) {
     return (
@@ -60,9 +60,8 @@ export default async function EventsPage({
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
-        <ImageScroller images={events} />
+        <ParallaxGallery events={events} />
       </main>
-      <Footer />
     </div>
   );
 }

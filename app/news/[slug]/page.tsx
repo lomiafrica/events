@@ -3,12 +3,11 @@ import { notFound } from "next/navigation";
 import { PortableText } from "@portabletext/react";
 import { CalendarDays, User, Tag } from "lucide-react";
 
-import { getBlogPostBySlug } from "@/lib/sanity/queries";
+import { getNewsPostBySlug } from "@/lib/queries/news";
+import type { NewsPost } from "@/lib/types/news";
 import { Separator } from "@/components/ui/separator";
 
-interface Category {
-  title: string;
-}
+// Category type is now handled by NewsPost type
 
 export async function generateMetadata({
   params,
@@ -16,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post: NewsPost | null = await getNewsPostBySlug(slug);
 
   if (!post) {
     return {
@@ -30,13 +29,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPostPage({
+export default async function NewsPostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post: NewsPost | null = await getNewsPostBySlug(slug);
 
   if (!post) {
     notFound();
@@ -65,16 +64,16 @@ export default async function BlogPostPage({
           <div className="flex items-center gap-2">
             <Tag className="h-4 w-4" />
             <span>
-              {post.categories.map((cat: Category) => cat.title).join(", ")}
+              {post.categories?.map((cat) => cat.title).join(", ") || ""}
             </span>
           </div>
         )}
       </div>
 
       {post.mainImage && (
-        <div className="relative aspect-video mb-8 rounded-md overflow-hidden">
+        <div className="relative aspect-video mb-8 rounded-sm overflow-hidden">
           <Image
-            src={post.mainImage.url || "/placeholder.webp"}
+            src={post.mainImage?.asset?.url || "/placeholder.webp"}
             alt={post.title}
             fill
             priority
@@ -89,17 +88,17 @@ export default async function BlogPostPage({
 
       <Separator className="my-8" />
 
-      <div className="bg-muted p-6 rounded-md">
+      <div className="bg-muted p-6 rounded-sm">
         <h2 className="text-xl font-bold mb-4">About the Author</h2>
         {post.author ? (
           <div className="flex items-center gap-4">
             {post.author.image && (
               <Image
-                src={post.author.image.url || "/placeholder.webp"}
+                src={post.author.image?.asset?.url || "/placeholder.webp"}
                 alt={post.author.name}
                 width={60}
                 height={60}
-                className="rounded-md"
+                className="rounded-sm"
               />
             )}
             <div>

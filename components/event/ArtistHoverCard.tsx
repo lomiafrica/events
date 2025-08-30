@@ -47,7 +47,7 @@ export default function ArtistHoverCard({ artist }: ArtistHoverCardProps) {
         {artist.name}
         {isHovered && artist && (
           <div
-            className="absolute z-20 bottom-full mb-2 left-full ml-4 w-64 max-w-xs bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden transition-opacity duration-200 ease-in-out"
+            className="absolute z-20 bottom-full mb-2 left-full ml-4 w-64 max-w-xs bg-slate-800 border border-slate-700 rounded-sm shadow-xl overflow-hidden transition-opacity duration-200 ease-in-out"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >

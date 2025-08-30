@@ -17,6 +17,7 @@ import { t } from "@/lib/i18n/translations";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { SupabaseClient } from "@supabase/supabase-js";
 import PhoneNumberInput from "@/components/ui/phone-number-input";
+import DjaouliCodeDialog from "@/components/landing/djaouli-code";
 
 // Helper function for formatting price (matching event page)
 const formatPrice = (price: number): string => {
@@ -90,14 +91,28 @@ export default function PurchaseFormModal({
   const [userPhone, setUserPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDjaouliCode, setShowDjaouliCode] = useState(false);
 
   useEffect(() => {
     if (item) {
       setQuantity(1); // Reset quantity when item changes
       setQuantityDisplay("1"); // Reset display value too
       setError(null); // Reset error
+
+      // Only show djaouli code dialog if user hasn't seen it before
+      const hasSeenDjaouliCode =
+        localStorage.getItem("djaouli-code-shown") === "true";
+      if (!hasSeenDjaouliCode) {
+        setShowDjaouliCode(true); // Show djaouli code dialog only first time
+      }
     }
   }, [item]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShowDjaouliCode(false); // Hide djaouli code dialog when modal closes
+    }
+  }, [isOpen]);
 
   if (!item) return null;
 
@@ -316,183 +331,191 @@ export default function PurchaseFormModal({
     : quantity;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-sm">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">
-            {t(currentLanguage, "purchaseModal.title")}
-          </DialogTitle>
-          <DialogDescription>
-            {t(currentLanguage, "purchaseModal.description")}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px] rounded-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">
+              {t(currentLanguage, "purchaseModal.title")}
+            </DialogTitle>
+            <DialogDescription>
+              {t(currentLanguage, "purchaseModal.description")}
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            {/* Item Details */}
-            <div className="bg-muted/50 p-3 rounded-sm">
-              <h4 className="font-medium text-sm mb-1">{item.name}</h4>
-              <p className="text-xs text-muted-foreground">
-                {formatPrice(item.price)}
-                {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
-                {item.isBundle && (
-                  <span className="ml-2 text-xs bg-teal-900/70 text-teal-300 px-2.5 py-1 rounded-full font-medium border border-teal-600/50">
-                    {t(currentLanguage, "purchaseModal.includesTickets", {
-                      count: item.ticketsIncluded || 1,
-                    })}
-                  </span>
-                )}
-              </p>
-            </div>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              {/* Item Details */}
+              <div className="bg-muted/50 p-3 rounded-sm">
+                <h4 className="font-medium text-sm mb-1">{item.name}</h4>
+                <p className="text-xs text-muted-foreground">
+                  {formatPrice(item.price)}
+                  {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
+                  {item.isBundle && (
+                    <span className="ml-2 text-xs bg-teal-900/70 text-teal-300 px-2.5 py-1 rounded-full font-medium border border-teal-600/50">
+                      {t(currentLanguage, "purchaseModal.includesTickets", {
+                        count: item.ticketsIncluded || 1,
+                      })}
+                    </span>
+                  )}
+                </p>
+              </div>
 
-            {/* Name Field */}
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm font-medium block">
-                {t(currentLanguage, "purchaseModal.labels.name")}
-              </Label>
-              <Input
-                id="name"
-                name="userName"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="rounded-sm h-10 text-base w-full"
-                placeholder={t(
-                  currentLanguage,
-                  "purchaseModal.placeholders.name",
-                )}
-                required
-              />
-            </div>
-
-            {/* Email Field */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium block">
-                {t(currentLanguage, "purchaseModal.labels.email")}
-              </Label>
-              <Input
-                id="email"
-                name="userEmail"
-                type="email"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                className="rounded-sm h-10 text-base w-full"
-                placeholder={t(
-                  currentLanguage,
-                  "purchaseModal.placeholders.email",
-                )}
-                required
-              />
-            </div>
-
-            {/* Phone Field */}
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium block">
-                {t(currentLanguage, "purchaseModal.labels.phone")}
-              </Label>
-              <PhoneNumberInput
-                value={userPhone}
-                onChange={(value) => setUserPhone(value || "")}
-                placeholder={t(
-                  currentLanguage,
-                  "purchaseModal.placeholders.phone",
-                )}
-              />
-            </div>
-
-            {/* Quantity Field */}
-            <div className="space-y-1.5">
-              <Label htmlFor="quantity" className="text-sm font-medium block">
-                {t(currentLanguage, "purchaseModal.labels.quantity")}
-              </Label>
-              <div className="flex items-center space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleQuantityDecrement}
-                  disabled={quantity <= 1}
-                  className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
+              {/* Name Field */}
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-sm font-medium block">
+                  {t(currentLanguage, "purchaseModal.labels.name")}
+                </Label>
                 <Input
-                  id="quantity"
-                  name="quantity"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={quantityDisplay}
-                  onChange={handleQuantityChange}
-                  onBlur={handleQuantityBlur}
-                  className="rounded-sm h-10 text-base text-center flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  id="name"
+                  name="userName"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="rounded-sm h-10 text-base w-full"
+                  placeholder={t(
+                    currentLanguage,
+                    "purchaseModal.placeholders.name",
+                  )}
                   required
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleQuantityIncrement}
-                  disabled={quantity >= maxQuantity}
-                  className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
               </div>
-            </div>
 
-            {/* Error Display */}
-            {error && (
-              <div className="text-sm text-red-400 text-center px-3 py-2 bg-red-900/20 rounded-sm border border-red-700/50 leading-relaxed">
-                {error}
+              {/* Email Field */}
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-medium block">
+                  {t(currentLanguage, "purchaseModal.labels.email")}
+                </Label>
+                <Input
+                  id="email"
+                  name="userEmail"
+                  type="email"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="rounded-sm h-10 text-base w-full"
+                  placeholder={t(
+                    currentLanguage,
+                    "purchaseModal.placeholders.email",
+                  )}
+                  required
+                />
               </div>
-            )}
 
-            {/* Total Price */}
-            <div className="pt-3 border-t border-border">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
-                  {t(currentLanguage, "purchaseModal.totalPrice")}:
-                </span>
-                <span className="text-primary font-semibold text-lg whitespace-nowrap">
-                  {formatPrice(totalPrice)}
-                  {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
-                </span>
+              {/* Phone Field */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium block">
+                  {t(currentLanguage, "purchaseModal.labels.phone")}
+                </Label>
+                <PhoneNumberInput
+                  value={userPhone}
+                  onChange={(value) => setUserPhone(value || "")}
+                  placeholder={t(
+                    currentLanguage,
+                    "purchaseModal.placeholders.phone",
+                  )}
+                />
               </div>
-              {item.isBundle && (
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-muted-foreground">
-                    {t(currentLanguage, "purchaseModal.ticketsGenerated")}:
-                  </span>
-                  <span className="text-xs font-medium">
-                    {actualTicketCount}{" "}
-                    {actualTicketCount === 1 ? "ticket" : "tickets"}
-                  </span>
+
+              {/* Quantity Field */}
+              <div className="space-y-1.5">
+                <Label htmlFor="quantity" className="text-sm font-medium block">
+                  {t(currentLanguage, "purchaseModal.labels.quantity")}
+                </Label>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleQuantityDecrement}
+                    disabled={quantity <= 1}
+                    className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    id="quantity"
+                    name="quantity"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={quantityDisplay}
+                    onChange={handleQuantityChange}
+                    onBlur={handleQuantityBlur}
+                    className="rounded-sm h-10 text-base text-center flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleQuantityIncrement}
+                    disabled={quantity >= maxQuantity}
+                    className="rounded-sm h-10 w-10 p-0 flex-shrink-0"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <div className="text-sm text-red-400 text-center px-3 py-2 bg-red-900/20 rounded-sm border border-red-700/50 leading-relaxed">
+                  {error}
                 </div>
               )}
-            </div>
-          </div>
 
-          <DialogFooter className="flex justify-center pt-4">
-            <Button
-              type="submit"
-              disabled={isLoading || !isFormValid()}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-sm text-base w-full font-medium"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t(currentLanguage, "purchaseModal.buttons.processing")}
-                </>
-              ) : (
-                <>
-                  <Ticket className="mr-2 h-4 w-4" />
-                  {t(currentLanguage, "purchaseModal.buttons.pay")}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+              {/* Total Price */}
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t(currentLanguage, "purchaseModal.totalPrice")}:
+                  </span>
+                  <span className="text-primary font-semibold text-lg whitespace-nowrap">
+                    {formatPrice(totalPrice)}
+                    {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
+                  </span>
+                </div>
+                {item.isBundle && (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-muted-foreground">
+                      {t(currentLanguage, "purchaseModal.ticketsGenerated")}:
+                    </span>
+                    <span className="text-xs font-medium">
+                      {actualTicketCount}{" "}
+                      {actualTicketCount === 1 ? "ticket" : "tickets"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="flex justify-center pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading || !isFormValid()}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-sm text-base w-full font-medium"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t(currentLanguage, "purchaseModal.buttons.processing")}
+                  </>
+                ) : (
+                  <>
+                    <Ticket className="mr-2 h-4 w-4" />
+                    {t(currentLanguage, "purchaseModal.buttons.pay")}
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Djaouli Code Dialog - shows as disclaimer when purchase modal opens */}
+      <DjaouliCodeDialog
+        isOpen={showDjaouliCode}
+        onClose={() => setShowDjaouliCode(false)}
+      />
+    </>
   );
 }

@@ -43,7 +43,7 @@ export function EventShareButton({
   const encodedTitle = encodeURIComponent(eventTitle);
 
   const baseButtonClasses =
-    "flex items-center justify-start gap-2 text-left h-12 rounded-[5px] text-white transition-colors duration-200";
+    "flex items-center justify-start gap-2 text-left h-12 rounded-sm text-white transition-colors duration-200";
 
   // Define handleCopy function BEFORE shareOptions that uses it
   const handleCopy = () => {
@@ -120,7 +120,7 @@ export function EventShareButton({
 
       {/* The Modal Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[425px] p-4 rounded-[5px] border border-border/40 bg-background backdrop-blur-sm">
+        <DialogContent className="sm:max-w-[425px] p-4 rounded-sm border border-border/40 bg-background backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <Share2 className="h-5 w-5 mr-2" />{" "}
@@ -174,7 +174,7 @@ export function EventShareButton({
                 id="link"
                 value={shareUrl}
                 readOnly
-                className="flex-1 rounded-[5px]"
+                className="flex-1 rounded-sm"
                 placeholder={t(currentLanguage, "eventShare.inputPlaceholder")}
               />
               <Button
@@ -182,7 +182,7 @@ export function EventShareButton({
                 size="icon"
                 variant="outline"
                 onClick={handleCopy}
-                className="rounded-[5px] hover:bg-accent/30"
+                className="rounded-sm hover:bg-accent/30"
                 disabled={!shareUrl}
               >
                 {copied ? (

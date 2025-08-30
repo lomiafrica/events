@@ -49,6 +49,7 @@ export async function getEventBySlug(slug: string, locale: string) {
       _id,
       title,
       subtitle,
+      number,
       slug,
       date,
       "dateFormatted": dateTime(date),
@@ -257,6 +258,7 @@ interface EventScrollerData {
   date?: string; // Matches the optional date field in the query
   description?: string; // Add description field
   ticketsAvailable?: boolean; // <-- Add this field
+  number?: number; // <-- Add number field
 }
 
 // New query for ImageScroller
@@ -271,7 +273,8 @@ export const getEventsForScroller = async (
     "featuredImage": flyer.asset->url, // Alias flyer URL as featuredImage
     date, // Keep date for potential use in scroller UI
     description, // Fetch the description
-    ticketsAvailable // <-- Add this field to the query
+    ticketsAvailable, // <-- Add this field to the query
+    number // <-- Add number field to the query
     // Add other fields if ImageScroller is adapted to show them
   }`;
   // Use the specific interface in the fetch call as well for better type safety

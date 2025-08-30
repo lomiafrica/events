@@ -24,7 +24,7 @@ export default function ArtistCard({
   currentLanguage,
 }: ArtistCardProps) {
   const cardBaseClasses =
-    "flex flex-col w-88 max-w-xs bg-grey-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden";
+    "flex flex-col w-88 max-w-xs bg-grey-900 border border-slate-700 rounded-sm shadow-xl overflow-hidden";
   const artistDisplayName = artist.name || "Artist";
 
   return (

@@ -47,6 +47,14 @@ export default {
       group: 'details',
     },
     {
+      name: 'number',
+      title: 'Event Number',
+      type: 'number',
+      group: 'details',
+      description: 'Custom number for this event (used in parallax display)',
+      validation: (Rule: Rule) => Rule.integer().min(1),
+    },
+    {
       name: 'slug',
       title: 'Slug',
       type: 'slug',

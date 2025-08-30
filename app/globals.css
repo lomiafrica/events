@@ -116,6 +116,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  /* Remove focus outlines/borders for keyboard navigation */
+  button:focus,
+  a:focus,
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [tabindex]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   body {
     @apply bg-background text-foreground;
   }

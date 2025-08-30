@@ -154,6 +154,24 @@
     "title": "Events",
     "noEvents": "No upcoming events found."
   },
+  "newsPage": {
+    "metadata": {
+      "title": "News | Djaouli Entertainment",
+      "description": "Latest news, event recaps, and entertainment insights from Djaouli Entertainment"
+    },
+    "title": "News",
+    "description": "Stay updated with the latest news, event recaps, and insights from Djaouli Entertainment. Discover stories from the vibrant music scene of Abidjan and beyond.",
+    "moreNews": "MORE NEWS",
+    "readMore": "Read more →"
+  },
+  "galleryPage": {
+    "title": "Gallery",
+    "description": "Explore our archives. From electrifying performances to behind-the-scenes moments, discover the energy and passion that defines our community.",
+    "highlights": "Highlights",
+    "moreShots": "More shots",
+    "gallery": "Gallery",
+    "noImages": "No images found. Check API route logs."
+  },
   "eventSlugPage": {
     "metadata": {
       "notFoundTitle": "Event Not Found"
@@ -164,7 +182,7 @@
       "inactive": "Currently Inactive",
       "soldOut": "Sold Out",
       "salesStart": "Sales start {startDate}",
-      "salesEnded": "Sales have ended",
+      "salesEnded": "Sold Out",
       "unavailable": "Unavailable",
       "misconfigured": "Ticketing system error."
     },

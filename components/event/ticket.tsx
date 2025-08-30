@@ -119,7 +119,7 @@ export default function EventTicket({
   const decorativeElements = [
     // Element 0: Headphones with stars
     <div key="headphones" className="flex items-center justify-center relative">
-      <div className="bg-gray-800 p-2 rounded-md">
+      <div className="bg-gray-800 p-2 rounded-sm">
         <Headphones className="h-10 w-10 text-blue-400" />
       </div>
       <Star className="absolute -top-3 -right-3 h-5 w-5 text-yellow-400" />
@@ -169,7 +169,7 @@ export default function EventTicket({
   return (
     <div className="w-full max-w-sm">
       {/* Main ticket container - vertical layout for mobile */}
-      <div className="bg-gradient-to-b from-black via-gray-950 to-black rounded-md overflow-hidden shadow-2xl border border-gray-900 relative">
+      <div className="bg-gradient-to-b from-black via-gray-950 to-black rounded-sm overflow-hidden shadow-2xl border border-gray-900 relative">
         {/* Fun pattern overlay */}
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"

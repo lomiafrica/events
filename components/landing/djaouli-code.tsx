@@ -1,9 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
 import { cn } from "@/lib/actions/utils";
 import Image from "next/image";
+import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const codeItemsData = [
   {
@@ -63,12 +71,47 @@ const codeItemsData = [
   },
 ];
 
-export default function OurCodeSection() {
+interface DjaouliCodeDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function DjaouliCodeDialog({
+  isOpen,
+  onClose,
+}: DjaouliCodeDialogProps) {
   const { currentLanguage } = useTranslation();
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasBeenShown, setHasBeenShown] = useState(false);
+
+  useEffect(() => {
+    // Check if dialog has been shown before
+    const hasShown = localStorage.getItem("djaouli-code-shown") === "true";
+    setHasBeenShown(hasShown);
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleClose = () => {
+    // Mark as shown in localStorage
+    localStorage.setItem("djaouli-code-shown", "true");
+    setHasBeenShown(true);
+    onClose();
+  };
+
+  // Don't show if already shown
+  if (hasBeenShown && !isOpen) {
+    return null;
+  }
 
   const itemsToRender = [];
   const totalItems = codeItemsData.length;
-
   for (let i = 0; i < totalItems; i++) {
     itemsToRender.push(
       <CodeItem
@@ -77,35 +120,78 @@ export default function OurCodeSection() {
         titleKey={codeItemsData[i].titleKey}
         descriptionKey={codeItemsData[i].descriptionKey}
         lang={currentLanguage}
+        isMobile={isMobile}
       />,
     );
-
-    if (totalItems === 11 && i === 9) {
-      itemsToRender.push(
-        <div key={`placeholder-${i}`} className="hidden lg:block"></div>,
-      );
-    }
   }
 
   return (
-    <section className="relative bg-gradient-to-b from-sidebar to-background text-white py-8 md:py-12 lg:py-16">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex justify-center mb-8 md:mb-12">
-          <Image
-            src="/code.webp"
-            alt="Djaouli Code"
-            width={300}
-            height={40}
-            className="object-contain"
-          />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent
+        className={cn(
+          "overflow-y-auto bg-gradient-to-b from-sidebar to-background text-white border-slate-700",
+          isMobile ? "max-w-[90vw] max-h-[80vh] mx-4" : "max-w-lg max-h-[70vh]",
+        )}
+        style={{
+          scrollbarWidth: "none", // Firefox
+          msOverflowStyle: "none", // IE/Edge
+        }}
+      >
+        <DialogHeader className="relative">
+          <DialogTitle className="text-center">
+            <Image
+              src="/code.webp"
+              alt="Djaouli Code"
+              width={isMobile ? 120 : 140}
+              height={20}
+              className="object-contain mx-auto"
+            />
+          </DialogTitle>
+          <button
+            onClick={handleClose}
+            className={cn(
+              "absolute rounded-full transition-colors flex items-center justify-center",
+              isMobile
+                ? "right-2 top-2 w-8 h-8 bg-white/10 hover:bg-white/20"
+                : "right-4 top-4 p-1 hover:bg-white/10",
+            )}
+            aria-label="Close"
+          >
+            <X
+              className={cn(
+                "text-white/70 hover:text-white",
+                isMobile ? "h-5 w-5" : "h-4 w-4",
+              )}
+            />
+          </button>
+        </DialogHeader>
+        <div className={cn("pb-2", isMobile ? "px-2" : "px-3")}>
+          <div className="grid gap-3 grid-cols-1">{itemsToRender}</div>
         </div>
-        <div className="py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {itemsToRender}
-          </div>
+
+        {/* Gotcha! Button */}
+        <div
+          className={cn(
+            "flex justify-center pt-2 pb-4",
+            isMobile ? "px-2" : "px-3",
+          )}
+        >
+          <button
+            onClick={handleClose}
+            className={cn(
+              "bg-blue-600 hover:bg-blue-700",
+              "text-white font-bold rounded-sm transition-all duration-200",
+              "shadow-lg hover:shadow-xl transform hover:scale-105",
+              isMobile
+                ? "px-6 py-3 text-sm min-w-[120px]"
+                : "px-8 py-3 text-base min-w-[140px]",
+            )}
+          >
+            Gotcha!
+          </button>
         </div>
-      </div>
-    </section>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -114,9 +200,16 @@ interface CodeItemProps {
   titleKey: string;
   descriptionKey: string;
   lang: string;
+  isMobile: boolean;
 }
 
-function CodeItem({ number, titleKey, descriptionKey, lang }: CodeItemProps) {
+function CodeItem({
+  number,
+  titleKey,
+  descriptionKey,
+  lang,
+  isMobile,
+}: CodeItemProps) {
   return (
     <div
       className={cn(
@@ -137,18 +230,39 @@ function CodeItem({ number, titleKey, descriptionKey, lang }: CodeItemProps) {
           className={cn(
             "size-full bg-gradient-to-br",
             "from-background/95 via-background/70 to-background/40",
-            "rounded-sm p-6 md:p-4 flex flex-col flex-grow",
+            "rounded-sm flex flex-col flex-grow",
+            isMobile ? "p-3" : "p-4",
           )}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-slate-400 font-semibold text-lg md:text-lg">
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              isMobile ? "mb-1" : "mb-1.5",
+            )}
+          >
+            <h3
+              className={cn(
+                "text-slate-400 font-semibold",
+                isMobile ? "text-xs" : "text-sm",
+              )}
+            >
               {t(lang, "djaouliCode.prefix")} {number}.
             </h3>
           </div>
-          <div className="text-gray-100 font-bold text-base md:text-base uppercase leading-tight mb-2">
+          <div
+            className={cn(
+              "text-gray-100 font-bold uppercase leading-tight",
+              isMobile ? "text-sm mb-1" : "text-base mb-1.5",
+            )}
+          >
             {t(lang, titleKey)}
           </div>
-          <p className="text-gray-400 italic text-sm md:text-sm leading-relaxed flex-grow">
+          <p
+            className={cn(
+              "text-gray-400 italic leading-relaxed flex-grow",
+              isMobile ? "text-xs" : "text-sm",
+            )}
+          >
             {t(lang, descriptionKey)}
           </p>
         </div>

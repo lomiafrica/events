@@ -596,7 +596,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     <div className="text-center space-y-3">
                       {/* Prominent Ticket Type Badge */}
                       <div className="flex justify-center">
-                        <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg px-4 py-2 flex items-center gap-2">
+                        <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-sm px-4 py-2 flex items-center gap-2">
                           <Tag className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           <span className="text-lg font-bold text-blue-800 dark:text-blue-200">
                             {ticketData.ticket_name}
@@ -711,7 +711,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Ticket Type Details */}
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border">
                   <div className="flex items-center gap-2 mb-2">
                     <Tag className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
