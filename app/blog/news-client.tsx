@@ -44,7 +44,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                 <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-2xl hover:shadow-3xl transition-all duration-700 bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/20 transform hover:-translate-y-2">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     {/* Image Section */}
-                    <div className="relative h-80 lg:h-96 overflow-hidden rounded-l-2xl">
+                    <div className="relative h-80 lg:h-96 overflow-hidden rounded-l-sm">
                       <Image
                         src={
                           featuredPosts[0].mainImage?.asset?.url ||
@@ -106,7 +106,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
               {featuredPosts.slice(1, 4).map((post: NewsPost) => (
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
                   <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 transform hover:-translate-y-1">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-sm">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
                         alt={post.mainImage?.alt || post.title}
@@ -174,7 +174,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
                   <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-md hover:shadow-lg transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/20 h-full flex flex-col transform hover:-translate-y-1">
                     {/* Image */}
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-sm">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
                         alt={post.mainImage?.alt || post.title}

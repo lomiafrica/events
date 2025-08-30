@@ -279,7 +279,7 @@ export const portableTextRenderers: Partial<PortableTextReactComponents> = {
       <h4 className="text-lg md:text-xl font-semibold mt-6 mb-2">{children}</h4>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-primary/80 pl-5 italic text-zinc-600 dark:text-zinc-300 my-6 py-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-md shadow">
+      <blockquote className="border-l-4 border-primary/80 pl-5 italic text-zinc-600 dark:text-zinc-300 my-6 py-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-sm shadow">
         {children}
       </blockquote>
     ),

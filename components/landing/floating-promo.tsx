@@ -95,7 +95,7 @@ export default function FloatingPromo({
           ) : (
             <button
               onClick={onButtonClick}
-              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-md flex items-center justify-center"
+              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm flex items-center justify-center"
             >
               <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
               {buttonText}
