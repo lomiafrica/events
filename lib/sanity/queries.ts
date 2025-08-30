@@ -258,7 +258,7 @@ interface EventScrollerData {
   date?: string; // Matches the optional date field in the query
   description?: string; // Add description field
   ticketsAvailable?: boolean; // <-- Add this field
-  number?: number; // <-- Add number field
+  number?: string; // <-- Add number field (now string to support alphanumeric)
 }
 
 // New query for ImageScroller

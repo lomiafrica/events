@@ -1,7 +1,7 @@
 import {Rule} from 'sanity'
 
 export default {
-  name: 'post',
+  name: 'news',
   title: 'News Post',
   type: 'document',
   fields: [

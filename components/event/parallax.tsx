@@ -11,7 +11,7 @@ interface EventParallaxData {
   slug: string;
   featuredImage?: string;
   promoVideoUrl?: string;
-  number?: number;
+  number?: string;
   date?: string;
   description?: string;
   ticketsAvailable?: boolean;
@@ -59,7 +59,7 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
     if (displayEvents.length === 0) return "#001";
     const event = displayEvents[currentEventIndex] || displayEvents[0];
     if (event.number) {
-      return `#${event.number.toString().padStart(3, "0")}`;
+      return `#${event.number.padStart(3, "0")}`;
     }
     return `#${String(displayEvents.length - currentEventIndex).padStart(3, "0")}`;
   };
@@ -107,7 +107,7 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
 
         {/* Single animated number positioned on the right side */}
         <motion.div
-          className="fixed top-1/2 right-4 md:right-16 md:top-1/2 top-[75%] md:-translate-x-20 -translate-x-16 transform -translate-y-1/2 pointer-events-none z-30"
+          className="fixed top-1/2 right-4 md:right-16 md:top-1/2 md:-translate-x-20 -translate-x-16 transform -translate-y-1/2 pointer-events-none z-30"
           style={{
             fontSize: "clamp(2.5rem, 12vw, 4.5rem)",
             fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',

@@ -5,7 +5,7 @@ import type { NewsPost, NewsCategory, NewsAuthor } from "../types/news";
 export async function getAllNewsPosts(): Promise<NewsPost[]> {
   try {
     console.log("Starting Sanity query for all news posts");
-    const query = `*[_type == "post"] | order(publishedAt desc) {
+    const query = `*[_type == "news"] | order(publishedAt desc) {
       _id,
       title,
       title_fr,
@@ -63,7 +63,7 @@ export async function getNewsPostBySlug(
   slug: string,
 ): Promise<NewsPost | null> {
   try {
-    const query = `*[_type == "post" && slug.current == $slug][0] {
+    const query = `*[_type == "news" && slug.current == $slug][0] {
       _id,
       title,
       title_fr,
@@ -123,7 +123,7 @@ export async function getNewsPostBySlug(
 // Get featured news posts (most recent 3)
 export async function getFeaturedNewsPosts(limit = 3): Promise<NewsPost[]> {
   try {
-    const query = `*[_type == "post"] | order(publishedAt desc)[0...${limit}] {
+    const query = `*[_type == "news"] | order(publishedAt desc)[0...${limit}] {
       _id,
       title,
       title_fr,
@@ -162,7 +162,7 @@ export async function getFeaturedNewsPosts(limit = 3): Promise<NewsPost[]> {
 // Get news posts by tag
 export async function getNewsPostsByTag(tagValue: string): Promise<NewsPost[]> {
   try {
-    const query = `*[_type == "post" && "${tagValue}" in tags] | order(publishedAt desc) {
+    const query = `*[_type == "news" && "${tagValue}" in tags] | order(publishedAt desc) {
       _id,
       title,
       title_fr,

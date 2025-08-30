@@ -130,17 +130,19 @@ export default function GalleryClientComponent() {
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-0 max-w-7xl">
         {/* Gallery Header Section */}
-        <div className="relative pt-24 md:pt-32 -mb-12">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6">
-            {t(currentLanguage, "galleryPage.title")}
-          </h1>
-          <div className="text-muted-foreground text-sm mt-1 mb-1 max-w-2xl">
-            {t(currentLanguage, "galleryPage.description")}
+        <div className="relative pt-24 md:pt-32 pb-16">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6">
+              {t(currentLanguage, "galleryPage.title")}
+            </h1>
+            <div className="text-muted-foreground text-lg mt-4 mb-8 max-w-3xl mx-auto leading-relaxed">
+              {t(currentLanguage, "galleryPage.description")}
+            </div>
           </div>
         </div>
 
         {/* Gallery Images Section */}
-        <div className="pt-20">
+        <div className="pb-24">
           {/* Display error inline if needed, without blocking gallery */}
           {error && (
             <p className="text-center text-red-500 mb-4">
