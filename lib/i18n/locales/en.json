@@ -21,7 +21,7 @@
       "events": "Events",
       "gallery": "Gallery",
       "shop": "Shop",
-      "blog": "News",
+      "blog": "Blog",
       "soon": "Soon"
     },
     "mobileMenu": {
@@ -156,12 +156,12 @@
   },
   "newsPage": {
     "metadata": {
-      "title": "News | Djaouli Entertainment",
+      "title": "Blog | Djaouli Entertainment",
       "description": "Latest news, event recaps, and entertainment insights from Djaouli Entertainment"
     },
-    "title": "News",
+    "title": "Blog",
     "description": "Stay updated with the latest news, event recaps, and insights from Djaouli Entertainment. Discover stories from the vibrant music scene of Abidjan and beyond.",
-    "moreNews": "MORE NEWS",
+    "moreNews": "MORE POSTS",
     "readMore": "Read more →"
   },
   "galleryPage": {

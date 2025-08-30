@@ -21,7 +21,7 @@
       "events": "Events",
       "gallery": "Galerie",
       "shop": "Boutique",
-      "blog": "News",
+      "blog": "Blog",
       "soon": "SOON"
     },
     "mobileMenu": {
@@ -156,10 +156,10 @@
   },
   "newsPage": {
     "metadata": {
-      "title": "News | Djaouli Entertainment",
+      "title": "Blog | Djaouli Entertainment",
       "description": "Dernières actualités, comptes-rendus d'événements et insights de la Djaouli Family."
     },
-    "title": "News",
+    "title": "Blog",
     "description": "Restez informé avec les dernières actu, comptes-rendus d'événements et insights de la Djaouli Family.",
     "moreNews": "PLUS D'ACTUALITÉS",
     "readMore": "Lire plus →"

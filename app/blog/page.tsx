@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // For now, return static metadata - in a real app you'd get the current language
   // and return the appropriate translated metadata
   return {
-    title: "News | Djaouli Entertainment",
+    title: "Blog | Djaouli Entertainment",
     description:
       "Latest news, event recaps, and entertainment insights from Djaouli Entertainment",
   };
