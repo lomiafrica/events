@@ -281,7 +281,7 @@ export default function PurchaseFormModal({
         console.error("Supabase function error:", functionError);
         setError(
           functionError.message ||
-          t(currentLanguage, "purchaseModal.errors.functionError"),
+            t(currentLanguage, "purchaseModal.errors.functionError"),
         );
         setIsLoading(false);
         return;
@@ -294,7 +294,7 @@ export default function PurchaseFormModal({
         console.error("Lomi checkout URL not found in response:", data);
         setError(
           data.error ||
-          t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
+            t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
         );
       }
     } catch (e: unknown) {
@@ -339,7 +339,7 @@ export default function PurchaseFormModal({
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="absolute top-0 right-0 h-8 w-8 p-0 hover:bg-muted/50 rounded-full"
+              className="absolute top-0 right-0 h-8 w-8 p-0 hover:bg-muted/50 rounded-sm"
               aria-label="Close modal"
             >
               <X className="h-4 w-4" />

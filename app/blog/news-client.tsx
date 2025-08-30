@@ -41,7 +41,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             {/* Featured Article */}
             <div className="mb-20">
               <Link href={`/blog/${featuredPosts[0].slug.current}`}>
-                <article className="group cursor-pointer relative overflow-hidden rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-700 bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/20 transform hover:-translate-y-2">
+                <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-2xl hover:shadow-3xl transition-all duration-700 bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/20 transform hover:-translate-y-2">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     {/* Image Section */}
                     <div className="relative h-80 lg:h-96 overflow-hidden rounded-l-2xl">
@@ -105,7 +105,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredPosts.slice(1, 4).map((post: NewsPost) => (
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 transform hover:-translate-y-1">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 transform hover:-translate-y-1">
                     <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
@@ -172,7 +172,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {remainingPosts.map((post: NewsPost) => (
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/20 h-full flex flex-col transform hover:-translate-y-1">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-md hover:shadow-lg transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/20 h-full flex flex-col transform hover:-translate-y-1">
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
                       <Image
