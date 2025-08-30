@@ -622,7 +622,7 @@ export default function AdminPage() {
                                 )}
                                 {purchase.email_dispatch_error && (
                                   <div
-                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 cursor-help"
+                                    className="w-4 h-4 flex items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30 cursor-help"
                                     title={purchase.email_dispatch_error}
                                   >
                                     <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />

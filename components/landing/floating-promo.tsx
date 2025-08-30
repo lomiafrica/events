@@ -55,7 +55,7 @@ export default function FloatingPromo({
       <div className="absolute -top-3 -right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={handleClose}
-          className="bg-[#2a2a2a] rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-[#3a3a3a] transition-colors border border-gray-700"
+          className="bg-[#2a2a2a] rounded-sm w-6 h-6 flex items-center justify-center shadow-md hover:bg-[#3a3a3a] transition-colors border border-gray-700"
           aria-label="Close"
         >
           <X className="h-3.5 w-3.5 text-gray-300" />
@@ -66,9 +66,9 @@ export default function FloatingPromo({
         {/* Traffic light buttons */}
         <div className="flex items-center px-2 py-1.5 bg-[#252525]">
           <div className="flex space-x-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#ff5f56]"></div>
-            <div className="w-2 h-2 rounded-full bg-[#ffbd2e]"></div>
-            <div className="w-2 h-2 rounded-full bg-[#27c93f]"></div>
+            <div className="w-2 h-2 rounded-sm bg-[#ff5f56]"></div>
+            <div className="w-2 h-2 rounded-sm bg-[#ffbd2e]"></div>
+            <div className="w-2 h-2 rounded-sm bg-[#27c93f]"></div>
           </div>
         </div>
 

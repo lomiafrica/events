@@ -356,7 +356,7 @@ export default function PurchaseFormModal({
                     {t(currentLanguage, "eventSlugPage.tickets.currencySuffix")}
                   </p>
                   {item.isBundle && (
-                    <span className="text-xs bg-teal-900/70 text-teal-300 px-3 py-1.5 rounded-full font-medium border border-teal-600/50 text-center">
+                    <span className="text-xs bg-teal-900/70 text-teal-300 px-3 py-1.5 rounded-sm font-medium border border-teal-600/50 text-center">
                       {t(currentLanguage, "purchaseModal.includesTickets", {
                         count: item.ticketsIncluded || 1,
                       })}

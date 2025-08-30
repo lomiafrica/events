@@ -150,7 +150,7 @@ export default function DjaouliCodeDialog({
           <button
             onClick={handleClose}
             className={cn(
-              "absolute rounded-full transition-colors flex items-center justify-center",
+              "absolute rounded-sm transition-colors flex items-center justify-center",
               isMobile
                 ? "right-2 top-2 w-8 h-8 bg-white/10 hover:bg-white/20"
                 : "right-4 top-4 p-1 hover:bg-white/10",

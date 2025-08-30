@@ -157,9 +157,9 @@ export default function EventTicket({
       key="vinyl"
       className="relative h-16 w-16 flex items-center justify-center"
     >
-      <div className="h-16 w-16 rounded-full bg-gray-900 border-4 border-gray-800 flex items-center justify-center">
-        <div className="h-5 w-5 rounded-full bg-gray-700"></div>
-        <div className="absolute inset-0 border-2 border-gray-700 rounded-full m-2"></div>
+      <div className="h-16 w-16 rounded-sm bg-gray-900 border-4 border-gray-800 flex items-center justify-center">
+        <div className="h-5 w-5 rounded-sm bg-gray-700"></div>
+        <div className="absolute inset-0 border-2 border-gray-700 rounded-sm m-2"></div>
       </div>
       <Star className="absolute -top-4 -right-4 h-6 w-6 text-yellow-400" />
       <Star className="absolute -bottom-4 -left-4 h-5 w-5 text-pink-400" />

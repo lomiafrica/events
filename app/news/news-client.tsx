@@ -41,7 +41,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             {/* Featured Article */}
             <div className="mb-16">
               <Link href={`/news/${featuredPosts[0].slug.current}`}>
-                <article className="group cursor-pointer relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50">
+                <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-xl hover:shadow-2xl transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     {/* Image Section */}
                     <div className="relative h-80 lg:h-96 overflow-hidden">
@@ -105,7 +105,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {featuredPosts.slice(1, 4).map((post: NewsPost) => (
                 <Link key={post._id} href={`/news/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50">
                     <div className="relative h-64 overflow-hidden">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
@@ -119,7 +119,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
 
                     <div className="p-6 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
+                        <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-sm">
                           News
                         </span>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -170,7 +170,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {remainingPosts.map((post: NewsPost) => (
                 <Link key={post._id} href={`/news/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50 h-full flex flex-col">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-md hover:shadow-lg transition-all duration-500 bg-white dark:bg-zinc-800/50 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/50 h-full flex flex-col">
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <Image
@@ -190,7 +190,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                         <span className="text-xs text-zinc-500 dark:text-zinc-400">
                           {format(new Date(post.publishedAt), "MMM d, yyyy")}
                         </span>
-                        <span className="px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-full">
+                        <span className="px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-sm">
                           News
                         </span>
                       </div>
