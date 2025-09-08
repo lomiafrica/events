@@ -299,42 +299,41 @@ export default async function EventPage({
               {event.location?.venueName && (
                 <div className="flex items-center gap-3">
                   <MapPin className="h-6 w-6 text-primary flex-shrink-0" />
-                  <div className="flex items-center gap-2 flex-wrap text-base">
-                    {event.location.googleMapsUrl ? (
-                      <a
-                        href={event.location.googleMapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        <span className="font-semibold text-gray-100">
-                          {event.location.venueName}
-                        </span>
-                        {event.location.address && (
-                          <span className="text-sm text-slate-400 block">
-                            {" "}
-                            ({event.location.address})
+                  <div className="flex items-center justify-between flex-1 gap-2">
+                    <div className="flex items-center gap-2 flex-wrap text-base">
+                      {event.location.googleMapsUrl ? (
+                        <a
+                          href={event.location.googleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          <span className="font-semibold text-gray-100">
+                            {event.location.venueName}
                           </span>
-                        )}
-                      </a>
-                    ) : (
-                      <span>
-                        <span className="font-semibold text-gray-100">
-                          {event.location.venueName}
-                        </span>
-                        {event.location.address && (
-                          <span className="text-sm text-slate-400 block">
-                            {" "}
-                            ({event.location.address})
+                          {event.location.address && (
+                            <span className="text-sm text-slate-400 block">
+                              {" "}
+                              ({event.location.address})
+                            </span>
+                          )}
+                        </a>
+                      ) : (
+                        <span>
+                          <span className="font-semibold text-gray-100">
+                            {event.location.venueName}
                           </span>
-                        )}
-                      </span>
-                    )}
+                          {event.location.address && (
+                            <span className="text-sm text-slate-400 block">
+                              {" "}
+                              ({event.location.address})
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
                     {event.location.yangoUrl && (
-                      <>
-                        <span className="text-muted-foreground">|</span>
-                        <YangoButton href={event.location.yangoUrl} />
-                      </>
+                      <YangoButton href={event.location.yangoUrl} />
                     )}
                   </div>
                 </div>
@@ -394,97 +393,99 @@ export default async function EventPage({
                               {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
                                 <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
-                                  <CardContent className="p-0 space-y-4">
-                                    <div className="flex flex-wrap items-baseline">
-                                      <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
-                                        {ticket.name.replace(
-                                          /\s*\(\d+(\s*\w+)?\)$/,
-                                          "",
-                                        )}
-                                      </h4>
-                                      <span className="mx-2 text-gray-400 text-lg">
-                                        |
-                                      </span>
-                                      <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                        {formatPrice(ticket.price)}
-                                        {t(
-                                          currentLanguage,
-                                          "eventSlugPage.tickets.currencySuffix",
-                                        )}
-                                      </p>
-                                    </div>
-                                    {ticket.description && (
-                                      <div className="text-sm space-y-1">
-                                        {ticket.description
-                                          .split("\n")
-                                          .map((line, index) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={index} />;
-                                            }
-                                            if (
-                                              trimmedLine.startsWith("⚠️")
-                                            ) {
+                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
+                                    <div className="flex-grow">
+                                      <div className="flex flex-wrap items-baseline mb-3">
+                                        <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
+                                          {ticket.name.replace(
+                                            /\s*\(\d+(\s*\w+)?\)$/,
+                                            "",
+                                          )}
+                                        </h4>
+                                        <span className="mx-2 text-gray-400 text-lg">
+                                          |
+                                        </span>
+                                        <p className="text-primary font-semibold text-xl whitespace-nowrap">
+                                          {formatPrice(ticket.price)}
+                                          {t(
+                                            currentLanguage,
+                                            "eventSlugPage.tickets.currencySuffix",
+                                          )}
+                                        </p>
+                                      </div>
+                                      {ticket.description && (
+                                        <div className="text-sm mb-1 space-y-1">
+                                          {ticket.description
+                                            .split("\n")
+                                            .map((line, index) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={index} />;
+                                              }
+                                              if (
+                                                trimmedLine.startsWith("⚠️")
+                                              ) {
+                                                return (
+                                                  <p
+                                                    key={index}
+                                                    className="text-amber-400 font-medium"
+                                                  >
+                                                    {trimmedLine}
+                                                  </p>
+                                                );
+                                              }
                                               return (
                                                 <p
                                                   key={index}
-                                                  className="text-amber-400 font-medium"
+                                                  className="text-gray-400 leading-relaxed"
                                                 >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            }
-                                            return (
-                                              <p
-                                                key={index}
-                                                className="text-gray-400 leading-relaxed"
-                                              >
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
-                                      </div>
-                                    )}
-                                    {ticket.details && (
-                                      <div className="text-xs text-gray-400/80 space-y-1">
-                                        {ticket.details
-                                          .split("\n")
-                                          .map((line, idx) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={idx} />;
-                                            }
-                                            const match =
-                                              trimmedLine.match(
-                                                /^(✅|✔|•|-|\*)\s*(.*)/,
-                                              );
-                                            if (match && match[2]) {
+                                            })}
+                                        </div>
+                                      )}
+                                      {ticket.details && (
+                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
+                                          {ticket.details
+                                            .split("\n")
+                                            .map((line, idx) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={idx} />;
+                                              }
+                                              const match =
+                                                trimmedLine.match(
+                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
+                                                );
+                                              if (match && match[2]) {
+                                                return (
+                                                  <div
+                                                    key={idx}
+                                                    className="flex items-start pl-5"
+                                                  >
+                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                    <span className="leading-snug">
+                                                      {match[2]}
+                                                    </span>
+                                                  </div>
+                                                );
+                                              }
                                               return (
-                                                <div
+                                                <p
                                                   key={idx}
-                                                  className="flex items-start pl-5"
+                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
                                                 >
-                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                  <span className="leading-snug">
-                                                    {match[2]}
-                                                  </span>
-                                                </div>
+                                                  {" "}
+                                                  {/* Indent non-list items slightly if preferred or remove ml for full width */}
+                                                  {trimmedLine}
+                                                </p>
                                               );
-                                            }
-                                            return (
-                                              <p
-                                                key={idx}
-                                                className="leading-snug ml-[calc(0.375rem+0.875rem)]"
-                                              >
-                                                {" "}
-                                                {/* Indent non-list items slightly if preferred or remove ml for full width */}
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
-                                      </div>
-                                    )}
-                                    <div className="w-full flex justify-center pt-2">
+                                            })}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0 flex justify-end">
                                       <CheckoutButton
                                         item={{
                                           id: ticket._key,
@@ -541,97 +542,99 @@ export default async function EventPage({
                             >
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
                                 <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
-                                  <CardContent className="p-0 space-y-4">
-                                    <div className="flex flex-wrap items-baseline">
-                                      <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
-                                        {bundle.name.replace(
-                                          /\s*\(\d+(\s*\w+)?\)$/,
-                                          "",
-                                        )}
-                                      </h4>
-                                      <span className="mx-2 text-gray-400 text-lg">
-                                        |
-                                      </span>
-                                      <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                        {formatPrice(bundle.price)}
-                                        {t(
-                                          currentLanguage,
-                                          "eventSlugPage.tickets.currencySuffix",
-                                        )}
-                                      </p>
-                                    </div>
-                                    {bundle.description && (
-                                      <div className="text-sm space-y-1">
-                                        {bundle.description
-                                          .split("\n")
-                                          .map((line, index) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={index} />;
-                                            }
-                                            if (
-                                              trimmedLine.startsWith("⚠️")
-                                            ) {
+                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
+                                    <div className="flex-grow">
+                                      <div className="flex flex-wrap items-baseline mb-3">
+                                        <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
+                                          {bundle.name.replace(
+                                            /\s*\(\d+(\s*\w+)?\)$/,
+                                            "",
+                                          )}
+                                        </h4>
+                                        <span className="mx-2 text-gray-400 text-lg">
+                                          |
+                                        </span>
+                                        <p className="text-primary font-semibold text-xl whitespace-nowrap">
+                                          {formatPrice(bundle.price)}
+                                          {t(
+                                            currentLanguage,
+                                            "eventSlugPage.tickets.currencySuffix",
+                                          )}
+                                        </p>
+                                      </div>
+                                      {bundle.description && (
+                                        <div className="text-sm mb-1 space-y-1">
+                                          {bundle.description
+                                            .split("\n")
+                                            .map((line, index) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={index} />;
+                                              }
+                                              if (
+                                                trimmedLine.startsWith("⚠️")
+                                              ) {
+                                                return (
+                                                  <p
+                                                    key={index}
+                                                    className="text-amber-400 font-medium"
+                                                  >
+                                                    {trimmedLine}
+                                                  </p>
+                                                );
+                                              }
                                               return (
                                                 <p
                                                   key={index}
-                                                  className="text-amber-400 font-medium"
+                                                  className="text-gray-400 leading-relaxed"
                                                 >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            }
-                                            return (
-                                              <p
-                                                key={index}
-                                                className="text-gray-400 leading-relaxed"
-                                              >
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
-                                      </div>
-                                    )}
-                                    {bundle.details && (
-                                      <div className="text-xs text-gray-400/80 space-y-1">
-                                        {bundle.details
-                                          .split("\n")
-                                          .map((line, idx) => {
-                                            const trimmedLine = line.trim();
-                                            if (trimmedLine === "") {
-                                              return <br key={idx} />;
-                                            }
-                                            const match =
-                                              trimmedLine.match(
-                                                /^(✅|✔|•|-|\*)\s*(.*)/,
-                                              );
-                                            if (match && match[2]) {
+                                            })}
+                                        </div>
+                                      )}
+                                      {bundle.details && (
+                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
+                                          {bundle.details
+                                            .split("\n")
+                                            .map((line, idx) => {
+                                              const trimmedLine = line.trim();
+                                              if (trimmedLine === "") {
+                                                return <br key={idx} />;
+                                              }
+                                              const match =
+                                                trimmedLine.match(
+                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
+                                                );
+                                              if (match && match[2]) {
+                                                return (
+                                                  <div
+                                                    key={idx}
+                                                    className="flex items-start pl-5"
+                                                  >
+                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                    <span className="leading-snug">
+                                                      {match[2]}
+                                                    </span>
+                                                  </div>
+                                                );
+                                              }
                                               return (
-                                                <div
+                                                <p
                                                   key={idx}
-                                                  className="flex items-start pl-5"
+                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
                                                 >
-                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                  <span className="leading-snug">
-                                                    {match[2]}
-                                                  </span>
-                                                </div>
+                                                  {" "}
+                                                  {/* Indent non-list items slightly */}
+                                                  {trimmedLine}
+                                                </p>
                                               );
-                                            }
-                                            return (
-                                              <p
-                                                key={idx}
-                                                className="leading-snug ml-[calc(0.375rem+0.875rem)]"
-                                              >
-                                                {" "}
-                                                {/* Indent non-list items slightly */}
-                                                {trimmedLine}
-                                              </p>
-                                            );
-                                          })}
-                                      </div>
-                                    )}
-                                    <div className="w-full flex justify-center pt-2">
+                                            })}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0 flex justify-end">
                                       <CheckoutButton
                                         item={{
                                           id: bundle.bundleId.current, // Use bundleId.current for bundles

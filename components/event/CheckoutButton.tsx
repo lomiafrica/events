@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import PurchaseFormModal from "@/components/event/PurchaseFormModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Ticket } from "lucide-react";
+import { Ticket, Package } from "lucide-react";
 import { t } from "@/lib/i18n/translations";
 import Link from "next/link";
 
@@ -167,7 +167,11 @@ export default function CheckoutButton({
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Ticket className="mr-2 h-4 w-4" />
+            {item.isBundle ? (
+              <Package className="mr-2 h-4 w-4" />
+            ) : (
+              <Ticket className="mr-2 h-4 w-4" />
+            )}
             {t(currentLanguage, "eventSlugPage.tickets.buyNow")}
           </Link>
         </Button>
@@ -183,7 +187,11 @@ export default function CheckoutButton({
       return (
         <>
           <Button onClick={handleOpenPurchaseModal} className={buttonClassName}>
-            <Ticket className="mr-2 h-4 w-4" />
+            {isBundle ? (
+              <Package className="mr-2 h-4 w-4" />
+            ) : (
+              <Ticket className="mr-2 h-4 w-4" />
+            )}
             {buttonText}
           </Button>
           {isModalOpen && (
