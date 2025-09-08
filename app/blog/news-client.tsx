@@ -41,10 +41,10 @@ export default function NewsContent({ posts }: NewsContentProps) {
             {/* Featured Article */}
             <div className="mb-20">
               <Link href={`/blog/${featuredPosts[0].slug.current}`}>
-                <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-2xl hover:shadow-3xl transition-all duration-700 bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/20 transform hover:-translate-y-2">
+                <article className="group cursor-pointer relative overflow-hidden rounded-xs shadow-2xl hover:shadow-3xl transition-all duration-700 bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/20 transform hover:-translate-y-2">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     {/* Image Section */}
-                    <div className="relative h-80 lg:h-96 overflow-hidden rounded-l-sm">
+                    <div className="relative h-80 lg:h-96 overflow-hidden rounded-l-xs">
                       <Image
                         src={
                           featuredPosts[0].mainImage?.asset?.url ||
@@ -60,7 +60,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/50" />
                       <div className="absolute top-6 left-6">
-                        <span className="px-4 py-2 text-xs font-semibold bg-blue-900 text-blue-100 rounded-sm shadow-lg">
+                        <span className="px-4 py-2 text-xs font-semibold bg-blue-900 text-blue-100 rounded-xs shadow-lg">
                           Featured
                         </span>
                       </div>
@@ -88,7 +88,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
 
                         <div className="flex justify-end pt-8">
                           <div className="flex items-center gap-3 text-primary font-semibold group-hover:gap-4 transition-all duration-300">
-                            <span>Read Full Story</span>
+                            <span>Read Story</span>
                             <span className="text-xl group-hover:translate-x-2 transition-transform">
                               →
                             </span>
@@ -105,8 +105,8 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredPosts.slice(1, 4).map((post: NewsPost) => (
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 transform hover:-translate-y-1">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-sm">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-xs shadow-lg hover:shadow-xl transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 transform hover:-translate-y-1">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-xs">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
                         alt={post.mainImage?.alt || post.title}
@@ -116,7 +116,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-sm shadow-md">
+                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-xs shadow-md">
                           News
                         </span>
                       </div>
@@ -172,9 +172,9 @@ export default function NewsContent({ posts }: NewsContentProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {remainingPosts.map((post: NewsPost) => (
                 <Link key={post._id} href={`/blog/${post.slug.current}`}>
-                  <article className="group cursor-pointer relative overflow-hidden rounded-sm shadow-md hover:shadow-lg transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/20 h-full flex flex-col transform hover:-translate-y-1">
+                  <article className="group cursor-pointer relative overflow-hidden rounded-xs shadow-md hover:shadow-lg transition-all duration-500 bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/20 h-full flex flex-col transform hover:-translate-y-1">
                     {/* Image */}
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-sm">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-xs">
                       <Image
                         src={post.mainImage?.asset?.url || "/placeholder.webp"}
                         alt={post.mainImage?.alt || post.title}
@@ -192,7 +192,7 @@ export default function NewsContent({ posts }: NewsContentProps) {
                         <span className="text-sm text-muted-foreground font-medium">
                           {format(new Date(post.publishedAt), "MMM d, yyyy")}
                         </span>
-                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-sm font-medium">
+                        <span className="px-3 py-1 text-xs bg-blue-900 text-blue-100 rounded-xs font-medium">
                           News
                         </span>
                       </div>

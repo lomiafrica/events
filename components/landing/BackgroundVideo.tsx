@@ -111,7 +111,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
       {/* Sound Toggle Button */}
       <button
         onClick={toggleSound}
-        className="absolute bottom-4 right-4 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
+        className="absolute bottom-4 right-4 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-xs text-white focus:outline-none transition-colors duration-200"
         aria-label={isMuted ? "Unmute video" : "Mute video"}
       >
         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
@@ -124,7 +124,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
           {current > 0 && (
             <button
               onClick={prev}
-              className="flex absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
+              className="flex absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-xs text-white focus:outline-none transition-colors duration-200"
               aria-label="Previous video"
               tabIndex={0}
             >
@@ -135,7 +135,7 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
           {current < videoUrls.length - 1 && (
             <button
               onClick={next}
-              className="flex absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-sm text-white focus:outline-none transition-colors duration-200"
+              className="flex absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/10 hover:bg-black/30 rounded-xs text-white focus:outline-none transition-colors duration-200"
               aria-label="Next video"
               tabIndex={0}
             >
@@ -145,14 +145,14 @@ export default function BackgroundVideo({ videoUrls }: BackgroundVideoProps) {
         </>
       )}
 
-      {/* Dot Indicator - now square with rounded-sm */}
+      {/* Dot Indicator - now square with rounded-xs */}
       {showNav && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {videoUrls.map((_, idx) => (
             <button
               key={idx}
               onClick={() => goTo(idx)}
-              className={`w-2 h-2 rounded-sm border border-white transition-all duration-200 ${idx === current ? "bg-white" : "bg-white/30"}`}
+              className={`w-2 h-2 rounded-xs border border-white transition-all duration-200 ${idx === current ? "bg-white" : "bg-white/30"}`}
               aria-label={`Go to video ${idx + 1}`}
               tabIndex={0}
             />

@@ -264,7 +264,7 @@ export default async function EventPage({
       <div className="container mx-auto py-22 px-4">
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 lg:gap-12 items-start">
           {/* Event Flyer - Assign 2 columns */}
-          <div className="lg:col-span-2 relative aspect-[2/3] rounded-sm overflow-hidden shadow-lg bg-muted">
+          <div className="lg:col-span-2 relative aspect-[2/3] rounded-xs overflow-hidden shadow-lg bg-muted">
             <Image
               src={event.flyer?.url || "/placeholder.webp"}
               alt={event.title}
@@ -355,7 +355,7 @@ export default async function EventPage({
             {/* Tickets/Bundles Section - Always Link Checkout Mode Logic */}
             <div className="py-4">
               {!globallyTicketsOnSale ? (
-                <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
+                <div className="bg-secondary text-secondary-foreground p-4 rounded-xs mb-6">
                   <p className="font-medium">
                     {t(
                       currentLanguage,
@@ -364,7 +364,7 @@ export default async function EventPage({
                   </p>
                 </div>
               ) : !hasAnyDefinedItems ? (
-                <div className="bg-secondary text-secondary-foreground p-4 rounded-sm">
+                <div className="bg-secondary text-secondary-foreground p-4 rounded-xs">
                   <p className="font-medium">
                     {t(currentLanguage, "eventSlugPage.tickets.noItemsListed")}
                   </p>
@@ -388,11 +388,11 @@ export default async function EventPage({
                           return (
                             <Card
                               key={ticket._key}
-                              className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col"
+                              className="border-slate-700 bg-background shadow-lg rounded-xs overflow-hidden flex flex-col"
                             >
                               {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
-                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-xs pt-1 pb-1 px-3 flex flex-col flex-grow">
                                   <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
                                     <div className="flex-grow">
                                       <div className="flex flex-wrap items-baseline mb-3">
@@ -538,10 +538,10 @@ export default async function EventPage({
                           return (
                             <Card
                               key={bundle._key}
-                              className="border-slate-700 bg-background shadow-lg rounded-sm overflow-hidden flex flex-col"
+                              className="border-slate-700 bg-background shadow-lg rounded-xs overflow-hidden flex flex-col"
                             >
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
-                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
+                                <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-xs pt-1 pb-1 px-3 flex flex-col flex-grow">
                                   <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
                                     <div className="flex-grow">
                                       <div className="flex flex-wrap items-baseline mb-3">
@@ -731,7 +731,7 @@ export default async function EventPage({
                   )}
                   {/* Embedded Map ADDED HERE */}
                   {mapEmbedSrc && (
-                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-sm shadow-lg border border-slate-700 overflow-hidden">
+                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-xs shadow-lg border border-slate-700 overflow-hidden">
                       <iframe
                         src={mapEmbedSrc}
                         width="100%"

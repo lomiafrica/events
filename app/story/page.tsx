@@ -16,7 +16,7 @@ export default async function StoryPage() {
       <p className="text-xl text-muted-foreground mb-8">{story.subtitle}</p>
 
       {story.image && (
-        <div className="relative aspect-video mb-8 rounded-sm overflow-hidden">
+        <div className="relative aspect-video mb-8 rounded-xs overflow-hidden">
           <Image
             src={story.image.url || "/placeholder.webp"}
             alt={story.image.alt || story.title}

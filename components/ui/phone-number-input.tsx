@@ -70,7 +70,7 @@ export default function PhoneNumberInput({
     <div className={cn("w-full relative", className)}>
       <div
         className={cn(
-          "flex w-full rounded-sm border border-input bg-transparent shadow-xs transition-[color,box-shadow]",
+          "flex w-full rounded-xs border border-input bg-transparent shadow-xs transition-[color,box-shadow]",
           isFocused && "border-ring ring-ring/50 ring-[3px]",
         )}
         onFocus={() => setIsFocused(true)}
@@ -105,7 +105,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, InputProps>(
           "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
           "flex h-11 w-full min-w-0 bg-transparent px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-          "border-0 shadow-none rounded-l-sm rounded-r-sm",
+          "border-0 shadow-none rounded-l-xs rounded-r-xs",
           className,
         )}
         {...props}
@@ -140,7 +140,7 @@ const CountrySelect = ({
     <div
       className={cn(
         "PhoneInputCountry relative inline-flex items-center self-stretch bg-transparent text-foreground outline-none",
-        "flex h-11 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-sm rounded-r-sm",
+        "flex h-11 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-xs rounded-r-xs",
         "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
         disabled && "pointer-events-none cursor-not-allowed opacity-50",
       )}
@@ -180,7 +180,7 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   const Flag = flags[country];
 
   return (
-    <span className="w-5 h-4 overflow-hidden rounded-sm flex items-center justify-center">
+    <span className="w-5 h-4 overflow-hidden rounded-xs flex items-center justify-center">
       {Flag ? (
         <Flag title={countryName} />
       ) : (

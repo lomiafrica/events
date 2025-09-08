@@ -17,8 +17,8 @@ interface FloatingPromoProps {
 
 export default function FloatingPromo({
   imageUrl = "/placeholder.svg?height=180&width=320",
-  onClose = () => {},
-  onButtonClick = () => {},
+  onClose = () => { },
+  onButtonClick = () => { },
   href,
   title = "Promotional event flyer",
   buttonText = "Get your ticket",
@@ -55,14 +55,14 @@ export default function FloatingPromo({
       <div className="absolute -top-3 -right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={handleClose}
-          className="bg-[#2a2a2a] rounded-sm w-6 h-6 flex items-center justify-center shadow-md hover:bg-[#3a3a3a] transition-colors border border-gray-700"
+          className="bg-[#2a2a2a] rounded-xs w-6 h-6 flex items-center justify-center shadow-md hover:bg-[#3a3a3a] transition-colors border border-gray-700"
           aria-label="Close"
         >
           <X className="h-3.5 w-3.5 text-gray-300" />
         </button>
       </div>
 
-      <div className="bg-[#1a1a1a] rounded-sm shadow-2xl overflow-hidden border border-gray-800 relative">
+      <div className="bg-[#1a1a1a] rounded-xs shadow-2xl overflow-hidden border border-gray-800 relative">
         {/* Traffic light buttons */}
         <div className="flex items-center px-2 py-1.5 bg-[#252525]">
           <div className="flex space-x-1.5">
@@ -87,7 +87,7 @@ export default function FloatingPromo({
         <div className="w-full">
           {href ? (
             <Link href={href} passHref legacyBehavior>
-              <a className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center">
+              <a className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-xs text-center flex items-center justify-center">
                 <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
                 {buttonText}
               </a>
@@ -95,7 +95,7 @@ export default function FloatingPromo({
           ) : (
             <button
               onClick={onButtonClick}
-              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm flex items-center justify-center"
+              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-xs flex items-center justify-center"
             >
               <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
               {buttonText}

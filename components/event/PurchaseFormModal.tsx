@@ -387,7 +387,7 @@ export default function PurchaseFormModal({
               style={{ position: "fixed", top: 0, right: 0, bottom: 0 }}
               onClick={(e) => e.stopPropagation()} // Prevent event bubbling to backdrop
             >
-              <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
+              <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-xs shadow-2xl">
                 {/* Header */}
                 <div className="flex justify-between items-center px-4 py-4 md:py-6 flex-shrink-0">
                   <div>
@@ -414,7 +414,7 @@ export default function PurchaseFormModal({
                 <div className="flex-1 overflow-y-auto px-4 min-h-0">
                   <form onSubmit={handleSubmit} className="space-y-6 py-2">
                     {/* Item Details */}
-                    <div className="bg-muted/30 p-4 rounded-sm">
+                    <div className="bg-muted/30 p-4 rounded-xs">
                       <h4 className="font-medium text-base">{item.name}</h4>
                       <p className="text-sm text-muted-foreground mt-2">
                         {formatPrice(item.price)}
@@ -423,7 +423,7 @@ export default function PurchaseFormModal({
                           "eventSlugPage.tickets.currencySuffix",
                         )}
                         {item.isBundle && (
-                          <span className="ml-3 text-sm bg-primary/20 text-primary px-3 py-1 rounded-sm font-medium">
+                          <span className="ml-3 text-sm bg-primary/20 text-primary px-3 py-1 rounded-xs font-medium">
                             {item.ticketsIncluded || 1} tickets
                           </span>
                         )}
@@ -439,7 +439,7 @@ export default function PurchaseFormModal({
                         id="name"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        className="rounded-sm h-12 text-base px-4"
+                        className="rounded-xs h-12 text-base px-4"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.name",
@@ -458,7 +458,7 @@ export default function PurchaseFormModal({
                         type="email"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
-                        className="rounded-sm h-12 text-base px-4"
+                        className="rounded-xs h-12 text-base px-4"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.email",
@@ -476,7 +476,7 @@ export default function PurchaseFormModal({
                         <PhoneNumberInput
                           value={userPhone}
                           onChange={(value) => setUserPhone(value || "")}
-                          className="rounded-sm h-12 text-base px-4"
+                          className="rounded-xs h-12 text-base px-4"
                           placeholder={t(
                             currentLanguage,
                             "purchaseModal.placeholders.phone",
@@ -497,7 +497,7 @@ export default function PurchaseFormModal({
                           size="sm"
                           onClick={handleQuantityDecrement}
                           disabled={quantity <= 1}
-                          className="rounded-sm h-12 w-12 p-0"
+                          className="rounded-xs h-12 w-12 p-0"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -508,7 +508,7 @@ export default function PurchaseFormModal({
                           value={quantityDisplay}
                           onChange={handleQuantityChange}
                           onBlur={handleQuantityBlur}
-                          className="rounded-sm h-12 text-base text-center flex-1"
+                          className="rounded-xs h-12 text-base text-center flex-1"
                           required
                         />
                         <Button
@@ -517,7 +517,7 @@ export default function PurchaseFormModal({
                           size="sm"
                           onClick={handleQuantityIncrement}
                           disabled={quantity >= maxQuantity}
-                          className="rounded-sm h-12 w-12 p-0"
+                          className="rounded-xs h-12 w-12 p-0"
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -526,7 +526,7 @@ export default function PurchaseFormModal({
 
                     {/* Error Display */}
                     {error && (
-                      <div className="text-sm text-red-400 text-center px-4 py-3 bg-red-900/20 rounded-sm border border-red-700/50">
+                      <div className="text-sm text-red-400 text-center px-4 py-3 bg-red-900/20 rounded-xs border border-red-700/50">
                         {error}
                       </div>
                     )}
@@ -565,7 +565,7 @@ export default function PurchaseFormModal({
                     type="submit"
                     disabled={isLoading || !isFormValid()}
                     onClick={handleSubmit}
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-base w-full font-semibold h-14"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xs text-base w-full font-semibold h-14"
                   >
                     {isLoading ? (
                       <>

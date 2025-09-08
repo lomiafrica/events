@@ -25,7 +25,7 @@ export function PaymentSuccessClient({
         <div className="max-w-md mx-auto">
           <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10 dark:border-green-800">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-sm flex items-center justify-center mb-4">
+              <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-xs flex items-center justify-center mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
               <CardTitle className="text-2xl font-bold text-green-800 dark:text-green-200">
@@ -36,7 +36,7 @@ export function PaymentSuccessClient({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 <p>{t(currentLanguage, "paymentSuccess.description")}</p>
                 {purchaseId && (
-                  <p className="text-sm mt-2 font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded-sm">
+                  <p className="text-sm mt-2 font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded-xs">
                     {t(currentLanguage, "paymentSuccess.orderId", {
                       orderId: purchaseId,
                     })}
@@ -44,7 +44,7 @@ export function PaymentSuccessClient({
                 )}
               </div>
 
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-sm p-4">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xs p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Ticket className="w-5 h-5 text-green-600 dark:text-green-400" />
                   <h3 className="font-semibold text-green-800 dark:text-green-200">

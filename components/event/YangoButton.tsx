@@ -19,7 +19,7 @@ export const YangoButton: React.FC<YangoButtonProps> = ({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={altText}
-      className={`inline-flex items-center justify-center px-6 py-2 h-8 w-20 rounded-sm text-sm font-bold bg-red-600 text-white ${className}`}
+      className={`inline-flex items-center justify-center px-6 py-2 h-8 w-20 rounded-xs text-sm font-bold bg-red-600 text-white ${className}`}
     >
       {buttonText}
     </Link>

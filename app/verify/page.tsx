@@ -16,7 +16,7 @@ export default async function VerifyTicketPage({
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-sm h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-xs h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       }
     >

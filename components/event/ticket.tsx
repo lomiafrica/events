@@ -119,7 +119,7 @@ export default function EventTicket({
   const decorativeElements = [
     // Element 0: Headphones with stars
     <div key="headphones" className="flex items-center justify-center relative">
-      <div className="bg-gray-800 p-2 rounded-sm">
+      <div className="bg-gray-800 p-2 rounded-xs">
         <Headphones className="h-10 w-10 text-blue-400" />
       </div>
       <Star className="absolute -top-3 -right-3 h-5 w-5 text-yellow-400" />
@@ -157,9 +157,9 @@ export default function EventTicket({
       key="vinyl"
       className="relative h-16 w-16 flex items-center justify-center"
     >
-      <div className="h-16 w-16 rounded-sm bg-gray-900 border-4 border-gray-800 flex items-center justify-center">
-        <div className="h-5 w-5 rounded-sm bg-gray-700"></div>
-        <div className="absolute inset-0 border-2 border-gray-700 rounded-sm m-2"></div>
+      <div className="h-16 w-16 rounded-xs bg-gray-900 border-4 border-gray-800 flex items-center justify-center">
+        <div className="h-5 w-5 rounded-xs bg-gray-700"></div>
+        <div className="absolute inset-0 border-2 border-gray-700 rounded-xs m-2"></div>
       </div>
       <Star className="absolute -top-4 -right-4 h-6 w-6 text-yellow-400" />
       <Star className="absolute -bottom-4 -left-4 h-5 w-5 text-pink-400" />
@@ -169,7 +169,7 @@ export default function EventTicket({
   return (
     <div className="w-full max-w-sm">
       {/* Main ticket container - vertical layout for mobile */}
-      <div className="bg-gradient-to-b from-black via-gray-950 to-black rounded-sm overflow-hidden shadow-2xl border border-gray-900 relative">
+      <div className="bg-gradient-to-b from-black via-gray-950 to-black rounded-xs overflow-hidden shadow-2xl border border-gray-900 relative">
         {/* Fun pattern overlay */}
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
@@ -186,14 +186,14 @@ export default function EventTicket({
               DJAOULI ENT.
             </h1>
           </div>
-          <div className="bg-yellow-500 px-2 py-1 rounded-sm transform rotate-2 shadow-lg">
+          <div className="bg-yellow-500 px-2 py-1 rounded-xs transform rotate-2 shadow-lg">
             <p className="text-xs font-bold text-gray-900">#{ticketId}</p>
           </div>
         </div>
 
         {/* Event name */}
         <div className="px-5 pt-5 pb-3">
-          <div className="bg-blue-700 py-2 px-3 inline-block rounded-sm transform -rotate-1 shadow-lg">
+          <div className="bg-blue-700 py-2 px-3 inline-block rounded-xs transform -rotate-1 shadow-lg">
             <h2 className="text-xl font-bold text-white uppercase">
               {eventName}
             </h2>
@@ -202,7 +202,7 @@ export default function EventTicket({
 
         {/* QR code section */}
         <div className="px-5 py-4 flex justify-center">
-          <div className="bg-white p-3 rounded-sm transform rotate-1 shadow-lg">
+          <div className="bg-white p-3 rounded-xs transform rotate-1 shadow-lg">
             <QRCodeSVG
               value={qrValue}
               size={180}
@@ -216,7 +216,7 @@ export default function EventTicket({
 
         {/* Admit section */}
         <div className="px-5 pb-4 flex justify-center">
-          <div className="bg-blue-700 text-white px-6 py-2 rounded-sm text-center transform -rotate-1 shadow-lg">
+          <div className="bg-blue-700 text-white px-6 py-2 rounded-xs text-center transform -rotate-1 shadow-lg">
             <p className="font-bold text-lg">{getAdmissionText()}</p>
             <p className="text-xs mt-1 opacity-90">{getNameText()}</p>
           </div>
@@ -226,7 +226,7 @@ export default function EventTicket({
         <div className="px-5 py-4 bg-gray-950/80">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
-              <div className="bg-amber-500 p-1.5 rounded-sm">
+              <div className="bg-amber-500 p-1.5 rounded-xs">
                 <Calendar className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
@@ -235,7 +235,7 @@ export default function EventTicket({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="bg-rose-600 p-1.5 rounded-sm">
+              <div className="bg-rose-600 p-1.5 rounded-xs">
                 <Clock className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
@@ -244,7 +244,7 @@ export default function EventTicket({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="bg-emerald-600 p-1.5 rounded-sm">
+              <div className="bg-emerald-600 p-1.5 rounded-xs">
                 <MapPin className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
@@ -253,7 +253,7 @@ export default function EventTicket({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="bg-indigo-600 p-1.5 rounded-sm">
+              <div className="bg-indigo-600 p-1.5 rounded-xs">
                 <Ticket className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
@@ -274,7 +274,7 @@ export default function EventTicket({
           <div className="flex">
             <div className="flex-1 space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="bg-cyan-600 p-1.5 rounded-sm">
+                <div className="bg-cyan-600 p-1.5 rounded-xs">
                   <User className="h-3.5 w-3.5 text-white" />
                 </div>
                 <p className="text-white text-sm">
@@ -282,13 +282,13 @@ export default function EventTicket({
                 </p>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="bg-pink-600 p-1.5 rounded-sm">
+                <div className="bg-pink-600 p-1.5 rounded-xs">
                   <Phone className="h-3.5 w-3.5 text-white" />
                 </div>
                 <p className="text-white text-sm">{phone}</p>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="bg-green-600 p-1.5 rounded-sm">
+                <div className="bg-green-600 p-1.5 rounded-xs">
                   <Mail className="h-3.5 w-3.5 text-white" />
                 </div>
                 <p className="text-white text-sm truncate">{email}</p>

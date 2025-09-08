@@ -167,7 +167,7 @@ export default function DjaouliCodeDialog({
             style={{ position: "fixed", top: 0, left: 0, bottom: 0 }}
             onClick={(e) => e.stopPropagation()} // Prevent event bubbling to backdrop
           >
-            <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
+            <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-xs shadow-2xl">
               {/* Header */}
               <div className="flex justify-between items-center px-3 md:px-4 py-6 mb-0">
                 <div className="flex-1">
@@ -202,7 +202,7 @@ export default function DjaouliCodeDialog({
               <div className="px-3 md:px-4 py-4 border-t border-border">
                 <button
                   onClick={handleClose}
-                  className="bg-teal-800 hover:bg-teal-700 text-teal-200 rounded-sm text-sm w-full font-medium h-10 transition-all shadow-lg hover:shadow-xl transform hover:scale-[0.98] active:scale-[0.95]"
+                  className="bg-teal-800 hover:bg-teal-700 text-teal-200 rounded-xs text-sm w-full font-medium h-10 transition-all shadow-lg hover:shadow-xl transform hover:scale-[0.98] active:scale-[0.95]"
                 >
                   Gotcha!
                 </button>
@@ -231,7 +231,7 @@ function CodeItem({
   lang,
 }: CodeItemProps) {
   return (
-    <div className="bg-muted/30 p-3 rounded-sm border border-slate-700">
+    <div className="bg-muted/30 p-3 rounded-xs border border-slate-700">
       <div className="flex items-start gap-3">
         <div className="text-primary font-semibold text-sm flex-shrink-0">
           {number}.

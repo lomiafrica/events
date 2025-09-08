@@ -24,7 +24,7 @@ export default function ArtistCard({
   currentLanguage,
 }: ArtistCardProps) {
   const cardBaseClasses =
-    "flex flex-col w-88 max-w-xs bg-grey-900 border border-slate-700 rounded-sm shadow-xl overflow-hidden";
+    "flex flex-col w-88 max-w-xs bg-grey-900 border border-slate-700 rounded-xs shadow-xl overflow-hidden";
   const artistDisplayName = artist.name || "Artist";
 
   return (
@@ -47,10 +47,10 @@ export default function ArtistCard({
                   {artist.name}
                 </h4>
                 {artist.isResident && (
-                  <div className="inline-flex items-center px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-sm flex-shrink-0">
+                  <div className="inline-flex items-center px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-xs flex-shrink-0">
                     <span className="relative flex h-2 w-2 mr-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-sm bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-sm h-2 w-2 bg-green-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-xs bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-xs h-2 w-2 bg-green-500"></span>
                     </span>
                     {t(currentLanguage, "artistCard.residentBadge")}
                   </div>
@@ -81,10 +81,10 @@ export default function ArtistCard({
                 {artist.name}
               </h4>
               {artist.isResident && (
-                <div className="inline-flex items-center px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-sm flex-shrink-0">
+                <div className="inline-flex items-center px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-xs flex-shrink-0">
                   <span className="relative flex h-2 w-2 mr-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-sm bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-sm h-2 w-2 bg-green-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-xs bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-xs h-2 w-2 bg-green-500"></span>
                   </span>
                   {t(currentLanguage, "artistCard.residentBadge")}
                 </div>

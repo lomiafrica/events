@@ -77,7 +77,7 @@ export default async function NewsPostPage({
 
           {/* Featured Image */}
           {post.mainImage && (
-            <div className="relative aspect-video mb-12 rounded-sm overflow-hidden shadow-2xl">
+            <div className="relative aspect-video mb-12 rounded-xs overflow-hidden shadow-2xl">
               <Image
                 src={post.mainImage?.asset?.url || "/placeholder.webp"}
                 alt={post.mainImage?.alt || post.title}
@@ -90,7 +90,7 @@ export default async function NewsPostPage({
           )}
 
           {/* Article Content */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-sm p-8 md:p-12 shadow-lg border border-border/50">
+          <div className="bg-card/50 backdrop-blur-sm rounded-xs p-8 md:p-12 shadow-lg border border-border/50">
             <div className="prose prose-lg md:prose-xl max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-blockquote:border-primary prose-code:text-primary">
               <PortableText value={post.body} />
             </div>
