@@ -3,15 +3,11 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
-import { cn } from "@/lib/actions/utils";
 import Image from "next/image";
 import { X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
 
 const codeItemsData = [
   {
@@ -83,6 +79,13 @@ export default function DjaouliCodeDialog({
   const { currentLanguage } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const [hasBeenShown, setHasBeenShown] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure component is mounted before rendering portal
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
     // Check if dialog has been shown before
@@ -110,6 +113,9 @@ export default function DjaouliCodeDialog({
     return null;
   }
 
+  // Only render portal content if mounted
+  if (!isMounted) return null;
+
   const itemsToRender = [];
   const totalItems = codeItemsData.length;
   for (let i = 0; i < totalItems; i++) {
@@ -125,73 +131,88 @@ export default function DjaouliCodeDialog({
     );
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className={cn(
-          "overflow-y-auto bg-gradient-to-b from-sidebar to-background text-white border-slate-700",
-          isMobile ? "max-w-[90vw] max-h-[80vh] mx-4" : "max-w-lg max-h-[70vh]",
-        )}
-        style={{
-          scrollbarWidth: "none", // Firefox
-          msOverflowStyle: "none", // IE/Edge
-        }}
-      >
-        <DialogHeader className="relative">
-          <DialogTitle className="text-center">
-            <Image
-              src="/code.webp"
-              alt="Djaouli Code"
-              width={isMobile ? 120 : 140}
-              height={20}
-              className="object-contain mx-auto"
-            />
-          </DialogTitle>
-          <button
-            onClick={handleClose}
-            className={cn(
-              "absolute rounded-sm transition-colors flex items-center justify-center",
-              isMobile
-                ? "right-2 top-2 w-8 h-8 bg-white/10 hover:bg-white/20"
-                : "right-4 top-4 p-1 hover:bg-white/10",
-            )}
-            aria-label="Close"
-          >
-            <X
-              className={cn(
-                "text-white/70 hover:text-white",
-                isMobile ? "h-5 w-5" : "h-4 w-4",
-              )}
-            />
-          </button>
-        </DialogHeader>
-        <div className={cn("pb-2", isMobile ? "px-2" : "px-3")}>
-          <div className="grid gap-3 grid-cols-1">{itemsToRender}</div>
-        </div>
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 z-[60] bg-foreground/30 will-change-auto cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClose();
+            }}
+            aria-hidden="true"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
 
-        {/* Gotcha! Button */}
-        <div
-          className={cn(
-            "flex justify-center pt-2 pb-4",
-            isMobile ? "px-2" : "px-3",
-          )}
-        >
-          <button
-            onClick={handleClose}
-            className={cn(
-              "bg-blue-600 hover:bg-blue-700",
-              "text-white font-bold rounded-sm transition-all duration-200",
-              "shadow-lg hover:shadow-xl transform hover:scale-105",
-              isMobile
-                ? "px-6 py-3 text-sm min-w-[120px]"
-                : "px-8 py-3 text-base min-w-[140px]",
-            )}
+          {/* Panel */}
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed top-0 bottom-0 left-0 flex w-full md:w-[500px] p-4 z-[70] will-change-transform pointer-events-auto"
+            style={{ position: "fixed", top: 0, left: 0, bottom: 0 }}
+            onClick={(e) => e.stopPropagation()} // Prevent event bubbling to backdrop
           >
-            Gotcha!
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
+              {/* Header */}
+              <div className="flex justify-between items-center px-3 md:px-4 py-6 mb-0">
+                <div className="flex-1">
+                  <Image
+                    src="/code.webp"
+                    alt="Djaouli Code"
+                    width={140}
+                    height={20}
+                    className="object-contain"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="hover:bg-muted/50"
+                  aria-label="Close modal"
+                  onClick={handleClose}
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Form Content */}
+              <div className="flex-1 overflow-y-auto px-3 md:px-4">
+                <div className="py-4">
+                  <div className="grid gap-3 grid-cols-1">{itemsToRender}</div>
+                </div>
+              </div>
+
+              {/* Footer with Gotcha Button */}
+              <div className="px-3 md:px-4 py-4 border-t border-border">
+                <button
+                  onClick={handleClose}
+                  className="bg-teal-800 hover:bg-teal-700 text-teal-200 rounded-sm text-sm w-full font-medium h-10 transition-all shadow-lg hover:shadow-xl transform hover:scale-[0.98] active:scale-[0.95]"
+                >
+                  Gotcha!
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.body,
   );
 }
 
@@ -208,61 +229,18 @@ function CodeItem({
   titleKey,
   descriptionKey,
   lang,
-  isMobile,
 }: CodeItemProps) {
   return (
-    <div
-      className={cn(
-        "border w-full rounded-sm overflow-hidden shadow-lg",
-        "bg-background",
-        "border-slate-700 md:border-slate-800",
-        "h-full flex flex-col",
-      )}
-    >
-      <div
-        className={cn(
-          "size-full bg-repeat p-1",
-          "bg-dot-pattern-light dark:bg-dot-pattern",
-          "bg-[length:20px_20px]",
-        )}
-      >
-        <div
-          className={cn(
-            "size-full bg-gradient-to-br",
-            "from-background/95 via-background/70 to-background/40",
-            "rounded-sm flex flex-col flex-grow",
-            isMobile ? "p-3" : "p-4",
-          )}
-        >
-          <div
-            className={cn(
-              "flex items-center gap-2",
-              isMobile ? "mb-1" : "mb-1.5",
-            )}
-          >
-            <h3
-              className={cn(
-                "text-slate-400 font-semibold",
-                isMobile ? "text-xs" : "text-sm",
-              )}
-            >
-              {t(lang, "djaouliCode.prefix")} {number}.
-            </h3>
-          </div>
-          <div
-            className={cn(
-              "text-gray-100 font-bold uppercase leading-tight",
-              isMobile ? "text-sm mb-1" : "text-base mb-1.5",
-            )}
-          >
+    <div className="bg-muted/30 p-3 rounded-sm border border-slate-700">
+      <div className="flex items-start gap-3">
+        <div className="text-primary font-semibold text-sm flex-shrink-0">
+          {number}.
+        </div>
+        <div className="flex-1">
+          <h4 className="text-gray-100 font-bold text-sm uppercase leading-tight mb-2">
             {t(lang, titleKey)}
-          </div>
-          <p
-            className={cn(
-              "text-gray-400 italic leading-relaxed flex-grow",
-              isMobile ? "text-xs" : "text-sm",
-            )}
-          >
+          </h4>
+          <p className="text-gray-400 leading-relaxed text-sm">
             {t(lang, descriptionKey)}
           </p>
         </div>

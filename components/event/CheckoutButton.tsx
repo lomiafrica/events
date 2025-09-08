@@ -160,7 +160,7 @@ export default function CheckoutButton({
       return (
         <Button
           asChild
-          className="sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-sm"
+          className="bg-green-600 hover:bg-green-700 text-white border-green-600 rounded-sm font-medium h-10 px-6 uppercase w-full justify-center"
         >
           <Link
             href={item.paymentLink}
@@ -178,8 +178,8 @@ export default function CheckoutButton({
         ? t(currentLanguage, "eventSlugPage.tickets.buyNow")
         : t(currentLanguage, "eventSlugPage.tickets.getETicket");
       const buttonClassName = isBundle
-        ? "sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm"
-        : "sm:w-auto bg-green-600 hover:bg-green-700 text-white rounded-sm";
+        ? "bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium h-10 px-6 uppercase w-full justify-center"
+        : "bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium h-10 px-6 uppercase w-full justify-center";
       return (
         <>
           <Button onClick={handleOpenPurchaseModal} className={buttonClassName}>
@@ -207,18 +207,34 @@ export default function CheckoutButton({
       return (
         <Badge
           variant="outline"
-          className="text-sm sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm h-10 inline-flex items-center"
+          className="text-sm justify-center py-2 px-4 rounded-sm h-10 inline-flex items-center font-medium w-full uppercase"
         >
           {t(currentLanguage, "eventSlugPage.availability.misconfigured")}
         </Badge>
       );
     }
   } else {
+    // Determine the styling based on the type of unavailability
+    const isComingSoon =
+      item.salesStart && new Date() < new Date(item.salesStart);
+    const isSoldOut = typeof item.stock === "number" && item.stock <= 0;
+
+    let badgeStyles =
+      "text-sm justify-center py-2 px-4 rounded-sm h-10 inline-flex items-center font-medium w-full uppercase";
+
+    if (isComingSoon) {
+      badgeStyles +=
+        " bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300";
+    } else if (isSoldOut) {
+      badgeStyles +=
+        " bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300";
+    } else {
+      badgeStyles +=
+        " bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400";
+    }
+
     return (
-      <Badge
-        variant="outline"
-        className="text-sm sm:w-auto justify-center py-2 px-3 border-slate-600 text-slate-400 rounded-sm h-10 inline-flex items-center"
-      >
+      <Badge variant="outline" className={badgeStyles}>
         {availabilityStatus.reason ||
           t(currentLanguage, "eventSlugPage.availability.unavailable")}
       </Badge>

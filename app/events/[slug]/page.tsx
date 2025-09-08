@@ -394,99 +394,97 @@ export default async function EventPage({
                               {/* Mimicking djaouli-code.tsx structure - outer div with pattern (simplified here) & inner with gradient (simplified here) */}
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
                                 <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
-                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
-                                    <div className="flex-grow">
-                                      <div className="flex flex-wrap items-baseline mb-3">
-                                        <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
-                                          {ticket.name.replace(
-                                            /\s*\(\d+(\s*\w+)?\)$/,
-                                            "",
-                                          )}
-                                        </h4>
-                                        <span className="mx-2 text-gray-400 text-lg">
-                                          |
-                                        </span>
-                                        <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                          {formatPrice(ticket.price)}
-                                          {t(
-                                            currentLanguage,
-                                            "eventSlugPage.tickets.currencySuffix",
-                                          )}
-                                        </p>
-                                      </div>
-                                      {ticket.description && (
-                                        <div className="text-sm mb-1 space-y-1">
-                                          {ticket.description
-                                            .split("\n")
-                                            .map((line, index) => {
-                                              const trimmedLine = line.trim();
-                                              if (trimmedLine === "") {
-                                                return <br key={index} />;
-                                              }
-                                              if (
-                                                trimmedLine.startsWith("⚠️")
-                                              ) {
-                                                return (
-                                                  <p
-                                                    key={index}
-                                                    className="text-amber-400 font-medium"
-                                                  >
-                                                    {trimmedLine}
-                                                  </p>
-                                                );
-                                              }
+                                  <CardContent className="p-0 space-y-4">
+                                    <div className="flex flex-wrap items-baseline">
+                                      <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
+                                        {ticket.name.replace(
+                                          /\s*\(\d+(\s*\w+)?\)$/,
+                                          "",
+                                        )}
+                                      </h4>
+                                      <span className="mx-2 text-gray-400 text-lg">
+                                        |
+                                      </span>
+                                      <p className="text-primary font-semibold text-xl whitespace-nowrap">
+                                        {formatPrice(ticket.price)}
+                                        {t(
+                                          currentLanguage,
+                                          "eventSlugPage.tickets.currencySuffix",
+                                        )}
+                                      </p>
+                                    </div>
+                                    {ticket.description && (
+                                      <div className="text-sm space-y-1">
+                                        {ticket.description
+                                          .split("\n")
+                                          .map((line, index) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={index} />;
+                                            }
+                                            if (
+                                              trimmedLine.startsWith("⚠️")
+                                            ) {
                                               return (
                                                 <p
                                                   key={index}
-                                                  className="text-gray-400 leading-relaxed"
+                                                  className="text-amber-400 font-medium"
                                                 >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            })}
-                                        </div>
-                                      )}
-                                      {ticket.details && (
-                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
-                                          {ticket.details
-                                            .split("\n")
-                                            .map((line, idx) => {
-                                              const trimmedLine = line.trim();
-                                              if (trimmedLine === "") {
-                                                return <br key={idx} />;
-                                              }
-                                              const match =
-                                                trimmedLine.match(
-                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
-                                                );
-                                              if (match && match[2]) {
-                                                return (
-                                                  <div
-                                                    key={idx}
-                                                    className="flex items-start pl-5"
-                                                  >
-                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                    <span className="leading-snug">
-                                                      {match[2]}
-                                                    </span>
-                                                  </div>
-                                                );
-                                              }
+                                            }
+                                            return (
+                                              <p
+                                                key={index}
+                                                className="text-gray-400 leading-relaxed"
+                                              >
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                      </div>
+                                    )}
+                                    {ticket.details && (
+                                      <div className="text-xs text-gray-400/80 space-y-1">
+                                        {ticket.details
+                                          .split("\n")
+                                          .map((line, idx) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={idx} />;
+                                            }
+                                            const match =
+                                              trimmedLine.match(
+                                                /^(✅|✔|•|-|\*)\s*(.*)/,
+                                              );
+                                            if (match && match[2]) {
                                               return (
-                                                <p
+                                                <div
                                                   key={idx}
-                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                                  className="flex items-start pl-5"
                                                 >
-                                                  {" "}
-                                                  {/* Indent non-list items slightly if preferred or remove ml for full width */}
-                                                  {trimmedLine}
-                                                </p>
+                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                  <span className="leading-snug">
+                                                    {match[2]}
+                                                  </span>
+                                                </div>
                                               );
-                                            })}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0 flex justify-end">
+                                            }
+                                            return (
+                                              <p
+                                                key={idx}
+                                                className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                              >
+                                                {" "}
+                                                {/* Indent non-list items slightly if preferred or remove ml for full width */}
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                      </div>
+                                    )}
+                                    <div className="w-full flex justify-center pt-2">
                                       <CheckoutButton
                                         item={{
                                           id: ticket._key,
@@ -543,99 +541,97 @@ export default async function EventPage({
                             >
                               <div className="size-full bg-repeat p-1 bg-[length:20px_20px]">
                                 <div className="size-full bg-gradient-to-br from-background/95 via-background/85 to-background/70 rounded-sm pt-1 pb-1 px-3 flex flex-col flex-grow">
-                                  <CardContent className="p-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-grow w-full">
-                                    <div className="flex-grow">
-                                      <div className="flex flex-wrap items-baseline mb-3">
-                                        <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
-                                          {bundle.name.replace(
-                                            /\s*\(\d+(\s*\w+)?\)$/,
-                                            "",
-                                          )}
-                                        </h4>
-                                        <span className="mx-2 text-gray-400 text-lg">
-                                          |
-                                        </span>
-                                        <p className="text-primary font-semibold text-xl whitespace-nowrap">
-                                          {formatPrice(bundle.price)}
-                                          {t(
-                                            currentLanguage,
-                                            "eventSlugPage.tickets.currencySuffix",
-                                          )}
-                                        </p>
-                                      </div>
-                                      {bundle.description && (
-                                        <div className="text-sm mb-1 space-y-1">
-                                          {bundle.description
-                                            .split("\n")
-                                            .map((line, index) => {
-                                              const trimmedLine = line.trim();
-                                              if (trimmedLine === "") {
-                                                return <br key={index} />;
-                                              }
-                                              if (
-                                                trimmedLine.startsWith("⚠️")
-                                              ) {
-                                                return (
-                                                  <p
-                                                    key={index}
-                                                    className="text-amber-400 font-medium"
-                                                  >
-                                                    {trimmedLine}
-                                                  </p>
-                                                );
-                                              }
+                                  <CardContent className="p-0 space-y-4">
+                                    <div className="flex flex-wrap items-baseline">
+                                      <h4 className="text-gray-100 font-bold text-lg uppercase leading-tight">
+                                        {bundle.name.replace(
+                                          /\s*\(\d+(\s*\w+)?\)$/,
+                                          "",
+                                        )}
+                                      </h4>
+                                      <span className="mx-2 text-gray-400 text-lg">
+                                        |
+                                      </span>
+                                      <p className="text-primary font-semibold text-xl whitespace-nowrap">
+                                        {formatPrice(bundle.price)}
+                                        {t(
+                                          currentLanguage,
+                                          "eventSlugPage.tickets.currencySuffix",
+                                        )}
+                                      </p>
+                                    </div>
+                                    {bundle.description && (
+                                      <div className="text-sm space-y-1">
+                                        {bundle.description
+                                          .split("\n")
+                                          .map((line, index) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={index} />;
+                                            }
+                                            if (
+                                              trimmedLine.startsWith("⚠️")
+                                            ) {
                                               return (
                                                 <p
                                                   key={index}
-                                                  className="text-gray-400 leading-relaxed"
+                                                  className="text-amber-400 font-medium"
                                                 >
                                                   {trimmedLine}
                                                 </p>
                                               );
-                                            })}
-                                        </div>
-                                      )}
-                                      {bundle.details && (
-                                        <div className="text-xs text-gray-400/80 my-2 space-y-1">
-                                          {bundle.details
-                                            .split("\n")
-                                            .map((line, idx) => {
-                                              const trimmedLine = line.trim();
-                                              if (trimmedLine === "") {
-                                                return <br key={idx} />;
-                                              }
-                                              const match =
-                                                trimmedLine.match(
-                                                  /^(✅|✔|•|-|\*)\s*(.*)/,
-                                                );
-                                              if (match && match[2]) {
-                                                return (
-                                                  <div
-                                                    key={idx}
-                                                    className="flex items-start pl-5"
-                                                  >
-                                                    <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
-                                                    <span className="leading-snug">
-                                                      {match[2]}
-                                                    </span>
-                                                  </div>
-                                                );
-                                              }
+                                            }
+                                            return (
+                                              <p
+                                                key={index}
+                                                className="text-gray-400 leading-relaxed"
+                                              >
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                      </div>
+                                    )}
+                                    {bundle.details && (
+                                      <div className="text-xs text-gray-400/80 space-y-1">
+                                        {bundle.details
+                                          .split("\n")
+                                          .map((line, idx) => {
+                                            const trimmedLine = line.trim();
+                                            if (trimmedLine === "") {
+                                              return <br key={idx} />;
+                                            }
+                                            const match =
+                                              trimmedLine.match(
+                                                /^(✅|✔|•|-|\*)\s*(.*)/,
+                                              );
+                                            if (match && match[2]) {
                                               return (
-                                                <p
+                                                <div
                                                   key={idx}
-                                                  className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                                  className="flex items-start pl-5"
                                                 >
-                                                  {" "}
-                                                  {/* Indent non-list items slightly */}
-                                                  {trimmedLine}
-                                                </p>
+                                                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-[1px]" />
+                                                  <span className="leading-snug">
+                                                    {match[2]}
+                                                  </span>
+                                                </div>
                                               );
-                                            })}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex-shrink-0 w-full sm:w-auto mt-3 sm:mt-0 flex justify-end">
+                                            }
+                                            return (
+                                              <p
+                                                key={idx}
+                                                className="leading-snug ml-[calc(0.375rem+0.875rem)]"
+                                              >
+                                                {" "}
+                                                {/* Indent non-list items slightly */}
+                                                {trimmedLine}
+                                              </p>
+                                            );
+                                          })}
+                                      </div>
+                                    )}
+                                    <div className="w-full flex justify-center pt-2">
                                       <CheckoutButton
                                         item={{
                                           id: bundle.bundleId.current, // Use bundleId.current for bundles
@@ -716,56 +712,56 @@ export default async function EventPage({
             {(event.location?.venueName ||
               event.location?.address ||
               event.venueDetails) && (
-              <div className="mb-10 pt-6">
-                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                  {t(currentLanguage, "eventSlugPage.venueSection.title")}
-                </h2>
-                {event.location?.venueName && (
-                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
-                    {event.location.venueName}
-                  </p>
-                )}
-                {event.location?.address && (
-                  <p className="text-slate-400 mb-4">
-                    {event.location.address}
-                  </p>
-                )}
-                {/* Embedded Map ADDED HERE */}
-                {mapEmbedSrc && (
-                  <div className="my-6 relative w-full h-[300px] bg-muted rounded-sm shadow-lg border border-slate-700 overflow-hidden">
-                    <iframe
-                      src={mapEmbedSrc}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen={false}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={(() => {
-                        const locationNameForMap =
-                          event.location?.venueName || event.location?.address;
-                        return locationNameForMap
-                          ? t(
+                <div className="mb-10 pt-6">
+                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                    {t(currentLanguage, "eventSlugPage.venueSection.title")}
+                  </h2>
+                  {event.location?.venueName && (
+                    <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
+                      {event.location.venueName}
+                    </p>
+                  )}
+                  {event.location?.address && (
+                    <p className="text-slate-400 mb-4">
+                      {event.location.address}
+                    </p>
+                  )}
+                  {/* Embedded Map ADDED HERE */}
+                  {mapEmbedSrc && (
+                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-sm shadow-lg border border-slate-700 overflow-hidden">
+                      <iframe
+                        src={mapEmbedSrc}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={false}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title={(() => {
+                          const locationNameForMap =
+                            event.location?.venueName || event.location?.address;
+                          return locationNameForMap
+                            ? t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleNamed",
                               { locationName: locationNameForMap },
                             )
-                          : t(
+                            : t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleDefault",
                             );
-                      })()}
-                      className="absolute top-0 left-0 w-full h-full"
-                    ></iframe>
-                  </div>
-                )}
-                {event.venueDetails && (
-                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                    {renderFormattedText(event.venueDetails)}
-                  </div>
-                )}
-              </div>
-            )}
+                        })()}
+                        className="absolute top-0 left-0 w-full h-full"
+                      ></iframe>
+                    </div>
+                  )}
+                  {event.venueDetails && (
+                    <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                      {renderFormattedText(event.venueDetails)}
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||
