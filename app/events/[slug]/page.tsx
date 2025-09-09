@@ -715,56 +715,56 @@ export default async function EventPage({
             {(event.location?.venueName ||
               event.location?.address ||
               event.venueDetails) && (
-                <div className="mb-10 pt-6">
-                  <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-                    {t(currentLanguage, "eventSlugPage.venueSection.title")}
-                  </h2>
-                  {event.location?.venueName && (
-                    <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
-                      {event.location.venueName}
-                    </p>
-                  )}
-                  {event.location?.address && (
-                    <p className="text-slate-400 mb-4">
-                      {event.location.address}
-                    </p>
-                  )}
-                  {/* Embedded Map ADDED HERE */}
-                  {mapEmbedSrc && (
-                    <div className="my-6 relative w-full h-[300px] bg-muted rounded-xs shadow-lg border border-slate-700 overflow-hidden">
-                      <iframe
-                        src={mapEmbedSrc}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen={false}
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title={(() => {
-                          const locationNameForMap =
-                            event.location?.venueName || event.location?.address;
-                          return locationNameForMap
-                            ? t(
+              <div className="mb-10 pt-6">
+                <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
+                  {t(currentLanguage, "eventSlugPage.venueSection.title")}
+                </h2>
+                {event.location?.venueName && (
+                  <p className="font-semibold text-gray-100 text-lg mt-2 mb-1">
+                    {event.location.venueName}
+                  </p>
+                )}
+                {event.location?.address && (
+                  <p className="text-slate-400 mb-4">
+                    {event.location.address}
+                  </p>
+                )}
+                {/* Embedded Map ADDED HERE */}
+                {mapEmbedSrc && (
+                  <div className="my-6 relative w-full h-[300px] bg-muted rounded-xs shadow-lg border border-slate-700 overflow-hidden">
+                    <iframe
+                      src={mapEmbedSrc}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen={false}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={(() => {
+                        const locationNameForMap =
+                          event.location?.venueName || event.location?.address;
+                        return locationNameForMap
+                          ? t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleNamed",
                               { locationName: locationNameForMap },
                             )
-                            : t(
+                          : t(
                               currentLanguage,
                               "eventSlugPage.venueSection.mapTitleDefault",
                             );
-                        })()}
-                        className="absolute top-0 left-0 w-full h-full"
-                      ></iframe>
-                    </div>
-                  )}
-                  {event.venueDetails && (
-                    <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
-                      {renderFormattedText(event.venueDetails)}
-                    </div>
-                  )}
-                </div>
-              )}
+                      })()}
+                      className="absolute top-0 left-0 w-full h-full"
+                    ></iframe>
+                  </div>
+                )}
+                {event.venueDetails && (
+                  <div className="prose prose-sm sm:prose dark:prose-invert max-w-none text-gray-300 leading-relaxed mt-1">
+                    {renderFormattedText(event.venueDetails)}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Share Button - Separator above it if content sections were present */}
             {(event.description ||

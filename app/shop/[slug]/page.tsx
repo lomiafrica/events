@@ -1,12 +1,16 @@
-// Placeholder for Single Product Page
+import { Suspense } from "react";
 import { getProductBySlug } from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
+import LoadingComponent from "@/components/ui/Bouncer";
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
+import { ProductDetailContent } from "@/components/shop/product-detail-content";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export default async function ProductDetailPage({ params }: Props) {
+async function ProductContent({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
@@ -15,21 +19,33 @@ export default async function ProductDetailPage({ params }: Props) {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-      <p className="text-lg mb-4">Price: {product.price} XOF</p>
-      {/* Render product images, description, variants, etc. later */}
-      <div className="prose lg:prose-xl mt-6">
-        {/* Placeholder for description - needs Portable Text renderer */}
-        <p>{JSON.stringify(product.description)}</p>
-      </div>
-      {/* Add to Cart / Variant selection logic later */}
-    </main>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        <ProductDetailContent product={product} />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default async function ProductDetailPage({ params }: Props) {
+  return (
+    <Suspense fallback={<LoadingComponent />}>
+      <ProductContent params={params} />
+    </Suspense>
   );
 }
 
 // Optional: Generate static paths if needed
-// export async function generateStaticParams() {
-//   const products = await getAllProducts(); // Assuming getAllProducts fetches slugs
-//   return products.map((product: any) => ({ slug: product.slug?.current || product.slug }));
-// }
+export async function generateStaticParams() {
+  const { getAllProducts } = await import("@/lib/sanity/queries");
+  const products = await getAllProducts();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return products.map((product: any) => ({
+    slug:
+      typeof product.slug === "string"
+        ? product.slug
+        : product.slug?.current || "",
+  }));
+}

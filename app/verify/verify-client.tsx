@@ -612,7 +612,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {/* Differentiate between individual and legacy ticket display */}
                           {ticketData.use_count !== undefined &&
-                            ticketData.total_quantity ? (
+                          ticketData.total_quantity ? (
                             <span>
                               {ticketData.use_count} /{" "}
                               {ticketData.total_quantity}{" "}
@@ -626,13 +626,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                               {ticketData.quantity}{" "}
                               {ticketData.quantity > 1
                                 ? t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
+                                    currentLanguage,
+                                    "ticketVerification.quantity.people",
+                                  )
                                 : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
-                                )}
+                                    currentLanguage,
+                                    "ticketVerification.quantity.person",
+                                  )}
                             </span>
                           )}
                         </p>
@@ -648,15 +648,15 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     <div className="text-center mt-3">
                       <p className="text-orange-800 dark:text-orange-200 font-medium">
                         {ticketData.use_count !== undefined &&
-                          ticketData.total_quantity
+                        ticketData.total_quantity
                           ? t(
-                            currentLanguage,
-                            "ticketVerification.warnings.fullyUsed",
-                          )
+                              currentLanguage,
+                              "ticketVerification.warnings.fullyUsed",
+                            )
                           : t(
-                            currentLanguage,
-                            "ticketVerification.warnings.alreadyUsed",
-                          )}
+                              currentLanguage,
+                              "ticketVerification.warnings.alreadyUsed",
+                            )}
                       </p>
                       <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
                         {t(
@@ -683,13 +683,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                             people:
                               ticketData?.quantity && ticketData.quantity > 1
                                 ? t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
+                                    currentLanguage,
+                                    "ticketVerification.quantity.people",
+                                  )
                                 : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
-                                ),
+                                    currentLanguage,
+                                    "ticketVerification.quantity.person",
+                                  ),
                           },
                         )}
                       </p>

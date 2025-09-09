@@ -787,8 +787,8 @@ export default function AdminPage() {
             <DialogHeader>
               <DialogTitle className="text-gray-100">
                 {selectedPurchase &&
-                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                    selectedPurchase.email_dispatch_attempts === 0)
+                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                  selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
@@ -876,7 +876,7 @@ export default function AdminPage() {
                       <>
                         {selectedPurchase.email_dispatch_status ===
                           "NOT_INITIATED" ||
-                          selectedPurchase.email_dispatch_attempts === 0 ? (
+                        selectedPurchase.email_dispatch_attempts === 0 ? (
                           <>
                             <Send className="h-4 w-4 mr-2" />
                             Send Email

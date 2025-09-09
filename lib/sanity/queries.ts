@@ -206,19 +206,50 @@ export async function getStory() {
   );
 }
 
-// Products (New Section)
+// Helper function to get cache configuration based on environment
+const getCacheConfig = (tags: string[]) => ({
+  next: {
+    revalidate: process.env.NODE_ENV === "production" ? 900 : 0, // No cache in development, 15 minutes in production
+    tags,
+  },
+});
+
+// Products (Enhanced Section)
 export async function getAllProducts() {
-  return client.fetch(`
+  return client.fetch(
+    `
     *[_type == "product"] | order(name asc) {
       _id,
       name,
-      slug,
+      "slug": slug.current,
       productId,
-      "mainImage": images[0].asset->url, // Get the first image URL
-      price,
-      stock
+      "mainImage": images[0].asset->url,
+      "price": basePrice,
+      "stock": baseStock,
+      description,
+      "categories": categories[]->{
+        _id,
+        title,
+        "slug": slug.current
+      },
+      tags,
+      images[]{
+        asset->{
+          _id,
+          url,
+          metadata {
+            dimensions,
+            lqip
+          }
+        },
+        alt,
+        caption
+      }
     }
-  `);
+  `,
+    {},
+    getCacheConfig(["products"]),
+  );
 }
 
 export async function getProductBySlug(slug: string) {
@@ -226,26 +257,39 @@ export async function getProductBySlug(slug: string) {
     `
     *[_type == "product" && slug.current == $slug][0] {
       _id,
-      name,
-      slug,
+      "name": name,
+      "slug": slug.current,
       productId,
+      "mainImage": images[0].asset->url,
       description,
-      "images": images[].asset->{
-        url,
-        metadata {
-          dimensions,
-          lqip // Low Quality Image Placeholder
-        }
-       },
-      price,
-      stock,
-      // Fetch referenced categories if needed
-      "categories": categories[]->{title, slug}
-      // Fetch variants if implemented
-      // variants
+      "images": images[]{
+        asset->{
+          url,
+          metadata {
+            dimensions,
+            lqip // Low Quality Image Placeholder
+          }
+        },
+        alt,
+        caption
+      },
+      "price": basePrice,
+      "stock": baseStock,
+      manageVariants,
+      variantOptions,
+      variantInventory,
+      "categories": categories[]->{
+        title,
+        "slug": slug.current
+      },
+      tags,
+      requiresShipping,
+      weight,
+      dimensions
     }
   `,
     { slug },
+    getCacheConfig([`product-${slug}`, "products"]),
   );
 }
 

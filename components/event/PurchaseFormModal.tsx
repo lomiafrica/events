@@ -298,7 +298,7 @@ export default function PurchaseFormModal({
         console.error("Supabase function error:", functionError);
         setError(
           functionError.message ||
-          t(currentLanguage, "purchaseModal.errors.functionError"),
+            t(currentLanguage, "purchaseModal.errors.functionError"),
         );
         setIsLoading(false);
         return;
@@ -311,7 +311,7 @@ export default function PurchaseFormModal({
         console.error("Lomi checkout URL not found in response:", data);
         setError(
           data.error ||
-          t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
+            t(currentLanguage, "purchaseModal.errors.lomiUrlMissing"),
         );
       }
     } catch (e: unknown) {
@@ -439,7 +439,7 @@ export default function PurchaseFormModal({
                         id="name"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        className="rounded-xs h-12 text-base px-4"
+                        className="rounded-xs h-12 text-base px-4 mt-2"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.name",
@@ -458,7 +458,7 @@ export default function PurchaseFormModal({
                         type="email"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
-                        className="rounded-xs h-12 text-base px-4"
+                        className="rounded-xs h-12 text-base px-4 mt-2"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.email",
@@ -476,7 +476,7 @@ export default function PurchaseFormModal({
                         <PhoneNumberInput
                           value={userPhone}
                           onChange={(value) => setUserPhone(value || "")}
-                          className="rounded-xs h-12 text-base px-4"
+                          className="rounded-xs h-12 text-base mt-2"
                           placeholder={t(
                             currentLanguage,
                             "purchaseModal.placeholders.phone",
@@ -497,7 +497,7 @@ export default function PurchaseFormModal({
                           size="sm"
                           onClick={handleQuantityDecrement}
                           disabled={quantity <= 1}
-                          className="rounded-xs h-12 w-12 p-0"
+                          className="rounded-xs h-12 w-12 p-0 mt-2"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -548,7 +548,10 @@ export default function PurchaseFormModal({
                       {item.isBundle && (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">
-                            {t(currentLanguage, "purchaseModal.ticketsGenerated")}
+                            {t(
+                              currentLanguage,
+                              "purchaseModal.ticketsGenerated",
+                            )}
                           </span>
                           <span className="text-sm font-medium">
                             {actualTicketCount}

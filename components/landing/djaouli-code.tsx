@@ -224,12 +224,7 @@ interface CodeItemProps {
   isMobile: boolean;
 }
 
-function CodeItem({
-  number,
-  titleKey,
-  descriptionKey,
-  lang,
-}: CodeItemProps) {
+function CodeItem({ number, titleKey, descriptionKey, lang }: CodeItemProps) {
   return (
     <div className="bg-muted/30 p-3 rounded-xs border border-slate-700">
       <div className="flex items-start gap-3">

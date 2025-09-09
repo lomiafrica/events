@@ -5,6 +5,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { TranslationProvider } from "@/lib/contexts/TranslationContext";
+import { CartProvider } from "@/components/shop/cart/cart-context";
+import { WishlistProvider } from "@/components/shop/wishlist/wishlist-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -71,7 +73,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TranslationProvider>
-            <main className="flex-grow">{children}</main>
+            <CartProvider>
+              <WishlistProvider>
+                <main className="flex-grow">{children}</main>
+              </WishlistProvider>
+            </CartProvider>
           </TranslationProvider>
         </ThemeProvider>
         <Analytics />
