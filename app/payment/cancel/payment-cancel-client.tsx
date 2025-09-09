@@ -23,7 +23,7 @@ export function PaymentCancelClient({ purchaseId }: PaymentCancelClientProps) {
         <div className="max-w-md mx-auto">
           <Card className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-xs flex items-center justify-center mb-4">
+              <div className="mx-auto w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-sm flex items-center justify-center mb-4">
                 <XCircle className="w-8 h-8 text-orange-600 dark:text-orange-400" />
               </div>
               <CardTitle className="text-2xl font-bold text-orange-800 dark:text-orange-200">
@@ -42,7 +42,7 @@ export function PaymentCancelClient({ purchaseId }: PaymentCancelClientProps) {
                 )}
               </div>
 
-              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xs p-4">
+              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-sm p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <ArrowLeft className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                   <h3 className="font-semibold text-orange-800 dark:text-orange-200">

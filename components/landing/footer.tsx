@@ -70,7 +70,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="WhatsApp"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xs text-white transition-colors hover:text-[#25D366]"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-sm text-white transition-colors hover:text-[#25D366]"
                 >
                   <WhatsappIcon className="h-[22px] w-[22px]" />
                 </Link>
@@ -82,7 +82,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Soundcloud"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xs text-white transition-colors hover:text-[#ff5500]"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-sm text-white transition-colors hover:text-[#ff5500]"
                 >
                   <Soundcloud className="h-[20px] w-[20px]" />
                 </Link>
@@ -94,7 +94,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xs transition-colors text-white hover:text-[#1877F2]"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-sm transition-colors text-white hover:text-[#1877F2]"
                 >
                   <FacebookIcon className="h-[19.5px] w-[19.5px]" />
                 </Link>
@@ -106,7 +106,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xs transition-colors text-white hover:text-[#E4405F]"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-sm transition-colors text-white hover:text-[#E4405F]"
                 >
                   <IG className="h-[23px] w-[23px]" />
                 </Link>

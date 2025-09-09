@@ -10,7 +10,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = 'public'
 AS $$
 DECLARE
   updated_ids TEXT[] := '{}';

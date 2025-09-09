@@ -88,7 +88,7 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
               className="h-screen snap-start flex justify-center items-center relative"
             >
               <div
-                className="w-[400px] h-[533px] md:w-[400px] md:h-[533px] lg:w-[500px] lg:h-[600px] m-5 mt-16 bg-black overflow-hidden relative rounded-xs shadow-2xl transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
+                className="w-[400px] h-[533px] md:w-[400px] md:h-[533px] lg:w-[500px] lg:h-[600px] m-5 mt-16 bg-black overflow-hidden relative rounded-sm shadow-2xl transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
                 onClick={() => handleImageClick(event.slug)}
               >
                 <div className="relative w-full h-full overflow-hidden rounded">

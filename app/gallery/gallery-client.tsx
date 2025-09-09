@@ -171,12 +171,12 @@ export default function GalleryClientComponent() {
                         className={`
                                         relative 
                                         mb-5 block w-full cursor-zoom-in
-                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-xs after:shadow-highlight
+                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
                                     `}
                       >
                         <Image
                           alt="Gallery photo - Highlight"
-                          className="transform rounded-xs brightness-90 transition will-change-auto group-hover:brightness-110"
+                          className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
                           style={{ transform: "translate3d(0, 0, 0)" }}
                           src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
                           width={!isNaN(numericWidth) ? numericWidth : 720}
@@ -188,7 +188,7 @@ export default function GalleryClientComponent() {
                           priority={index < 3} // Priority for first few tagged images
                         />
                         {tags && tags.length > 0 && (
-                          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-xs shadow-lg z-10">
+                          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
                             {tags[0]}
                           </div>
                         )}
@@ -216,12 +216,12 @@ export default function GalleryClientComponent() {
                         className={`
                                         relative 
                                         mb-5 block w-full cursor-zoom-in
-                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-xs after:shadow-highlight
+                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
                                     `}
                       >
                         <Image
                           alt="Gallery photo"
-                          className="transform rounded-xs brightness-90 transition will-change-auto group-hover:brightness-110"
+                          className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
                           style={{ transform: "translate3d(0, 0, 0)" }}
                           src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
                           width={!isNaN(numericWidth) ? numericWidth : 720}
@@ -299,7 +299,7 @@ export default function GalleryClientComponent() {
                 >
                   <Image
                     alt={`Zoomed gallery photo ${zoomedImage.id}`}
-                    className="object-contain w-full h-full rounded-xs" // Transform class removed
+                    className="object-contain w-full h-full rounded-sm" // Transform class removed
                     style={{ transform: "translate3d(0, 0, 0)" }} // Keep for potential GPU layer promotion
                     src={imageSrc}
                     width={baseWidth}
@@ -308,7 +308,7 @@ export default function GalleryClientComponent() {
                   />
                   {/* Tag is now relative to this scaling wrapper */}
                   {zoomedImage.tags && zoomedImage.tags.length > 0 && (
-                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-xs shadow-lg z-10">
+                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
                       {zoomedImage.tags[0]}
                     </div>
                   )}

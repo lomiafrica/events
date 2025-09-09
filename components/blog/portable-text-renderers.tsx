@@ -27,7 +27,7 @@ interface BlockProps {
 const CodeBlockRenderer: React.FC<BlockProps> = ({ value }) => {
   if (!value?.code) return null;
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xs p-4 my-6 overflow-x-auto border border-zinc-200 dark:border-zinc-700 shadow-sm">
+    <div className="bg-zinc-100 dark:bg-zinc-800 rounded-sm p-4 my-6 overflow-x-auto border border-zinc-200 dark:border-zinc-700 shadow-sm">
       <pre className="text-sm font-mono whitespace-pre-wrap break-words">
         <code>{value.code}</code>
       </pre>
@@ -44,7 +44,7 @@ const CodeBlockRenderer: React.FC<BlockProps> = ({ value }) => {
 const InfoBlockRenderer: React.FC<BlockProps> = ({ value }) => {
   if (!value?.text) return null;
   return (
-    <div className="flex rounded-xs border border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/30 p-4 my-6 shadow">
+    <div className="flex rounded-sm border border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/30 p-4 my-6 shadow">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -88,7 +88,7 @@ const InfoBlockRenderer: React.FC<BlockProps> = ({ value }) => {
 const WarningBlockRenderer: React.FC<BlockProps> = ({ value }) => {
   if (!value?.text) return null;
   return (
-    <div className="flex rounded-xs border border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-900/30 p-4 my-6 shadow">
+    <div className="flex rounded-sm border border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-900/30 p-4 my-6 shadow">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -134,7 +134,7 @@ const TableRenderer: React.FC<BlockProps> = ({ value }) => {
   const headerCells = value.rows[0]?.cells || [];
   const bodyRows = value.rows.slice(1);
   return (
-    <div className="overflow-x-auto my-8 rounded-xs border border-zinc-200 dark:border-zinc-700 shadow-md">
+    <div className="overflow-x-auto my-8 rounded-sm border border-zinc-200 dark:border-zinc-700 shadow-md">
       <table className="w-full min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
         {headerCells.length > 0 && (
           <thead className="bg-zinc-100 dark:bg-zinc-800">
@@ -185,7 +185,7 @@ const BodyImageRenderer: React.FC<BlockProps> = ({ value }) => {
   const imageUrl = urlFor(value).image().url();
   return (
     <figure className="my-8 transition-all duration-300 ease-in-out hover:shadow-2xl">
-      <div className="relative aspect-video rounded-xs overflow-hidden shadow-lg">
+      <div className="relative aspect-video rounded-sm overflow-hidden shadow-lg">
         <Image
           src={imageUrl}
           alt={value.alt || "Blog post image"}
@@ -228,7 +228,7 @@ export const portableTextRenderers: Partial<PortableTextReactComponents> = {
       );
     },
     highlight: ({ children }) => (
-      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-xs font-medium">
+      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm font-medium">
         {children}
       </span>
     ),
@@ -239,7 +239,7 @@ export const portableTextRenderers: Partial<PortableTextReactComponents> = {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block my-3 px-6 py-3 bg-primary text-white rounded-xs text-sm font-semibold hover:bg-primary/80 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background"
+          className="inline-block my-3 px-6 py-3 bg-primary text-white rounded-sm text-sm font-semibold hover:bg-primary/80 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background"
         >
           {children}
         </a>
@@ -279,7 +279,7 @@ export const portableTextRenderers: Partial<PortableTextReactComponents> = {
       <h4 className="text-lg md:text-xl font-semibold mt-6 mb-2">{children}</h4>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-primary/80 pl-5 italic text-zinc-600 dark:text-zinc-300 my-6 py-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-xs shadow">
+      <blockquote className="border-l-4 border-primary/80 pl-5 italic text-zinc-600 dark:text-zinc-300 my-6 py-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-sm shadow">
         {children}
       </blockquote>
     ),

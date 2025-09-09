@@ -310,41 +310,41 @@ export default function AdminPage() {
     switch (status) {
       case "SENT_SUCCESSFULLY":
         return (
-          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm min-w-[80px] justify-center">
             <CheckCircle className="h-3 w-3 mr-1" />
             Sent
           </Badge>
         );
       case "DISPATCH_FAILED":
         return (
-          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-sm min-w-[80px] justify-center">
             <AlertCircle className="h-3 w-3 mr-1" />
             Failed
           </Badge>
         );
       case "DISPATCH_IN_PROGRESS":
         return (
-          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-sm min-w-[80px] justify-center">
             <Clock className="h-3 w-3 mr-1" />
             In Progress
           </Badge>
         );
       case "PENDING_DISPATCH":
         return (
-          <Badge className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 rounded-sm min-w-[80px] justify-center">
             <Clock className="h-3 w-3 mr-1" />
             Pending
           </Badge>
         );
       case "NOT_INITIATED":
         return (
-          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-sm min-w-[80px] justify-center">
             Not Initiated
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-xs min-w-[80px] justify-center">
+          <Badge className="bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 rounded-sm min-w-[80px] justify-center">
             Unknown
           </Badge>
         );
@@ -355,25 +355,25 @@ export default function AdminPage() {
     switch (status) {
       case "paid":
         return (
-          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-xs">
+          <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm">
             Paid
           </Badge>
         );
       case "pending_payment":
         return (
-          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-xs">
+          <Badge className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700 rounded-sm">
             Pending
           </Badge>
         );
       case "payment_failed":
         return (
-          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-xs">
+          <Badge className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 rounded-sm">
             Failed
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-zinc-900/90 dark:bg-black/50 text-zinc-100 dark:text-sage-100 border-zinc-800 rounded-xs">
+          <Badge className="bg-zinc-900/90 dark:bg-black/50 text-zinc-100 dark:text-sage-100 border-zinc-800 rounded-sm">
             {status}
           </Badge>
         );
@@ -414,7 +414,7 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-xs border-slate-700">
+        <Card className="w-full max-w-md rounded-sm border-slate-700">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-gray-100">
               Admin Access
@@ -435,11 +435,11 @@ export default function AdminPage() {
                 onChange={(e) => setPin(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleAuth()}
                 placeholder="Enter PIN"
-                className="rounded-xs bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
+                className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
               />
             </div>
             {authError && (
-              <div className="rounded-xs border border-red-700 bg-red-900/30 p-3 text-red-300">
+              <div className="rounded-sm border border-red-700 bg-red-900/30 p-3 text-red-300">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   <span>{authError}</span>
@@ -448,7 +448,7 @@ export default function AdminPage() {
             )}
             <Button
               onClick={handleAuth}
-              className="w-full rounded-xs"
+              className="w-full rounded-sm"
               disabled={!pin.trim()}
             >
               Login
@@ -471,7 +471,7 @@ export default function AdminPage() {
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="rounded-xs border-slate-700 text-gray-100 hover:bg-slate-800"
+            className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
           >
             <X className="h-4 w-4 mr-2" />
             Logout
@@ -479,7 +479,7 @@ export default function AdminPage() {
         </div>
 
         {/* Search and Actions */}
-        <Card className="mb-6 rounded-xs border-slate-700 bg-background">
+        <Card className="mb-6 rounded-sm border-slate-700 bg-background">
           <CardContent className="pt-6">
             <div className="flex gap-4 items-end">
               <div className="flex-1">
@@ -492,13 +492,13 @@ export default function AdminPage() {
                     placeholder="Search by name, email, event, or purchase ID..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="rounded-xs bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
+                    className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
                   />
                   <Button
                     onClick={searchPurchases}
                     variant="outline"
                     size="sm"
-                    className="rounded-xs border-slate-700 text-gray-100 hover:bg-slate-800 h-10 px-3"
+                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800 h-10 px-3"
                     disabled={loading}
                   >
                     <Search className="h-4 w-4" />
@@ -508,7 +508,7 @@ export default function AdminPage() {
               <Button
                 onClick={loadPurchases}
                 variant="outline"
-                className="rounded-xs border-slate-700 text-gray-100 hover:bg-slate-800"
+                className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
                 disabled={loading}
               >
                 <RefreshCw
@@ -519,7 +519,7 @@ export default function AdminPage() {
               <Button
                 onClick={downloadCSV}
                 variant="outline"
-                className="rounded-xs border-slate-700 text-gray-100 hover:bg-slate-800"
+                className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
                 disabled={loading}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -530,7 +530,7 @@ export default function AdminPage() {
         </Card>
 
         {/* Purchases Table */}
-        <Card className="rounded-xs border-slate-700 bg-background">
+        <Card className="rounded-sm border-slate-700 bg-background">
           <CardHeader>
             <CardTitle className="text-gray-100">
               Purchases ({filteredPurchases.length})
@@ -622,7 +622,7 @@ export default function AdminPage() {
                                 )}
                                 {purchase.email_dispatch_error && (
                                   <div
-                                    className="w-4 h-4 flex items-center justify-center rounded-xs bg-red-100 dark:bg-red-900/30 cursor-help"
+                                    className="w-4 h-4 flex items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30 cursor-help"
                                     title={purchase.email_dispatch_error}
                                   >
                                     <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
@@ -662,7 +662,7 @@ export default function AdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => openEmailDialog(purchase)}
-                                className="rounded-xs bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
+                                className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
                                 disabled={!canSendEmail(purchase)}
                               >
                                 <EmailIcon className="h-4 w-4 mr-2" />
@@ -683,7 +683,7 @@ export default function AdminPage() {
                     return (
                       <Card
                         key={purchase.purchase_id}
-                        className="rounded-xs border-slate-700 bg-background"
+                        className="rounded-sm border-slate-700 bg-background"
                       >
                         <CardContent className="p-4">
                           <div className="space-y-3">
@@ -755,7 +755,7 @@ export default function AdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => openEmailDialog(purchase)}
-                                className="flex-1 rounded-xs bg-blue-600 hover:bg-blue-700 text-white"
+                                className="flex-1 rounded-sm bg-blue-600 hover:bg-blue-700 text-white"
                                 disabled={!canSendEmail(purchase)}
                               >
                                 <EmailIcon className="h-4 w-4 mr-2" />
@@ -763,7 +763,7 @@ export default function AdminPage() {
                               </Button>
                               {purchase.email_dispatch_error && (
                                 <div
-                                  className="w-9 h-9 flex items-center justify-center rounded-xs bg-red-100 dark:bg-red-900/30 cursor-help"
+                                  className="w-9 h-9 flex items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30 cursor-help"
                                   title={purchase.email_dispatch_error}
                                 >
                                   <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
@@ -783,12 +783,12 @@ export default function AdminPage() {
 
         {/* Email Dialog */}
         <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-          <DialogContent className="rounded-xs border-slate-700 bg-background">
+          <DialogContent className="rounded-sm border-slate-700 bg-background">
             <DialogHeader>
               <DialogTitle className="text-gray-100">
                 {selectedPurchase &&
-                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                  selectedPurchase.email_dispatch_attempts === 0)
+                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                    selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
@@ -808,7 +808,7 @@ export default function AdminPage() {
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder="Enter correct name"
-                      className="rounded-xs bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
+                      className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
                     />
                   </div>
                   <div>
@@ -820,7 +820,7 @@ export default function AdminPage() {
                       value={newPhone}
                       onChange={(e) => setNewPhone(e.target.value)}
                       placeholder="Enter correct phone"
-                      className="rounded-xs bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
+                      className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
                     />
                   </div>
                 </div>
@@ -834,10 +834,10 @@ export default function AdminPage() {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="Enter correct email"
-                    className="rounded-xs bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
+                    className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400"
                   />
                 </div>
-                <div className="bg-slate-800/50 p-4 rounded-xs border border-slate-700">
+                <div className="bg-slate-800/50 p-4 rounded-sm border border-slate-700">
                   <h4 className="font-medium mb-2 text-gray-100">
                     Purchase Details
                   </h4>
@@ -858,14 +858,14 @@ export default function AdminPage() {
                   <Button
                     variant="outline"
                     onClick={() => setIsEmailDialogOpen(false)}
-                    className="rounded-xs border-slate-700 text-gray-100 hover:bg-slate-800"
+                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleEmailAction}
                     disabled={emailActionLoading || !newEmail.trim()}
-                    className="rounded-xs"
+                    className="rounded-sm"
                   >
                     {emailActionLoading ? (
                       <>
@@ -876,7 +876,7 @@ export default function AdminPage() {
                       <>
                         {selectedPurchase.email_dispatch_status ===
                           "NOT_INITIATED" ||
-                        selectedPurchase.email_dispatch_attempts === 0 ? (
+                          selectedPurchase.email_dispatch_attempts === 0 ? (
                           <>
                             <Send className="h-4 w-4 mr-2" />
                             Send Email

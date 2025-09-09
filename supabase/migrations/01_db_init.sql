@@ -28,7 +28,7 @@ CREATE OR REPLACE FUNCTION public.trigger_set_timestamp()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
-SET search_path = ''
+SET search_path = 'public'
 AS $$
 BEGIN
   NEW.updated_at = NOW();
