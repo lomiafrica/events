@@ -1,7 +1,3 @@
 # Build
 .temp
 .env
-functions/
-
-# Data
-data
