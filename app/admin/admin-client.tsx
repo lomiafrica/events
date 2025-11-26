@@ -35,7 +35,7 @@ import {
     QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
-import LoadingSpinner from "@/components/ui/bouncer";
+import LoadingSpinner from "@/components/ui/Bouncer";
 
 interface Purchase {
     purchase_id: string;
