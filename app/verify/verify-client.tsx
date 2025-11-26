@@ -20,7 +20,6 @@ import {
   Tag,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import Footer from "@/components/landing/footer";
 import Link from "next/link";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
@@ -51,6 +50,57 @@ interface TicketData {
 
 const PIN_CACHE_KEY = "staff_verification_pin";
 const PIN_CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+const DUPLICATE_SCAN_WINDOW = 2000; // 2 seconds in milliseconds
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 1000; // 1 second
+
+// Track last scanned ticket to prevent rapid duplicates
+let lastScannedTicket: { id: string; timestamp: number } | null = null;
+
+// Audio feedback for scanning
+const playSuccessSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800; // Higher pitch for success
+    oscillator.type = 'sine';
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch {
+    // Silent fail if audio not supported
+  }
+};
+
+const playErrorSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 200; // Lower pitch for error
+    oscillator.type = 'sawtooth';
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch {
+    // Silent fail if audio not supported
+  }
+};
 
 // Enhanced storage with fallbacks for mobile compatibility
 interface StaffCache {
@@ -134,6 +184,36 @@ interface VerifyClientProps {
   ticketId?: string;
 }
 
+// Retry helper with exponential backoff
+const retryWithBackoff = async <T,>(
+  fn: () => Promise<T>,
+  retries: number = MAX_RETRY_ATTEMPTS,
+  delay: number = RETRY_DELAY_MS,
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+
+    // Check if it's a network error (worth retrying)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isNetworkError =
+      errorMessage.includes('network') ||
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('fetch') ||
+      errorMessage.includes('connection');
+
+    if (!isNetworkError) {
+      // Don't retry validation errors like TICKET_NOT_FOUND
+      throw error;
+    }
+
+    // Wait before retrying
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 1.5); // Exponential backoff
+  }
+};
+
 export function VerifyClient({ ticketId }: VerifyClientProps) {
   const { currentLanguage } = useTranslation();
   const [pin, setPin] = useState("");
@@ -142,6 +222,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
   const [wasJustAdmitted, setWasJustAdmitted] = useState(false);
+  const [flashColor, setFlashColor] = useState<'green' | 'red' | null>(null);
 
   // Check for cached PIN on component mount
   useEffect(() => {
@@ -179,37 +260,85 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId, isVerified, ticketData]);
 
+  // Helper to parse error codes from database exceptions
+  const parseErrorMessage = (errorMessage: string): { code: string; message: string } => {
+    const match = errorMessage.match(/^([A-Z_]+):\s*(.+)$/);
+    if (match) {
+      return { code: match[1], message: match[2] };
+    }
+    return { code: 'UNKNOWN_ERROR', message: errorMessage };
+  };
+
+  // Helper to get user-friendly error message
+  const getUserFriendlyError = useCallback((errorCode: string, defaultMessage: string): string => {
+    const errorMap: Record<string, string> = {
+      'TICKET_NOT_FOUND': t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
+      'INVALID_TICKET_ID': t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
+      'UNPAID_TICKET': 'This ticket has not been paid for. Please check payment status.',
+      'ORPHANED_TICKET': 'Ticket data is incomplete. Please contact support.',
+      'ALREADY_USED': t(currentLanguage, "ticketVerification.errors.alreadyUsed"),
+      'DUPLICATE_SCAN': 'Please wait a moment before scanning again.',
+    };
+    return errorMap[errorCode] || defaultMessage;
+  }, [currentLanguage]);
+
   const verifyTicket = useCallback(
     async (ticketIdentifier: string) => {
       setIsLoading(true);
       setError(null);
       setTicketData(null);
 
-      try {
-        const { data, error: rpcError } = await supabase.rpc("verify_ticket", {
-          p_ticket_identifier: ticketIdentifier.trim(),
-        });
-
-        if (rpcError) {
-          throw new Error(rpcError.message);
-        }
-
-        if (!data || data.length === 0) {
-          setError(
-            t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
-          );
+      // Check for duplicate scan
+      const now = Date.now();
+      if (lastScannedTicket && lastScannedTicket.id === ticketIdentifier.trim()) {
+        if (now - lastScannedTicket.timestamp < DUPLICATE_SCAN_WINDOW) {
+          setError("Please wait before scanning this ticket again.");
+          setIsLoading(false);
           return;
         }
+      }
 
-        setTicketData(data[0]);
+      try {
+        const result = await retryWithBackoff(async () => {
+          const { data, error: rpcError } = await supabase.rpc("verify_ticket", {
+            p_ticket_identifier: ticketIdentifier.trim(),
+          });
+
+          if (rpcError) {
+            throw new Error(rpcError.message);
+          }
+
+          if (!data || data.length === 0) {
+            throw new Error('TICKET_NOT_FOUND: No ticket found');
+          }
+
+          return data[0];
+        });
+
+        // Update last scanned ticket
+        lastScannedTicket = { id: ticketIdentifier.trim(), timestamp: now };
+        setTicketData(result);
+
+        // Success feedback
+        playSuccessSound();
+        setFlashColor('green');
+        setTimeout(() => setFlashColor(null), 300);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Verification failed");
+        const errorMessage = err instanceof Error ? err.message : "Verification failed";
+        const { code, message } = parseErrorMessage(errorMessage);
+        const friendlyMessage = getUserFriendlyError(code, message);
+        setError(friendlyMessage);
+
+        // Error feedback
+        playErrorSound();
+        setFlashColor('red');
+        setTimeout(() => setFlashColor(null), 500);
       } finally {
         setIsLoading(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setIsLoading, setError, setTicketData],
+    [currentLanguage, setIsLoading, setError, setTicketData, getUserFriendlyError],
   );
 
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -262,14 +391,18 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
     setIsLoading(true);
     try {
-      const { data: result, error } = await supabase.rpc("mark_ticket_used", {
-        p_ticket_identifier: ticketId.trim(),
-        p_verified_by: "staff_portal",
-      });
+      const result = await retryWithBackoff(async () => {
+        const { data: result, error } = await supabase.rpc("mark_ticket_used", {
+          p_ticket_identifier: ticketId.trim(),
+          p_verified_by: "staff_portal",
+        });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return result;
+      });
 
       // Handle the response from the unified mark_ticket_used function
       if (result === "ALREADY_USED") {
@@ -280,6 +413,9 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
         );
         return;
+      } else if (result === "DUPLICATE_SCAN") {
+        setError("This ticket was just scanned. Please wait a moment.");
+        return;
       } else if (result === "SUCCESS") {
         // Set flag to show "Successfully Admitted" instead of "Already Used"
         setWasJustAdmitted(true);
@@ -289,9 +425,10 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       // Refresh ticket data
       await verifyTicket(ticketId.trim());
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to mark ticket as used",
-      );
+      const errorMessage = err instanceof Error ? err.message : "Failed to mark ticket as used";
+      const { code, message } = parseErrorMessage(errorMessage);
+      const friendlyMessage = getUserFriendlyError(code, message);
+      setError(friendlyMessage);
     } finally {
       setIsLoading(false);
     }
@@ -303,6 +440,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     setError,
     verifyTicket,
     currentLanguage,
+    getUserFriendlyError,
   ]);
 
   // Auto-admit valid tickets
@@ -326,8 +464,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   const getTicketStatus = () => {
     if (error) {
       return {
-        bgColor: "bg-red-50/50 dark:bg-red-900/10",
-        borderColor: "border-red-200 dark:border-red-800",
+        bgColor: "bg-red-50/30 dark:bg-red-900/20",
+        borderColor: "border-red-300 dark:border-red-700",
         textColor: "text-red-800 dark:text-red-200",
         icon: <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />,
         badgeVariant: "destructive" as const,
@@ -341,8 +479,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       const remaining = ticketData.total_quantity - ticketData.use_count;
       if (remaining <= 0) {
         return {
-          bgColor: "bg-orange-50/50 dark:bg-orange-900/10",
-          borderColor: "border-orange-200 dark:border-orange-800",
+          bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
+          borderColor: "border-orange-300 dark:border-orange-700",
           textColor: "text-orange-800 dark:text-orange-200",
           icon: (
             <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
@@ -355,8 +493,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     } else if (ticketData?.is_used) {
       // This is an individual ticket that has been used
       return {
-        bgColor: "bg-orange-50/50 dark:bg-orange-900/10",
-        borderColor: "border-orange-200 dark:border-orange-800",
+        bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
+        borderColor: "border-orange-300 dark:border-orange-700",
         textColor: "text-orange-800 dark:text-orange-200",
         icon: (
           <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
@@ -369,8 +507,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
     if (ticketData) {
       return {
-        bgColor: "bg-green-50/50 dark:bg-green-900/10",
-        borderColor: "border-green-200 dark:border-green-800",
+        bgColor: "bg-green-50/30 dark:bg-green-900/20",
+        borderColor: "border-green-300 dark:border-green-700",
         textColor: "text-green-800 dark:text-green-200",
         icon: (
           <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -390,7 +528,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       <>
         <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4">
           <div className="max-w-md mx-auto">
-            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+            <Card className="border border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20 rounded-sm">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-sm flex items-center justify-center mb-4">
                   <QrCode className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -400,7 +538,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center text-gray-600 dark:text-gray-300">
+                <div className="text-center text-gray-300">
                   <p className="text-sm">
                     {t(
                       currentLanguage,
@@ -409,7 +547,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                   </p>
                 </div>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm p-4">
+                <div className="bg-blue-50/30 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-sm p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <h3 className="font-semibold text-blue-800 dark:text-blue-200">
@@ -463,7 +601,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
             </Card>
           </div>
         </div>
-        <Footer />
       </>
     );
   }
@@ -474,7 +611,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       <>
         <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4">
           <div className="max-w-md mx-auto">
-            <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
+            <Card className="border border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-900/20 rounded-sm">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-sm flex items-center justify-center mb-4">
                   <Shield className="w-8 h-8 text-amber-600 dark:text-amber-400" />
@@ -484,14 +621,14 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center text-gray-600 dark:text-gray-300">
+                <div className="text-center text-gray-300">
                   <p className="text-lg mb-2">
                     {t(
                       currentLanguage,
                       "ticketVerification.pinEntry.description",
                     )}
                   </p>
-                  <p className="text-sm font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded-sm">
+                  <p className="text-sm font-mono bg-gray-800 p-2 rounded-sm">
                     {t(
                       currentLanguage,
                       "ticketVerification.pinEntry.ticketIdLabel",
@@ -510,7 +647,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     value={pin}
                     onChange={(e) => setPin(e.target.value)}
                     maxLength={4}
-                    className="text-center text-2xl tracking-widest h-12"
+                    className="text-center text-2xl tracking-widest h-12 rounded-sm bg-background border border-border"
                     disabled={isLoading}
                   />
                   <Button
@@ -540,7 +677,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                 </form>
 
                 {error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm p-4">
+                  <div className="bg-red-50/30 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-sm p-4">
                     <div className="text-center text-red-600 dark:text-red-400 text-sm">
                       {error}
                     </div>
@@ -554,7 +691,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
             </Card>
           </div>
         </div>
-        <Footer />
       </>
     );
   }
@@ -564,11 +700,22 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   // Show ticket details after PIN verification
   return (
     <>
+      {/* Flash Feedback Overlay */}
+      {flashColor && (
+        <div
+          className={`fixed inset-0 pointer-events-none z-50 ${flashColor === 'green'
+            ? 'bg-green-500/30'
+            : 'bg-red-500/30'
+            }`}
+          style={{ animation: 'flash 0.4s ease-out' }}
+        />
+      )}
+
       <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-md mx-auto space-y-6">
           {/* Loading State */}
           {isLoading && !ticketData && (
-            <Card>
+            <Card className="rounded-sm">
               <CardContent className="pt-6 text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                 <p>
@@ -584,7 +731,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           {/* Status Header with Customer Name and Ticket Type */}
           {status && (
             <Card
-              className={`border-2 ${status.borderColor} ${status.bgColor}`}
+              className={`border-2 ${status.borderColor} ${status.bgColor} rounded-sm`}
             >
               <CardContent className="pt-6 text-center">
                 <div className="flex flex-col items-center space-y-4">
@@ -609,7 +756,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                           {ticketData.customer_name}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-400">
                           {/* Differentiate between individual and legacy ticket display */}
                           {ticketData.use_count !== undefined &&
                             ticketData.total_quantity ? (
@@ -702,7 +849,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
           {/* Detailed Ticket Information */}
           {ticketData && (
-            <Card>
+            <Card className="rounded-sm">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Ticket className="h-5 w-5" />
@@ -711,10 +858,10 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Ticket Type Details */}
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border">
+                <div className="bg-muted/50 rounded-sm p-3 border border-border">
                   <div className="flex items-center gap-2 mb-2">
-                    <Tag className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <Tag className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-400">
                       Ticket Type & Purchase Details
                     </span>
                   </div>
@@ -722,7 +869,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     {ticketData.ticket_name}
                   </p>
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-400">
                       Quantity: {ticketData.quantity}{" "}
                       {ticketData.quantity > 1 ? "tickets" : "ticket"}
                     </p>
@@ -736,7 +883,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                       ID: {ticketData.ticket_type_id}
                     </p>
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                      Total: {ticketData.total_amount.toLocaleString()}{" "}
+                      Total {ticketData.total_amount.toLocaleString()}{" "}
                       {ticketData.currency_code}
                     </p>
                   </div>
@@ -747,8 +894,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                   ticketData.total_quantity && (
                     <div className="pt-4 border-t">
                       <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-400">
                           Legacy Ticket Status
                         </span>
                       </div>
@@ -756,7 +903,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         Scanned: {ticketData.use_count} of{" "}
                         {ticketData.total_quantity}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-400">
                         This is a multi-person ticket. It can be scanned{" "}
                         {ticketData.total_quantity - ticketData.use_count} more
                         time(s).
@@ -817,7 +964,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
           {/* Automatic Admission Status */}
           {ticketData && !ticketData.is_used && isLoading && (
-            <Card className="border-2 border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+            <Card className="border-2 border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20 rounded-sm">
               <CardContent className="pt-6 text-center">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600 dark:text-blue-400" />
                 <p className="text-blue-700 dark:text-blue-300 font-medium">
@@ -831,7 +978,14 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           )}
         </div>
       </div>
-      <Footer />
+
+      <style jsx global>{`
+        @keyframes flash {
+          0% { opacity: 0; }
+          50% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
     </>
   );
 }
