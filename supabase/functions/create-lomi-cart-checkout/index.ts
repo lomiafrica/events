@@ -23,9 +23,7 @@ const LOMI_API_BASE_URL =
 const APP_BASE_URL = (
   Deno.env.get("APP_BASE_URL") || "http://localhost:3000"
 ).replace(/\/$/, ""); // Remove trailing slash
-
-// Default allowed providers
-const DEFAULT_ALLOWED_PROVIDERS = ["WAVE"];
+const LOMI_CHECKOUT_BASE_URL = "https://checkout.lomi.africa/pay";
 
 interface CartItem {
   merchandiseId: string;
@@ -248,7 +246,6 @@ serve(async (req: Request) => {
     const baseLomiPayload = {
       success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=success`,
       cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=cancelled`,
-      allowed_providers: DEFAULT_ALLOWED_PROVIDERS,
       currency_code: currencyCode,
       customer_email: payload.userEmail,
       customer_name: payload.userName,
@@ -265,7 +262,6 @@ serve(async (req: Request) => {
         is_product_based: isProductBased,
         item_count: payload.cartItems.length,
       },
-      expiration_minutes: 30,
     };
 
     const lomiPayload = isProductBased
@@ -273,13 +269,13 @@ serve(async (req: Request) => {
           ...baseLomiPayload,
           product_id: singleProductId,
           title: `${payload.cartItems[0].title} (x${payload.cartItems[0].quantity})`,
-          public_description: `Purchase: ${payload.cartItems[0].title}`,
+          description: `Purchase: ${payload.cartItems[0].title}`,
         }
       : {
           ...baseLomiPayload,
           amount: totalAmount,
           title: `Merch (${payload.cartItems.length} items)`,
-          public_description: `Your order: ${payload.cartItems.map((item) => `${item.quantity}x ${item.title}`).join(", ")}`,
+          description: `Your order: ${payload.cartItems.map((item) => `${item.quantity}x ${item.title}`).join(", ")}`,
         };
 
     console.log(
@@ -299,7 +295,7 @@ serve(async (req: Request) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": LOMI_API_KEY,
+        "x-api-key": LOMI_API_KEY,
       },
       body: JSON.stringify(lomiPayload),
     });
@@ -349,8 +345,7 @@ serve(async (req: Request) => {
 
     if (
       !lomiResponse.ok ||
-      !lomiResponseData.data ||
-      !lomiResponseData.data.url
+      !lomiResponseData.checkout_session_id
     ) {
       console.error("lomi. API error:", lomiResponseData);
 
@@ -376,17 +371,20 @@ serve(async (req: Request) => {
       );
     }
 
+    // --- Construct checkout URL from session ID ---
+    const checkoutUrl = `${LOMI_CHECKOUT_BASE_URL}/${lomiResponseData.checkout_session_id}`;
+
     // --- Update Purchase Records with lomi. details using RPC ---
     for (const purchaseId of purchaseIds) {
       const { error: updatePurchaseError } = await supabase.rpc(
         "update_purchase_lomi_session",
         {
           p_purchase_id: purchaseId,
-          p_lomi_session_id: lomiResponseData.data.checkout_session_id,
-          p_lomi_checkout_url: lomiResponseData.data.url,
+          p_lomi_session_id: lomiResponseData.checkout_session_id,
+          p_lomi_checkout_url: checkoutUrl,
           p_payment_processor_details: {
             request: lomiPayload,
-            response: lomiResponseData.data,
+            response: lomiResponseData,
           },
         },
       );
@@ -412,13 +410,13 @@ serve(async (req: Request) => {
 
     console.log(
       "Successfully created checkout session:",
-      lomiResponseData.data.checkout_session_id,
+      lomiResponseData.checkout_session_id,
     );
 
     // --- Success Response ---
     return new Response(
       JSON.stringify({
-        checkout_url: lomiResponseData.data.url,
+        checkout_url: checkoutUrl,
         purchase_ids: purchaseIds,
       }),
       {

@@ -21,9 +21,7 @@ const LOMI_API_KEY = Deno.env.get("LOMI_API_KEY");
 const LOMI_API_BASE_URL =
   Deno.env.get("LOMI_API_BASE_URL") || "https://api.lomi.africa/v1";
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
-
-// Default allowed providers
-const DEFAULT_ALLOWED_PROVIDERS = ["WAVE"];
+const LOMI_CHECKOUT_BASE_URL = "https://checkout.lomi.africa/pay";
 
 interface RequestPayload {
   eventId: string;
@@ -222,7 +220,6 @@ serve(async (req: Request) => {
     const baseLomiPayload = {
       success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_id=${purchaseId}&status=success`,
       cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_id=${purchaseId}&status=cancelled`,
-      allowed_providers: payload.allowedProviders || DEFAULT_ALLOWED_PROVIDERS,
       currency_code: currencyCode,
       quantity: payload.quantity,
       customer_email: payload.userEmail,
@@ -240,7 +237,6 @@ serve(async (req: Request) => {
         app_source: "djaouli_events_app",
         is_product_based: isProductBased,
       },
-      expiration_minutes: 30,
     };
 
     const lomiPayload = isProductBased
@@ -248,14 +244,14 @@ serve(async (req: Request) => {
           ...baseLomiPayload,
           product_id: payload.productId,
           title: `${payload.eventTitle} Tickets (x${payload.quantity})`,
-          public_description: `Tickets for: ${payload.eventTitle}`,
+          description: `Tickets for: ${payload.eventTitle}`,
         }
       : {
           ...baseLomiPayload,
           // Event-based checkout: Use unit price, let lomi. handle quantity multiplication
           amount: payload.pricePerTicket, // Unit price - lomi. will multiply by quantity
           title: `${payload.ticketName} - ${payload.eventTitle} (x${payload.quantity})`,
-          public_description: `Payment for ${payload.quantity} ticket(s) for the event: ${payload.eventTitle}. Ticket type: ${payload.ticketName}.`,
+          description: `Payment for ${payload.quantity} ticket(s) for the event: ${payload.eventTitle}. Ticket type: ${payload.ticketName}.`,
         };
 
     console.log(
@@ -275,7 +271,7 @@ serve(async (req: Request) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": LOMI_API_KEY,
+        "x-api-key": LOMI_API_KEY,
       },
       body: JSON.stringify(lomiPayload),
     });
@@ -323,8 +319,7 @@ serve(async (req: Request) => {
 
     if (
       !lomiResponse.ok ||
-      !lomiResponseData.data ||
-      !lomiResponseData.data.url
+      !lomiResponseData.checkout_session_id
     ) {
       console.error("lomi. API error:", lomiResponseData);
 
@@ -348,16 +343,19 @@ serve(async (req: Request) => {
       );
     }
 
+    // --- Construct checkout URL from session ID ---
+    const checkoutUrl = `${LOMI_CHECKOUT_BASE_URL}/${lomiResponseData.checkout_session_id}`;
+
     // --- Update Purchase Record with lomi. details using RPC ---
     const { error: updatePurchaseError } = await supabase.rpc(
       "update_purchase_lomi_session",
       {
         p_purchase_id: purchaseId,
-        p_lomi_session_id: lomiResponseData.data.checkout_session_id,
-        p_lomi_checkout_url: lomiResponseData.data.url,
+        p_lomi_session_id: lomiResponseData.checkout_session_id,
+        p_lomi_checkout_url: checkoutUrl,
         p_payment_processor_details: {
           request: lomiPayload,
-          response: lomiResponseData.data,
+          response: lomiResponseData,
         },
       },
     );
@@ -371,13 +369,13 @@ serve(async (req: Request) => {
 
     console.log(
       "Successfully created checkout session:",
-      lomiResponseData.data.checkout_session_id,
+      lomiResponseData.checkout_session_id,
     );
 
     // --- Success Response ---
     return new Response(
       JSON.stringify({
-        checkout_url: lomiResponseData.data.url,
+        checkout_url: checkoutUrl,
         purchase_id: purchaseId,
       }),
       {
