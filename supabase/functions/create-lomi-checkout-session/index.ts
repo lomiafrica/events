@@ -19,7 +19,7 @@ const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 // lomi. API Config
 const LOMI_API_KEY = Deno.env.get("LOMI_API_KEY");
 const LOMI_API_BASE_URL =
-  Deno.env.get("LOMI_API_BASE_URL") || "https://api.lomi.africa/v1";
+  Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
 const LOMI_CHECKOUT_BASE_URL = "https://checkout.lomi.africa/pay";
 
