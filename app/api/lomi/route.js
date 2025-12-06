@@ -150,7 +150,7 @@ export async function POST(request) {
       lomiCheckoutSessionId = eventData.metadata?.linkId || eventData.id; // Get from metadata for payment events
     }
     const amount = eventData.amount || eventData.gross_amount; // Amount from Lomi
-    const currency = eventData.currency_code;
+    const currency = eventData.currency_code || eventData.currency; // Support both field names
 
     if (!purchaseId) {
       console.error(
