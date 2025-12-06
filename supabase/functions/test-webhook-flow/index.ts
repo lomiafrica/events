@@ -204,7 +204,7 @@ serve(async (req: Request) => {
 
     // Step 3: Create webhook payload
     const webhookPayload = {
-      event: "payment.succeeded",
+      event: "PAYMENT_SUCCEEDED",
       data: {
         id: "chks_test_" + Date.now(),
         transaction_id: "txn_test_" + Date.now(),
