@@ -1,12 +1,37 @@
 -- Add columns to the 'purchases' table to track email dispatch status and related info
-ALTER TABLE public.purchases
-ADD COLUMN IF NOT EXISTS email_dispatch_status TEXT DEFAULT 'NOT_INITIATED' NOT NULL,
-    -- Possible values: NOT_INITIATED, PENDING_DISPATCH, DISPATCH_IN_PROGRESS, SENT_SUCCESSFULLY, DISPATCH_FAILED
-ADD COLUMN IF NOT EXISTS email_dispatch_attempts INTEGER DEFAULT 0 NOT NULL,
-ADD COLUMN IF NOT EXISTS email_last_dispatch_attempt_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS email_dispatch_error TEXT, -- To store any error message from the last dispatch attempt
-ADD COLUMN IF NOT EXISTS unique_ticket_identifier TEXT, -- Will be populated by the function that generates the ticket/QR
-ADD COLUMN IF NOT EXISTS webhook_processing_log JSONB DEFAULT '{}'::jsonb; -- To track processed webhooks for deduplication
+DO $$
+BEGIN
+    -- Add columns one by one to avoid syntax issues
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'email_dispatch_status') THEN
+        ALTER TABLE public.purchases ADD COLUMN email_dispatch_status TEXT DEFAULT 'NOT_INITIATED' NOT NULL;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'email_dispatch_attempts') THEN
+        ALTER TABLE public.purchases ADD COLUMN email_dispatch_attempts INTEGER DEFAULT 0 NOT NULL;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'email_last_dispatch_attempt_at') THEN
+        ALTER TABLE public.purchases ADD COLUMN email_last_dispatch_attempt_at TIMESTAMPTZ;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'email_dispatch_error') THEN
+        ALTER TABLE public.purchases ADD COLUMN email_dispatch_error TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'unique_ticket_identifier') THEN
+        ALTER TABLE public.purchases ADD COLUMN unique_ticket_identifier TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'public' AND table_name = 'purchases' AND column_name = 'webhook_processing_log') THEN
+        ALTER TABLE public.purchases ADD COLUMN webhook_processing_log JSONB DEFAULT '{}'::jsonb;
+    END IF;
+END $$;
 
 -- Add an index for querying purchases pending dispatch
 CREATE INDEX IF NOT EXISTS idx_purchases_email_dispatch_status ON public.purchases(email_dispatch_status);
