@@ -2,6 +2,42 @@ import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { Buffer } from "node:buffer";
 
+// --- Helper: Check if webhook has already been processed ---
+async function isWebhookAlreadyProcessed(supabase, webhookEventId) {
+  try {
+    const { data, error } = await supabase.rpc('check_webhook_already_processed', {
+      p_webhook_event_id: webhookEventId
+    });
+
+    if (error) {
+      console.warn('Error checking webhook processing status via RPC:', error);
+      return false; // Default to allowing processing if check fails
+    }
+
+    return data || false;
+  } catch (error) {
+    console.warn('Error checking webhook processing status:', error);
+    return false;
+  }
+}
+
+// --- Helper: Mark webhook as processed ---
+async function markWebhookAsProcessed(supabase, webhookEventId, purchaseId) {
+  try {
+    const { error } = await supabase.rpc('update_purchase_webhook_metadata', {
+      p_purchase_id: purchaseId,
+      p_webhook_event_id: webhookEventId,
+    });
+
+    if (error) {
+      console.warn('Error marking webhook as processed:', error);
+      // Don't throw - logging failure shouldn't break webhook processing
+    }
+  } catch (error) {
+    console.warn('Error marking webhook as processed:', error);
+  }
+}
+
 // --- Helper: Verify Lomi Webhook Signature ---
 async function verifyLomiWebhook(rawBody, signatureHeader, webhookSecret) {
   if (!signatureHeader) {
@@ -181,6 +217,20 @@ export async function POST(request) {
       );
     }
 
+    // Check if this webhook has already been processed to prevent duplicates
+    const webhookEventId = `${lomiEventType}:${lomiTransactionId || lomiCheckoutSessionId}`;
+    const webhookProcessed = await isWebhookAlreadyProcessed(supabase, webhookEventId);
+    if (webhookProcessed) {
+      console.warn(`Events Webhook: ${webhookEventId} already processed, skipping duplicate`);
+      return new Response(
+        JSON.stringify({ received: true, message: "Webhook already processed" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     let paymentStatusForDb = "unknown";
     if (lomiEventType === "CHECKOUT_COMPLETED") {
       // Check if checkout_session.status is 'paid' or similar if Lomi provides it.
@@ -238,6 +288,9 @@ export async function POST(request) {
     console.log(
       `Events Webhook: Payment for purchase ${purchaseId} (status: ${paymentStatusForDb}) processed.`,
     );
+
+    // Mark webhook as processed after successful payment recording
+    await markWebhookAsProcessed(supabase, webhookEventId, purchaseId);
 
     // Only proceed to email dispatch if payment was successful
     if (paymentStatusForDb === "paid") {

@@ -5,7 +5,8 @@ ADD COLUMN IF NOT EXISTS email_dispatch_status TEXT DEFAULT 'NOT_INITIATED' NOT 
 ADD COLUMN IF NOT EXISTS email_dispatch_attempts INTEGER DEFAULT 0 NOT NULL,
 ADD COLUMN IF NOT EXISTS email_last_dispatch_attempt_at TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS email_dispatch_error TEXT, -- To store any error message from the last dispatch attempt
-ADD COLUMN IF NOT EXISTS unique_ticket_identifier TEXT; -- Will be populated by the function that generates the ticket/QR
+ADD COLUMN IF NOT EXISTS unique_ticket_identifier TEXT, -- Will be populated by the function that generates the ticket/QR
+ADD COLUMN IF NOT EXISTS webhook_processing_log JSONB DEFAULT '{}'::jsonb; -- To track processed webhooks for deduplication
 
 -- Add an index for querying purchases pending dispatch
 CREATE INDEX IF NOT EXISTS idx_purchases_email_dispatch_status ON public.purchases(email_dispatch_status);
@@ -47,10 +48,36 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+DECLARE
+    v_current_status TEXT;
+    v_dispatch_status TEXT;
 BEGIN
+    -- Get current statuses
+    SELECT status, email_dispatch_status
+    INTO v_current_status, v_dispatch_status
+    FROM public.purchases
+    WHERE id = p_purchase_id;
+
+    IF NOT FOUND THEN
+        RAISE WARNING 'Purchase ID % not found during prepare_purchase_for_email_dispatch', p_purchase_id;
+        RETURN;
+    END IF;
+
+    -- Idempotency check: Don't prepare for dispatch if already sent or in progress
+    IF v_dispatch_status IN ('SENT_SUCCESSFULLY', 'DISPATCH_IN_PROGRESS') THEN
+        RAISE NOTICE 'Purchase % email dispatch already % , skipping duplicate preparation', p_purchase_id, v_dispatch_status;
+        RETURN;
+    END IF;
+
+    -- Only prepare for dispatch if purchase is paid
+    IF v_current_status != 'paid' THEN
+        RAISE WARNING 'Purchase % is not paid (status: %), skipping email dispatch preparation', p_purchase_id, v_current_status;
+        RETURN;
+    END IF;
+
     -- Update email dispatch status to PENDING_DISPATCH
     UPDATE public.purchases
-    SET 
+    SET
         email_dispatch_status = 'PENDING_DISPATCH',
         email_dispatch_attempts = COALESCE(email_dispatch_attempts, 0) + 1,
         updated_at = NOW()
@@ -58,7 +85,7 @@ BEGIN
 
     -- Return purchase data for email dispatch
     RETURN QUERY
-    SELECT 
+    SELECT
         p.id as purchase_id,
         c.name as customer_name,
         c.email as customer_email,
