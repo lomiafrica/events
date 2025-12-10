@@ -257,7 +257,7 @@ serve(async (req: Request) => {
       metadata: {
         internal_purchase_ids: purchaseIds,
         customer_id: customerId,
-        app_source: "kamayakoi_merch_app",
+        app_source: "djaouli_merch_app",
         is_cart_checkout: true,
         is_product_based: isProductBased,
         item_count: payload.cartItems.length,

@@ -14,7 +14,7 @@ export async function sendEmail(formData: FormData) {
     // Handle newsletter subscriptions
     if (type === "newsletter") {
       try {
-        // Send notification email to kamayakoi@gmail.com
+        // Send notification email to djaouli@gmail.com
         const response = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -22,8 +22,8 @@ export async function sendEmail(formData: FormData) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "newsletter@updates.kamayakoi.com",
-            to: "kamayakoi@gmail.com",
+            from: "newsletter@updates.djaouli.com",
+            to: "djaouli@gmail.com",
             subject: subject || "New Newsletter Subscription",
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -31,7 +31,7 @@ export async function sendEmail(formData: FormData) {
                 <p><strong>Email:</strong> ${email}</p>
                 <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
                 <hr>
-                <p>This person has subscribed to the Kamayakoi newsletter.</p>
+                <p>This person has subscribed to the Djaouli newsletter.</p>
               </div>
             `,
           }),
@@ -54,7 +54,7 @@ export async function sendEmail(formData: FormData) {
     }
 
     try {
-      // Send contact form email to kamayakoi@gmail.com
+      // Send contact form email to djaouli@gmail.com
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -62,8 +62,8 @@ export async function sendEmail(formData: FormData) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "contact@kamayakoi.com",
-          to: "kamayakoi@gmail.com",
+          from: "contact@djaouli.com",
+          to: "djaouli@gmail.com",
           subject: subject || "New Contact Form Message",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

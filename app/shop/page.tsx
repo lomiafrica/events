@@ -5,9 +5,9 @@ import LoadingComponent from "@/components/ui/Bouncer";
 import MerchContentClient from "./merch-content-client";
 
 export const metadata: Metadata = {
-  title: "Merch | Kamayakoi",
+  title: "Merch | Djaouli",
   description:
-    "Shop exclusive Kamayakoi merchandise, apparel, and collectibles. Support the movement with our unique designs and products.",
+    "Shop exclusive Djaouli merchandise, apparel, and collectibles. Support the movement with our unique designs and products.",
 };
 
 async function MerchContent() {

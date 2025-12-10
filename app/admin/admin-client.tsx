@@ -576,7 +576,7 @@ export default function AdminClient() {
                             </h1>
                             <p className="text-zinc-200 text-sm sm:text-base md:text-xl leading-relaxed tracking-tight max-w-3xl">
                                 Manage purchases, track email dispatch status, and oversee
-                                ticket sales for Kamayakoi events.
+                                ticket sales for Djaouli events.
                             </p>
                         </div>
                         <Button
