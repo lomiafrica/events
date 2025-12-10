@@ -163,7 +163,7 @@ SET search_path = ''
 AS $$
 BEGIN
     UPDATE public.customers
-    SET 
+    SET
         email = p_new_email,
         name = p_new_name,
         phone = COALESCE(p_new_phone, phone),
