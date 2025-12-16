@@ -33,6 +33,7 @@ import {
     Download,
     Filter,
     QrCode,
+    UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/ui/Bouncer";
@@ -108,6 +109,14 @@ export default function AdminClient() {
     // New: Status filter (defaults to 'paid' only)
     const [statusFilter, setStatusFilter] = useState<string>("paid");
     const [showFilters, setShowFilters] = useState(false);
+
+    // Guest invitation state
+    const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [inviteGuestName, setInviteGuestName] = useState("");
+    const [inviteGuestEmail, setInviteGuestEmail] = useState("");
+    const [inviteGuestPhone, setInviteGuestPhone] = useState("");
+    const [inviteTicketCount, setInviteTicketCount] = useState(1);
+    const [inviteLoading, setInviteLoading] = useState(false);
 
     // Helper function to format relative time
     const formatRelativeTime = (timestamp: string | null) => {
@@ -288,6 +297,78 @@ export default function AdminClient() {
             }
         } catch (error) {
             console.error("Error loading verification errors:", error);
+        }
+    };
+
+    const handleInviteGuest = async () => {
+        if (!selectedEvent || !inviteGuestEmail.trim() || !inviteGuestName.trim()) {
+            toast.error("Please select an event and fill in guest details");
+            return;
+        }
+
+        const selectedEventData = events.find(e => e.event_id === selectedEvent);
+        if (!selectedEventData) {
+            toast.error("Please select an event first");
+            return;
+        }
+
+        setInviteLoading(true);
+        try {
+            // Call the issue_guest_ticket RPC
+            const { data, error } = await supabase.rpc("issue_guest_ticket", {
+                p_event_id: selectedEvent,
+                p_event_title: selectedEventData.event_title,
+                p_event_date_text: selectedEventData.event_date_text || "TBA",
+                p_event_time_text: "TBA",
+                p_event_venue_name: "TBA",
+                p_guest_name: inviteGuestName.trim(),
+                p_guest_email: inviteGuestEmail.trim(),
+                p_guest_phone: inviteGuestPhone.trim() || null,
+                p_ticket_type_name: "Guest List",
+                p_quantity: inviteTicketCount,
+                p_notes: "Invited via admin panel",
+            });
+
+            if (error) {
+                toast.error("Failed to create guest ticket");
+                console.error("Error creating guest ticket:", error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                toast.error("Failed to create guest ticket");
+                return;
+            }
+
+            const result = data[0];
+            toast.success(`Guest ticket created for ${inviteGuestName}!`);
+
+            // Optionally trigger email send
+            const { error: emailError } = await supabase.functions.invoke(
+                "send-ticket-email",
+                {
+                    body: { purchase_id: result.purchase_id },
+                },
+            );
+
+            if (emailError) {
+                toast.warning("Ticket created but email failed to send. You can resend from the list.");
+            } else {
+                toast.success("Ticket email sent!");
+            }
+
+            // Reset form and close dialog
+            setIsInviteDialogOpen(false);
+            setInviteGuestName("");
+            setInviteGuestEmail("");
+            setInviteGuestPhone("");
+            setInviteTicketCount(1);
+            loadPurchases(); // Refresh the list
+        } catch (error) {
+            toast.error("Failed to invite guest");
+            console.error("Error inviting guest:", error);
+        } finally {
+            setInviteLoading(false);
         }
     };
 
@@ -635,6 +716,19 @@ export default function AdminClient() {
                             </>
                         )}
                     </div>
+
+                    {/* Invite Guest Button */}
+                    {selectedEvent && (
+                        <div className="mt-4">
+                            <Button
+                                onClick={() => setIsInviteDialogOpen(true)}
+                                className="rounded-sm bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
+                            >
+                                <UserPlus className="h-4 w-4 mr-2" />
+                                Invite Guest
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Verification Errors - Mobile Optimized */}
@@ -1055,6 +1149,118 @@ export default function AdminClient() {
                                 </div>
                             </div>
                         )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Invite Guest Dialog */}
+                <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+                    <DialogContent className="rounded-sm border-slate-700 bg-card/90 backdrop-blur-sm shadow-2xl max-w-[95vw] sm:max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle className="text-gray-100 text-base sm:text-lg flex items-center gap-2">
+                                <UserPlus className="h-5 w-5 text-purple-400" />
+                                Invite Guest
+                            </DialogTitle>
+                            <DialogDescription className="text-gray-300 text-xs sm:text-sm">
+                                Create a complimentary ticket for a guest and send them an email with their QR code.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <div>
+                                    <Label htmlFor="inviteGuestName" className="text-gray-200 text-xs sm:text-sm">
+                                        Guest Name *
+                                    </Label>
+                                    <Input
+                                        id="inviteGuestName"
+                                        value={inviteGuestName}
+                                        onChange={(e) => setInviteGuestName(e.target.value)}
+                                        placeholder="Enter guest name"
+                                        className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="inviteGuestPhone" className="text-gray-200 text-xs sm:text-sm">
+                                        Phone Number
+                                    </Label>
+                                    <Input
+                                        id="inviteGuestPhone"
+                                        value={inviteGuestPhone}
+                                        onChange={(e) => setInviteGuestPhone(e.target.value)}
+                                        placeholder="Optional"
+                                        className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <Label htmlFor="inviteGuestEmail" className="text-gray-200 text-xs sm:text-sm">
+                                    Email Address *
+                                </Label>
+                                <Input
+                                    id="inviteGuestEmail"
+                                    type="email"
+                                    value={inviteGuestEmail}
+                                    onChange={(e) => setInviteGuestEmail(e.target.value)}
+                                    placeholder="guest@example.com"
+                                    className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="inviteTicketCount" className="text-gray-200 text-xs sm:text-sm">
+                                    Number of Tickets
+                                </Label>
+                                <Input
+                                    id="inviteTicketCount"
+                                    type="number"
+                                    min={1}
+                                    max={10}
+                                    value={inviteTicketCount}
+                                    onChange={(e) => setInviteTicketCount(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                                    className="rounded-sm bg-background border-slate-700 text-gray-100 text-sm w-24"
+                                />
+                            </div>
+                            {selectedEvent && (
+                                <div className="bg-purple-900/30 p-3 rounded-sm border border-purple-700">
+                                    <h4 className="font-medium mb-2 text-purple-100 text-sm">
+                                        Event
+                                    </h4>
+                                    <div className="text-xs sm:text-sm text-purple-200">
+                                        {events.find(e => e.event_id === selectedEvent)?.event_title || "Selected Event"}
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setIsInviteDialogOpen(false);
+                                        setInviteGuestName("");
+                                        setInviteGuestEmail("");
+                                        setInviteGuestPhone("");
+                                        setInviteTicketCount(1);
+                                    }}
+                                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 w-full sm:w-auto"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleInviteGuest}
+                                    disabled={inviteLoading || !inviteGuestEmail.trim() || !inviteGuestName.trim()}
+                                    className="rounded-sm bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
+                                >
+                                    {inviteLoading ? (
+                                        <>
+                                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="h-4 w-4 mr-2" />
+                                            Create & Send Ticket
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>

@@ -220,6 +220,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null); // Track error type for UI differentiation
   const [isVerified, setIsVerified] = useState(false);
   const [wasJustAdmitted, setWasJustAdmitted] = useState(false);
   const [flashColor, setFlashColor] = useState<'green' | 'red' | null>(null);
@@ -286,6 +287,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     async (ticketIdentifier: string) => {
       setIsLoading(true);
       setError(null);
+      setErrorCode(null);
       setTicketData(null);
 
       // Check for duplicate scan
@@ -328,10 +330,15 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         const { code, message } = parseErrorMessage(errorMessage);
         const friendlyMessage = getUserFriendlyError(code, message);
         setError(friendlyMessage);
+        setErrorCode(code);
 
-        // Error feedback
-        playErrorSound();
-        setFlashColor('red');
+        // Error feedback - use orange flash for ALREADY_USED, red for other errors
+        if (code === 'ALREADY_USED') {
+          setFlashColor('red'); // Still flash to get attention
+        } else {
+          playErrorSound();
+          setFlashColor('red');
+        }
         setTimeout(() => setFlashColor(null), 500);
       } finally {
         setIsLoading(false);
@@ -407,19 +414,23 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       // Handle the response from the unified mark_ticket_used function
       if (result === "ALREADY_USED") {
         setError(t(currentLanguage, "ticketVerification.errors.alreadyUsed"));
+        setErrorCode("ALREADY_USED");
         return;
       } else if (result === "NOT_FOUND") {
         setError(
           t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
         );
+        setErrorCode("NOT_FOUND");
         return;
       } else if (result === "DUPLICATE_SCAN") {
         setError("This ticket was just scanned. Please wait a moment.");
+        setErrorCode("DUPLICATE_SCAN");
         return;
       } else if (result === "SUCCESS") {
         // Set flag to show "Successfully Admitted" instead of "Already Used"
         setWasJustAdmitted(true);
         setError(null);
+        setErrorCode(null);
       }
 
       // Refresh ticket data
@@ -462,6 +473,20 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
   // Get status colors and icons based on ticket state
   const getTicketStatus = () => {
+    // Show orange styling for ALREADY_USED errors (ticket is valid but was already admitted)
+    if (error && errorCode === 'ALREADY_USED') {
+      return {
+        bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
+        borderColor: "border-orange-300 dark:border-orange-700",
+        textColor: "text-orange-800 dark:text-orange-200",
+        icon: <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />,
+        badgeVariant: "secondary" as const,
+        badgeText: t(currentLanguage, "ticketVerification.badges.alreadyUsed"),
+        statusText: t(currentLanguage, "ticketVerification.status.alreadyUsed"),
+      };
+    }
+
+    // Show red styling for actual errors (ticket not found, invalid, unpaid, etc.)
     if (error) {
       return {
         bgColor: "bg-red-50/30 dark:bg-red-900/20",
