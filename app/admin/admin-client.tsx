@@ -755,7 +755,7 @@ export default function AdminClient() {
 
                     {/* Invite Guest Button */}
                     {selectedEvent && (
-                        <div className="mt-4">
+                        <div className="mt-4 flex justify-end">
                             <Button
                                 onClick={() => setIsInviteDialogOpen(true)}
                                 className="rounded-sm bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
@@ -1257,8 +1257,7 @@ export default function AdminClient() {
                 <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                     <DialogContent className="rounded-sm border-slate-700 bg-card/90 backdrop-blur-sm shadow-2xl max-w-[95vw] sm:max-w-lg">
                         <DialogHeader>
-                            <DialogTitle className="text-gray-100 text-base sm:text-lg flex items-center gap-2">
-                                <UserPlus className="h-5 w-5 text-purple-400" />
+                            <DialogTitle className="text-gray-100 text-base sm:text-lg">
                                 Invite Guest
                             </DialogTitle>
                             <DialogDescription className="text-gray-300 text-xs sm:text-sm">
