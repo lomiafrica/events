@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import supabase from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -91,6 +91,16 @@ interface VerificationError {
     error_message: string;
 }
 
+interface ScanLog {
+    id: string;
+    attempt_timestamp: string;
+    success: boolean;
+    customer_name?: string;
+    customer_email?: string;
+    event_title?: string;
+    error_message?: string;
+}
+
 export default function AdminClient() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [pin, setPin] = useState("");
@@ -110,11 +120,10 @@ export default function AdminClient() {
     // Event filtering state
     const [events, setEvents] = useState<EventInfo[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-    const [verificationErrors, setVerificationErrors] = useState<VerificationError[]>([]);
 
     // Scanner Tab State
     const [activeTab, setActiveTab] = useState("purchases");
-    const [scanLogs, setScanLogs] = useState<any[]>([]);
+    const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
 
     // New: Status filter (defaults to 'paid' only)
     const [statusFilter, setStatusFilter] = useState<string>("paid");
@@ -202,7 +211,6 @@ export default function AdminClient() {
             setIsAuthenticated(true);
             loadEvents();
             loadPurchases();
-            loadVerificationErrors();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -212,7 +220,6 @@ export default function AdminClient() {
         if (isAuthenticated) {
             loadPurchases();
             loadScanLogs();
-            loadVerificationErrors();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedEvent, statusFilter, isAuthenticated]);
@@ -222,9 +229,9 @@ export default function AdminClient() {
         if (isAuthenticated && activeTab === "scans") {
             loadScanLogs();
         }
-    }, [activeTab, selectedEvent, isAuthenticated]);
+    }, [activeTab, selectedEvent, isAuthenticated, loadScanLogs]);
 
-    const loadScanLogs = async () => {
+    const loadScanLogs = useCallback(async () => {
         try {
             const { data, error } = await supabase.rpc("get_admin_verification_logs", {
                 p_event_id: selectedEvent,
@@ -238,7 +245,7 @@ export default function AdminClient() {
         } catch (error) {
             console.error("Error loading scan logs:", error);
         }
-    };
+    }, [selectedEvent]);
 
 
     const handleAuth = async () => {
@@ -259,7 +266,6 @@ export default function AdminClient() {
                 loadEvents();
                 loadPurchases();
                 loadScanLogs();
-                loadVerificationErrors();
             } else {
                 setAuthError("Invalid PIN. Please try again.");
             }
@@ -320,21 +326,6 @@ export default function AdminClient() {
         }
     };
 
-    const loadVerificationErrors = async () => {
-        try {
-            const { data, error } = await supabase.rpc("get_recent_verification_errors", {
-                p_limit: 20,
-                p_event_id: selectedEvent,
-            });
-            if (error) {
-                console.error("Error loading verification errors:", error);
-            } else {
-                setVerificationErrors(data || []);
-            }
-        } catch (error) {
-            console.error("Error loading verification errors:", error);
-        }
-    };
 
     const handleInviteGuest = async () => {
         if (!selectedEvent || !inviteGuestEmail.trim() || !inviteGuestName.trim()) {

@@ -30,11 +30,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function EventsPage({
-  params: paramsPromise,
-}: {
-  params: Promise<{ locale?: string }>;
-}) {
+export default async function EventsPage() {
   const events: EventImageData[] = await getEventsForScroller();
   return <EventsPageContent events={events} />;
 }

@@ -13,16 +13,6 @@ import CheckoutButton from "@/components/event/CheckoutButton";
 import ArtistCard from "@/components/event/ArtistCard";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 
-interface EventImageData {
-    _id: string;
-    title: string;
-    slug: string;
-    featuredImage: string;
-    date?: string;
-    description?: string;
-    ticketsAvailable?: boolean;
-}
-
 interface TicketTypeData {
     _key: string;
     name: string;
