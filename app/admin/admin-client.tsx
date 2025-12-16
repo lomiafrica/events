@@ -81,15 +81,6 @@ interface EventInfo {
     last_purchase_date: string;
 }
 
-interface VerificationError {
-    id: string;
-    ticket_identifier: string;
-    event_id: string;
-    event_title: string;
-    attempt_timestamp: string;
-    error_code: string;
-    error_message: string;
-}
 
 interface ScanLog {
     id: string;
@@ -136,6 +127,23 @@ export default function AdminClient() {
     const [inviteGuestPhone, setInviteGuestPhone] = useState("");
     const [inviteTicketCount, setInviteTicketCount] = useState(1);
     const [inviteLoading, setInviteLoading] = useState(false);
+
+    // Load scan logs function (declared before useEffect hooks)
+    const loadScanLogs = useCallback(async () => {
+        try {
+            const { data, error } = await supabase.rpc("get_admin_verification_logs", {
+                p_event_id: selectedEvent,
+                p_limit: 50,
+            });
+            if (error) {
+                console.error("Error loading scan logs:", error);
+            } else {
+                setScanLogs(data || []);
+            }
+        } catch (error) {
+            console.error("Error loading scan logs:", error);
+        }
+    }, [selectedEvent]);
 
     // Helper function to format relative time
     const formatRelativeTime = (timestamp: string | null) => {
@@ -230,22 +238,6 @@ export default function AdminClient() {
             loadScanLogs();
         }
     }, [activeTab, selectedEvent, isAuthenticated, loadScanLogs]);
-
-    const loadScanLogs = useCallback(async () => {
-        try {
-            const { data, error } = await supabase.rpc("get_admin_verification_logs", {
-                p_event_id: selectedEvent,
-                p_limit: 50,
-            });
-            if (error) {
-                console.error("Error loading scan logs:", error);
-            } else {
-                setScanLogs(data || []);
-            }
-        } catch (error) {
-            console.error("Error loading scan logs:", error);
-        }
-    }, [selectedEvent]);
 
 
     const handleAuth = async () => {
