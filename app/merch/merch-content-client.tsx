@@ -96,22 +96,24 @@ export default function MerchContentClient({
         <div className="container mx-auto px-4 py-0 max-w-7xl">
           {/* Hero Section */}
           <div className="relative pt-24 md:pt-32 mb-12">
-            <motion.h1
-              className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              {t(currentLanguage, "merchPage.title")}
-            </motion.h1>
-            <motion.p
-              className="text-zinc-600 dark:text-zinc-200 text-base sm:text-lg md:text-xl leading-relaxed tracking-tight max-w-3xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {t(currentLanguage, "merchPage.subtitle")}
-            </motion.p>
+            <div className="text-center">
+              <motion.h1
+                className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                {t(currentLanguage, "merchPage.title")}
+              </motion.h1>
+              <motion.div
+                className="text-muted-foreground text-lg mt-4 mb-8 max-w-3xl mx-auto leading-relaxed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                {t(currentLanguage, "merchPage.subtitle")}
+              </motion.div>
+            </div>
           </div>
 
           {/* Filters and Search */}
@@ -121,9 +123,9 @@ export default function MerchContentClient({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <div className="mb-6">
+            <div className="mb-6 text-center">
               {/* Search and Filters */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-wrap">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-4 flex-wrap">
                 <div className="relative w-full sm:w-48">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
@@ -196,15 +198,15 @@ export default function MerchContentClient({
             >
               <h2 className="text-2xl font-semibold mb-4 text-zinc-900 dark:text-white">
                 {searchQuery ||
-                selectedCategory !== "all" ||
-                selectedTag !== "all"
+                  selectedCategory !== "all" ||
+                  selectedTag !== "all"
                   ? "No products found"
                   : t(currentLanguage, "merchPage.comingSoon.title")}
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                 {searchQuery ||
-                selectedCategory !== "all" ||
-                selectedTag !== "all"
+                  selectedCategory !== "all" ||
+                  selectedTag !== "all"
                   ? "Try adjusting your filters or search terms."
                   : t(currentLanguage, "merchPage.comingSoon.description")}
               </p>

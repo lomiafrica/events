@@ -172,6 +172,40 @@
     "gallery": "Galerie",
     "noImages": "Aucune image trouvée. Vérifiez les logs de l'API."
   },
+  "merchPage": {
+    "title": "La boutique",
+    "subtitle": "Montrez votre soutien à Djaouli avec des marchandises et objets de collection officiels.",
+    "breadcrumb": "Boutique",
+    "loading": "Chargement...",
+    "searchPlaceholder": "Rechercher...",
+    "categoryFilter": "Catégories",
+    "tagPlaceholder": "Tag",
+    "tagFilter": "Tags",
+    "noProductsFound": "Aucun produit trouvé",
+    "noProductsFoundDescription": "Essayez d'ajuster vos filtres ou termes de recherche.",
+    "comingSoon": {
+      "title": "Bientôt disponible",
+      "description": "Nouveaux produits bientôt disponibles. Restez à l'écoute pour des équipements et objets de collection Djaouli exclusifs."
+    },
+    "productDetail": {
+      "backToMerch": "Merch",
+      "noImage": "Aucune image disponible",
+      "quantity": "Quantité",
+      "total": "Total",
+      "outOfStock": "Rupture de stock",
+      "addToCart": "Ajouter au panier",
+      "inStock": "en stock",
+      "addToWishlist": "Ajouter à la liste d'envies",
+      "removeFromWishlist": "Retirer de la liste d'envies",
+      "share": "Partager",
+      "description": "Description",
+      "productDetails": "Détails du produit",
+      "productId": "ID produit :",
+      "category": "Catégorie : Produits dérivés",
+      "tags": "Étiquettes :",
+      "relatedProducts": "Vous pourriez aussi aimer"
+    }
+  },
   "eventSlugPage": {
     "metadata": {
       "notFoundTitle": "Événement non trouvé"
@@ -192,7 +226,7 @@
       "title": "Billets",
       "buyNow": "Acheter",
       "getETicket": "Obtenir ticket",
-      "currencySuffix": " FCFA"
+      "currencySuffix": " F CFA"
     },
     "bundles": {
       "title": "Packs"
@@ -266,6 +300,54 @@
       "functionError": "Impossible d'initier le paiement. Veuillez réessayer.",
       "lomiUrlMissing": "URL de paiement non reçue. Veuillez réessayer.",
       "submitError": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
+  "cartModal": {
+    "products": "Produits",
+    "itemCount": "{count} article",
+    "itemCountPlural": "{count} articles",
+    "yourCartIsEmpty": "Votre panier est vide",
+    "startShopping": "Commencer les achats pour commencer →",
+    "shipping": "Livraison",
+    "calculatedAtCheckout": "Calculée à la caisse",
+    "total": "Total",
+    "cart": "Panier",
+    "proceedToCheckout": "Procéder au paiement"
+  },
+  "cartItemCard": {
+    "noImage": "Aucune image"
+  },
+  "cartPurchaseForm": {
+    "title": "Paiement",
+    "itemCount": "{count} article",
+    "itemCountPlural": "{count} articles",
+    "labels": {
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone"
+    },
+    "placeholders": {
+      "name": "Entrez votre nom complet",
+      "email": "Entrez votre email",
+      "phone": "Entrez votre numéro de téléphone"
+    },
+    "shipping": "Livraison",
+    "shippingCalculated": "Calculée à la caisse",
+    "total": "Total",
+    "currency": "F CFA",
+    "buttons": {
+      "processing": "Traitement...",
+      "completePurchase": "Finaliser l'achat"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez entrer une adresse e-mail valide",
+      "phoneRequired": "Le numéro de téléphone est requis",
+      "cartEmpty": "Votre panier est vide",
+      "checkoutFailed": "Échec du traitement du paiement",
+      "checkoutUrlFailed": "Échec de l'obtention de l'URL de paiement",
+      "unexpectedError": "Une erreur inattendue s'est produite"
     }
   },
   "paymentSuccess": {

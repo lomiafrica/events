@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useTransition } from "react";
 import { useCart, CartItem } from "./cart-context";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -13,6 +15,7 @@ interface CartItemCardProps {
 
 export function CartItemCard({ item }: CartItemCardProps) {
   const { updateItem } = useCart();
+  const { currentLanguage } = useTranslation();
   const [isPending, startTransition] = useTransition();
 
   const { id, quantity, product } = item;
@@ -35,7 +38,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
   return (
     <div className="flex gap-8 p-3 bg-[#1a1a1a]/50 hover:bg-[#1a1a1a]/70 rounded-sm transition-colors items-stretch">
       {/* Product Image */}
-      <div className="flex-shrink-0 w-16">
+      <div className="shrink-0 w-16">
         {image ? (
           <div className="h-full aspect-square relative overflow-hidden rounded-sm bg-muted">
             <Image
@@ -47,7 +50,9 @@ export function CartItemCard({ item }: CartItemCardProps) {
           </div>
         ) : (
           <div className="h-full aspect-square bg-muted rounded-sm flex items-center justify-center">
-            <span className="text-xs text-white/70">No Image</span>
+            <span className="text-xs text-white/70">
+              {t(currentLanguage, "cartItemCard.noImage")}
+            </span>
           </div>
         )}
       </div>
@@ -68,7 +73,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
             size="sm"
             onClick={handleRemoveItem}
             disabled={isPending}
-            className="flex-shrink-0 h-6 w-6 p-0"
+            className="shrink-0 h-6 w-6 p-0"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -86,7 +91,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
             >
               <MinusIcon className="h-3 w-3" />
             </Button>
-            <span className="text-sm font-medium min-w-[2rem] text-center text-white">
+            <span className="text-sm font-medium min-w-8 text-center text-white">
               {quantity}
             </span>
             <Button

@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import Header from "@/components/landing/header";
-import BackgroundVideo from "@/components/landing/BackgroundVideo";
+import { HeroSection } from "@/components/landing/hero-section";
 import Footer from "@/components/landing/footer";
-
-import {
-  getHomepageVideoUrls,
-  getHomepagePromoEvent,
-} from "@/lib/sanity/queries";
+import { getHomepageContent, getHomepagePromoEvent } from "@/lib/sanity/queries";
 import FloatingPromo from "@/components/landing/floating-promo";
 
 // Use the general site metadata for the home page
@@ -16,17 +12,17 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const videoUrls = await getHomepageVideoUrls();
+  // Fetch homepage content server-side
+  const homepageData = await getHomepageContent();
   const promoEventData = await getHomepagePromoEvent();
-
   return (
-    <>
-      <div className="relative h-screen overflow-hidden">
-        <BackgroundVideo videoUrls={videoUrls} />
-        <div className="relative z-10 h-full flex flex-col">
-          <Header />
-        </div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground relative">
+      <Header />
+      {/* Use HeroSection with combined videos and featured events */}
+      <HeroSection
+        sanityHeroItems={homepageData?.heroContent}
+        featuredEvents={homepageData?.featuredEvents}
+      />
       <Footer />
 
       {/* Floating Promo - Renders if promoEventData is found and has a flyer and slug */}
@@ -35,9 +31,9 @@ export default async function Home() {
           imageUrl={promoEventData.flyerUrl}
           href={`/events/${promoEventData.slug}`}
           title={promoEventData.title || "View Event"} // Use event title for alt text or a default
-          // onClose can be implemented here if needed, e.g., to set a cookie to not show again
+        // onClose can be implemented here if needed, e.g., to set a cookie to not show again
         />
       )}
-    </>
+    </div>
   );
 }

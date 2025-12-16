@@ -122,38 +122,6 @@ export async function getEventBySlug(slug: string, locale: string) {
 }
 
 // Blog
-export async function getLatestBlogPosts(limit = 2) {
-  return client.fetch(
-    `
-    *[_type == "post"] | order(publishedAt desc) [0...$limit] {
-      _id,
-      title,
-      "slug": slug.current,
-      publishedAt,
-      excerpt,
-      "mainImage": {
-        "url": mainImage.asset->url
-      }
-    }
-  `,
-    { limit },
-  );
-}
-
-export async function getAllBlogPosts() {
-  return client.fetch(`
-    *[_type == "post"] | order(publishedAt desc) {
-      _id,
-      title,
-      "slug": slug.current,
-      publishedAt,
-      excerpt,
-      "mainImage": {
-        "url": mainImage.asset->url
-      }
-    }
-  `);
-}
 
 export async function getBlogPostBySlug(slug: string) {
   const post = await client.fetch(
@@ -312,7 +280,96 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
   return {
     defaultShippingCost: result?.defaultShippingCost ?? 0,
   };
+}
+
+// ================================= Homepage Content ================================
+
+// Interface for homepage data
+export interface HomepageData {
+  heroContent?: {
+    _key: string;
+    title?: string;
+    description?: string;
+    type: "image" | "video";
+    image?: {
+      asset: { url: string };
+      alt?: string;
+      caption?: string;
+    };
+    video?: {
+      asset: { url: string };
+    };
+    videoUrl?: string;
+    isActive: boolean;
+  }[];
+  featuredEvents?: {
+    _id: string;
+    title: string;
+    slug: {
+      current: string;
+    };
+    date: string;
+    time?: string;
+    location?:
+      | string
+      | {
+          venueName?: string;
+          address?: string;
+        };
+    description?: {
+      en?: string;
+      fr?: string;
+    };
+    flyer?: {
+      url: string;
+    };
+    ticketsAvailable?: boolean;
+  }[];
+}
+
+export const getHomepageContent = async (): Promise<HomepageData | null> => {
+  const query = `*[_type == "homepage"][0] {
+    heroContent[]{
+      _key,
+      title,
+      description,
+      type,
+      image{
+        asset->{url},
+        alt,
+        caption
+      },
+      video{
+        asset->{url}
+      },
+      videoUrl,
+      isActive
+    },
+    featuredEvents[]->{
+      _id,
+      title,
+      slug,
+      date,
+      time,
+      location,
+      description,
+      "flyer": {
+        "url": flyer.asset->url
+      },
+      ticketsAvailable
+    }
+  }`;
+
+  const result = await client.fetch<HomepageData | null>(
+    query,
+    {},
+    getCacheConfig(["homepage"]),
+  );
+
+  return result;
 };
+
+;
 
 // Define interface for the data returned by getEventsForScroller
 interface EventScrollerData {

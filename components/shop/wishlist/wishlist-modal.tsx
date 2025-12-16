@@ -73,7 +73,7 @@ export default function WishlistModal() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="fixed inset-0 z-[60] bg-foreground/30 will-change-auto"
+                  className="fixed inset-0 z-60 bg-foreground/30 will-change-auto"
                   onClick={closeWishlist}
                   aria-hidden="true"
                   style={{
@@ -91,7 +91,7 @@ export default function WishlistModal() {
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="fixed top-0 bottom-0 right-0 flex w-full md:w-[500px] p-4 z-[70] will-change-transform"
+                  className="fixed top-0 bottom-0 right-0 flex w-full md:w-[500px] p-4 z-70 will-change-transform"
                   style={{ position: "fixed", top: 0, right: 0, bottom: 0 }}
                 >
                   <div className="flex flex-col py-6 w-full bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
@@ -133,7 +133,7 @@ export default function WishlistModal() {
                               <Card className="bg-[#2a2a2a]/50 hover:bg-[#2a2a2a]/70 rounded-sm p-4 transition-colors">
                                 <div className="flex gap-8 items-stretch">
                                   {/* Product Image */}
-                                  <div className="flex-shrink-0 w-16">
+                                  <div className="shrink-0 w-16">
                                     {item.product.mainImage ? (
                                       <div className="h-full aspect-square relative overflow-hidden rounded-sm bg-muted">
                                         <Image
@@ -160,7 +160,7 @@ export default function WishlistModal() {
                                           {item.product.name}
                                         </h3>
                                         <p className="text-xs text-white/70 mt-1">
-                                          {formatPrice(item.product.price)} F
+                                          {formatPrice(item.product.price)} F CFA
                                           CFA
                                         </p>
                                       </div>
@@ -170,7 +170,7 @@ export default function WishlistModal() {
                                         onClick={() =>
                                           removeFromWishlist(item.product._id)
                                         }
-                                        className="flex-shrink-0 h-6 w-6 p-0 text-white/70 hover:text-red-400"
+                                        className="shrink-0 h-6 w-6 p-0 text-white/70 hover:text-red-400"
                                       >
                                         <X className="h-4 w-4" />
                                       </Button>

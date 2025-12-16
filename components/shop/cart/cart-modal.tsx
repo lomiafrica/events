@@ -12,6 +12,8 @@ import Link from "next/link";
 import { cn } from "@/lib/actions/utils";
 import { createPortal } from "react-dom";
 import CartPurchaseForm from "./cart-purchase-form";
+import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { t } from "@/lib/i18n/translations";
 
 const CartContainer = ({
   children,
@@ -26,9 +28,11 @@ const CartContainer = ({
 const CartItems = ({
   closeCart,
   onProceedToCheckout,
+  currentLanguage,
 }: {
   closeCart: () => void;
   onProceedToCheckout: () => void;
+  currentLanguage: string;
 }) => {
   const { cart } = useCart();
 
@@ -37,9 +41,11 @@ const CartItems = ({
   return (
     <div className="flex flex-col justify-between h-full overflow-hidden">
       <CartContainer className="flex justify-between items-center px-2 text-sm text-muted-foreground mb-4">
-        <span className="font-medium">Products</span>
+        <span className="font-medium">{t(currentLanguage, "cartModal.products")}</span>
         <span className="bg-muted/50 px-2 py-1 rounded-sm text-xs">
-          {cart.lines.length} item{cart.lines.length !== 1 ? "s" : ""}
+          {cart.lines.length === 1
+            ? t(currentLanguage, "cartModal.itemCount", { count: cart.lines.length })
+            : t(currentLanguage, "cartModal.itemCountPlural", { count: cart.lines.length })}
         </span>
       </CartContainer>
       <div className="relative flex-1 min-h-0 py-4 overflow-x-hidden">
@@ -62,11 +68,11 @@ const CartItems = ({
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
             <div className="flex justify-between items-center py-3">
-              <p className="font-medium text-foreground">Shipping</p>
-              <p className="text-muted-foreground">Calculated at checkout</p>
+              <p className="font-medium text-foreground">{t(currentLanguage, "cartModal.shipping")}</p>
+              <p className="text-muted-foreground">{t(currentLanguage, "cartModal.calculatedAtCheckout")}</p>
             </div>
             <div className="flex justify-between items-center py-2">
-              <p className="text-lg font-bold text-foreground">Total</p>
+              <p className="text-lg font-bold text-foreground">{t(currentLanguage, "cartModal.total")}</p>
               <p className="text-xl font-bold text-primary">
                 {Number(cart.cost.totalAmount.amount).toLocaleString("fr-FR")} F
                 CFA
@@ -74,7 +80,7 @@ const CartItems = ({
             </div>
           </CartContainer>
         </div>
-        <CheckoutButton onProceedToCheckout={onProceedToCheckout} />
+        <CheckoutButton onProceedToCheckout={onProceedToCheckout} currentLanguage={currentLanguage} />
       </CartContainer>
     </div>
   );
@@ -91,6 +97,7 @@ const serializeCart = (cart: { lines: { id: string; quantity: number }[] }) => {
 
 export default function CartModal() {
   const { cart } = useCart();
+  const { currentLanguage } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
@@ -164,10 +171,10 @@ export default function CartModal() {
               </div>
               <div className="flex flex-col flex-1 gap-2">
                 <span className="text-xl font-bold text-foreground">
-                  Your cart is empty
+                  {t(currentLanguage, "cartModal.yourCartIsEmpty")}
                 </span>
                 <p className="text-muted-foreground hover:text-primary transition-colors">
-                  Start shopping to get started →
+                  {t(currentLanguage, "cartModal.startShopping")}
                 </p>
               </div>
             </div>
@@ -182,6 +189,7 @@ export default function CartModal() {
       <CartItems
         closeCart={closeCart}
         onProceedToCheckout={() => setShowPurchaseForm(true)}
+        currentLanguage={currentLanguage}
       />
     );
   };
@@ -224,7 +232,7 @@ export default function CartModal() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="fixed inset-0 z-[60] bg-foreground/30 will-change-auto"
+                  className="fixed inset-0 z-60 bg-foreground/30 will-change-auto"
                   onClick={closeCart}
                   aria-hidden="true"
                   style={{
@@ -242,7 +250,7 @@ export default function CartModal() {
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="fixed top-0 bottom-0 right-0 flex w-full md:w-[500px] p-4 z-[70] will-change-transform"
+                  className="fixed top-0 bottom-0 right-0 flex w-full md:w-[500px] p-4 z-70 will-change-transform"
                   style={{ position: "fixed", top: 0, right: 0, bottom: 0 }}
                   onClick={(e) => e.stopPropagation()} // Prevent event bubbling to cart button
                 >
@@ -250,7 +258,7 @@ export default function CartModal() {
                     <CartContainer className="flex justify-between items-center mb-8">
                       <div>
                         <h2 className="text-3xl font-bold text-foreground">
-                          Cart
+                          {t(currentLanguage, "cartModal.cart")}
                         </h2>
                       </div>
                       <Button
@@ -278,8 +286,10 @@ export default function CartModal() {
 
 function CheckoutButton({
   onProceedToCheckout,
+  currentLanguage,
 }: {
   onProceedToCheckout: () => void;
+  currentLanguage: string;
 }) {
   const { pending } = useFormStatus();
   const { cart, isPending } = useCart();
@@ -308,7 +318,7 @@ function CheckoutButton({
             {isLoading ? (
               <Loader />
             ) : (
-              <span className="font-semibold">Proceed to checkout</span>
+              <span className="font-semibold">{t(currentLanguage, "cartModal.proceedToCheckout")}</span>
             )}
           </motion.div>
         </AnimatePresence>

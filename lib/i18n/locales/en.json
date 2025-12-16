@@ -172,6 +172,40 @@
     "gallery": "Gallery",
     "noImages": "No images found. Check API route logs."
   },
+  "merchPage": {
+    "title": "Djaouli Shop",
+    "subtitle": "Show your support for Djaouli with official merchandise and collectibles.",
+    "breadcrumb": "Shop",
+    "loading": "Loading...",
+    "searchPlaceholder": "Search products...",
+    "categoryFilter": "Categories",
+    "tagPlaceholder": "Tag",
+    "tagFilter": "Tags",
+    "noProductsFound": "No products found",
+    "noProductsFoundDescription": "Try adjusting your filters or search terms.",
+    "comingSoon": {
+      "title": "Coming Soon",
+      "description": "New merchandise dropping soon. Stay tuned for exclusive Djaouli gear and collectibles."
+    },
+    "productDetail": {
+      "backToMerch": "Merch",
+      "noImage": "No Image Available",
+      "quantity": "Quantity",
+      "total": "Total",
+      "outOfStock": "Out of Stock",
+      "addToCart": "Add to cart",
+      "inStock": "in stock",
+      "addToWishlist": "Maybe next time",
+      "removeFromWishlist": "Remove from wishlist",
+      "share": "Share",
+      "description": "Description",
+      "productDetails": "Product Details",
+      "productId": "Product ID:",
+      "category": "Category: Merchandise",
+      "tags": "Tags:",
+      "relatedProducts": "You might also like"
+    }
+  },
   "eventSlugPage": {
     "metadata": {
       "notFoundTitle": "Event Not Found"
@@ -192,7 +226,7 @@
       "title": "Tickets",
       "buyNow": "Buy now",
       "getETicket": "Get Ticket",
-      "currencySuffix": " FCFA"
+      "currencySuffix": " F CFA"
     },
     "bundles": {
       "title": "Bundles"
@@ -266,6 +300,54 @@
       "functionError": "Could not initiate payment. Please try again.",
       "lomiUrlMissing": "Payment URL not received. Please try again.",
       "submitError": "An error occurred. Please try again."
+    }
+  },
+  "cartModal": {
+    "products": "Products",
+    "itemCount": "{count} item",
+    "itemCountPlural": "{count} items",
+    "yourCartIsEmpty": "Your cart is empty",
+    "startShopping": "Start shopping to get started →",
+    "shipping": "Shipping",
+    "calculatedAtCheckout": "Calculated at checkout",
+    "total": "Total",
+    "cart": "Cart",
+    "proceedToCheckout": "Proceed to checkout"
+  },
+  "cartItemCard": {
+    "noImage": "No image"
+  },
+  "cartPurchaseForm": {
+    "title": "Checkout",
+    "itemCount": "{count} item",
+    "itemCountPlural": "{count} items",
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "placeholders": {
+      "name": "Enter your full name",
+      "email": "Enter your email",
+      "phone": "Enter your phone number"
+    },
+    "shipping": "Shipping",
+    "shippingCalculated": "Calculated at checkout",
+    "total": "Total",
+    "currency": "F CFA",
+    "buttons": {
+      "processing": "Processing...",
+      "completePurchase": "Complete purchase"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "cartEmpty": "Your cart is empty",
+      "checkoutFailed": "Failed to process checkout",
+      "checkoutUrlFailed": "Failed to get checkout URL",
+      "unexpectedError": "An unexpected error occurred"
     }
   },
   "paymentSuccess": {
