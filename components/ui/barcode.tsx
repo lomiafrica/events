@@ -54,7 +54,7 @@ export default function Barcode() {
         href="https://github.com/djaoulient/djaoulient.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute -bottom-6 right-0 text-xs text-white font-mono hover:underline"
+        className="absolute -bottom-6 right-0 text-xs text-muted-foreground font-mono hover:underline"
       >
         {t(currentLanguage, "barcode.opensource")}
       </a>
