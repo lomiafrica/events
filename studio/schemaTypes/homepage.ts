@@ -1,11 +1,9 @@
 import {defineType, defineField} from 'sanity'
-import {HomeIcon} from '@sanity/icons'
 
 export default defineType({
   name: 'homepage',
   title: 'Homepage',
   type: 'document',
-  icon: HomeIcon,
   // Uncomment limiter if using @sanity/document-internationalization
   // __experimental_actions: [/* 'create', */ 'update', /* 'delete', */ 'publish'],
   fields: [
@@ -168,7 +166,6 @@ export default defineType({
 
       return {
         title: previewTitle,
-        media: HomeIcon,
       }
     },
   },
