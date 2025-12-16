@@ -38,6 +38,13 @@ export default defineType({
       description:
         "Select an event to feature in the floating promo on the homepage. The event's flyer will be used as the image, and the promo will link to the event page.",
     }),
+    defineField({
+      name: 'defaultShippingCost',
+      title: 'Default Shipping Cost (XOF)',
+      type: 'number',
+      description: 'Default shipping cost for products without a specific fee. Used by the shop cart.',
+      initialValue: 0,
+    }),
     // Add other homepage-specific fields here if needed
   ],
   preview: {

@@ -238,6 +238,13 @@ export default {
         {name: 'height', title: 'Height', type: 'number'},
       ],
     },
+    {
+      name: 'shippingFee',
+      title: 'Shipping Fee (XOF)',
+      type: 'number',
+      group: 'shipping',
+      description: 'Shipping cost for this product. Leave empty to use default.',
+    },
   ],
   preview: {
     select: {

@@ -25,6 +25,7 @@ export interface SanityProduct {
     slug: string;
   }>;
   tags?: string[];
+  shippingFee?: number;
   images?: Array<{
     url: string;
     metadata?: {

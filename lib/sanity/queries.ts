@@ -233,6 +233,7 @@ export async function getAllProducts() {
         "slug": slug.current
       },
       tags,
+      shippingFee,
       images[]{
         asset->{
           _id,
@@ -285,13 +286,33 @@ export async function getProductBySlug(slug: string) {
       tags,
       requiresShipping,
       weight,
-      dimensions
+      dimensions,
+      shippingFee
     }
   `,
     { slug },
     getCacheConfig([`product-${slug}`, "products"]),
   );
 }
+
+// ================================= Shipping ================================
+export interface ShippingSettings {
+  defaultShippingCost: number;
+}
+
+export const getShippingSettings = async (): Promise<ShippingSettings> => {
+  const query = `*[_type == "homepage"][0] {
+    defaultShippingCost
+  }`;
+  const result = await client.fetch<{ defaultShippingCost?: number }>(
+    query,
+    {},
+    getCacheConfig(["homepage", "settings"]),
+  );
+  return {
+    defaultShippingCost: result?.defaultShippingCost ?? 0,
+  };
+};
 
 // Define interface for the data returned by getEventsForScroller
 interface EventScrollerData {

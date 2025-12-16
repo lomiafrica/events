@@ -16,6 +16,7 @@ import {
 import styles from "@/lib/styles/header.module.css";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
+import CartModal from "@/components/shop/cart/cart-modal";
 
 interface NavItem {
   nameKey: string;
@@ -49,7 +50,7 @@ export default function Header() {
     { nameKey: "header.nav.events", path: "/events" },
     { nameKey: "header.nav.gallery", path: "/gallery" },
     { nameKey: "header.nav.blog", path: "/blog" },
-    { nameKey: "header.nav.shop", path: "/shop", isComingSoon: true },
+    { nameKey: "header.nav.shop", path: "/merch" },
   ];
 
   return (
@@ -109,7 +110,13 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="flex items-center gap-4 md:hidden">
+        {/* Cart Modal - Desktop */}
+        <div className="hidden md:flex items-center ml-4">
+          <CartModal />
+        </div>
+
+        <div className="flex items-center gap-2 md:hidden">
+          <CartModal />
           <Sheet>
             <SheetTrigger asChild>
               <Button
