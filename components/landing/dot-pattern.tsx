@@ -3,11 +3,10 @@ import React from "react";
 
 import { cn } from "@/lib/actions/utils";
 
-interface DotPatternProps
-  extends Omit<
-    React.SVGAttributes<SVGSVGElement>,
-    "x" | "y" | "width" | "height" | "className"
-  > {
+interface DotPatternProps extends Omit<
+  React.SVGAttributes<SVGSVGElement>,
+  "x" | "y" | "width" | "height" | "className"
+> {
   width?: number;
   height?: number;
   x?: number;

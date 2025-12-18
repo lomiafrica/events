@@ -18,7 +18,8 @@ export default defineType({
       name: 'defaultShippingCost',
       title: 'Default Shipping Cost (XOF)',
       type: 'number',
-      description: 'Default shipping cost for products without a specific fee. Used by the shop cart.',
+      description:
+        'Default shipping cost for products without a specific fee. Used by the shop cart.',
       initialValue: 0,
     }),
     defineField({

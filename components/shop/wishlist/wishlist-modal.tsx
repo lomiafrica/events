@@ -160,8 +160,8 @@ export default function WishlistModal() {
                                           {item.product.name}
                                         </h3>
                                         <p className="text-xs text-white/70 mt-1">
-                                          {formatPrice(item.product.price)} F CFA
-                                          CFA
+                                          {formatPrice(item.product.price)} F
+                                          CFA CFA
                                         </p>
                                       </div>
                                       <Button

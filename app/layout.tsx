@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { TranslationProvider } from "@/lib/contexts/TranslationContext";
 import { CartProvider } from "@/components/shop/cart/cart-context";
 import { WishlistProvider } from "@/components/shop/wishlist/wishlist-context";
+import { FacebookPixel } from "@/components/FacebookPixel";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -66,6 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
+        <FacebookPixel />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -75,7 +77,7 @@ export default function RootLayout({
           <TranslationProvider>
             <CartProvider>
               <WishlistProvider>
-                <main className="flex-grow">{children}</main>
+                <main className="grow">{children}</main>
               </WishlistProvider>
             </CartProvider>
           </TranslationProvider>

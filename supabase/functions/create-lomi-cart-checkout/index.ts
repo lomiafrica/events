@@ -343,10 +343,7 @@ serve(async (req: Request) => {
       );
     }
 
-    if (
-      !lomiResponse.ok ||
-      !lomiResponseData.checkout_session_id
-    ) {
+    if (!lomiResponse.ok || !lomiResponseData.checkout_session_id) {
       console.error("lomi. API error:", lomiResponseData);
 
       // Update purchase with failure details using RPC

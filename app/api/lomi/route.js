@@ -5,18 +5,21 @@ import { Buffer } from "node:buffer";
 // --- Helper: Check if webhook has already been processed ---
 async function isWebhookAlreadyProcessed(supabase, webhookEventId) {
   try {
-    const { data, error } = await supabase.rpc('check_webhook_already_processed', {
-      p_webhook_event_id: webhookEventId
-    });
+    const { data, error } = await supabase.rpc(
+      "check_webhook_already_processed",
+      {
+        p_webhook_event_id: webhookEventId,
+      },
+    );
 
     if (error) {
-      console.warn('Error checking webhook processing status via RPC:', error);
+      console.warn("Error checking webhook processing status via RPC:", error);
       return false; // Default to allowing processing if check fails
     }
 
     return data || false;
   } catch (error) {
-    console.warn('Error checking webhook processing status:', error);
+    console.warn("Error checking webhook processing status:", error);
     return false;
   }
 }
@@ -24,17 +27,17 @@ async function isWebhookAlreadyProcessed(supabase, webhookEventId) {
 // --- Helper: Mark webhook as processed ---
 async function markWebhookAsProcessed(supabase, webhookEventId, purchaseId) {
   try {
-    const { error } = await supabase.rpc('update_purchase_webhook_metadata', {
+    const { error } = await supabase.rpc("update_purchase_webhook_metadata", {
       p_purchase_id: purchaseId,
       p_webhook_event_id: webhookEventId,
     });
 
     if (error) {
-      console.warn('Error marking webhook as processed:', error);
+      console.warn("Error marking webhook as processed:", error);
       // Don't throw - logging failure shouldn't break webhook processing
     }
   } catch (error) {
-    console.warn('Error marking webhook as processed:', error);
+    console.warn("Error marking webhook as processed:", error);
   }
 }
 
@@ -181,25 +184,31 @@ export async function POST(request) {
     // For PAYMENT_SUCCEEDED events from lomi, checkout_session_id is a direct field
     const lomiCheckoutSessionId = String(
       eventData.checkout_session_id ||
-      eventData.metadata?.checkout_session_id ||
-      eventData.metadata?.linkId ||
-      eventData.id ||
-      ''
+        eventData.metadata?.checkout_session_id ||
+        eventData.metadata?.linkId ||
+        eventData.id ||
+        "",
     );
 
     // Debug logging for RPC params
-    console.log('Events Webhook: RPC params debug:', {
+    console.log("Events Webhook: RPC params debug:", {
       lomiCheckoutSessionId,
-      checkoutSessionIdSource: eventData.checkout_session_id ? 'direct' :
-        eventData.metadata?.checkout_session_id ? 'metadata.checkout_session_id' :
-          eventData.metadata?.linkId ? 'metadata.linkId' : 'eventData.id',
+      checkoutSessionIdSource: eventData.checkout_session_id
+        ? "direct"
+        : eventData.metadata?.checkout_session_id
+          ? "metadata.checkout_session_id"
+          : eventData.metadata?.linkId
+            ? "metadata.linkId"
+            : "eventData.id",
     });
 
     // Amount: lomi sends gross_amount from the transactions table
-    const amount = parseFloat(eventData.gross_amount || eventData.amount || eventData.net_amount || '0');
+    const amount = parseFloat(
+      eventData.gross_amount || eventData.amount || eventData.net_amount || "0",
+    );
 
     // Currency: lomi sends currency_code from the transactions table
-    const currency = eventData.currency_code || eventData.currency || 'XOF';
+    const currency = eventData.currency_code || eventData.currency || "XOF";
 
     if (!purchaseId) {
       console.error(
@@ -219,11 +228,19 @@ export async function POST(request) {
 
     // Check if this webhook has already been processed to prevent duplicates
     const webhookEventId = `${lomiEventType}:${lomiTransactionId || lomiCheckoutSessionId}`;
-    const webhookProcessed = await isWebhookAlreadyProcessed(supabase, webhookEventId);
+    const webhookProcessed = await isWebhookAlreadyProcessed(
+      supabase,
+      webhookEventId,
+    );
     if (webhookProcessed) {
-      console.warn(`Events Webhook: ${webhookEventId} already processed, skipping duplicate`);
+      console.warn(
+        `Events Webhook: ${webhookEventId} already processed, skipping duplicate`,
+      );
       return new Response(
-        JSON.stringify({ received: true, message: "Webhook already processed" }),
+        JSON.stringify({
+          received: true,
+          message: "Webhook already processed",
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json" },

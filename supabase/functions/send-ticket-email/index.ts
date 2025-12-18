@@ -685,7 +685,9 @@ Deno.serve(async (req: Request) => {
     let logoSrc = defaultLogoUrl; // Default to URL - email sending always works
 
     try {
-      console.log("Attempting to embed logo from Supabase storage bucket into email...");
+      console.log(
+        "Attempting to embed logo from Supabase storage bucket into email...",
+      );
       const logoResponse = await fetch(defaultLogoUrl);
 
       if (logoResponse.ok) {

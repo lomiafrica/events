@@ -60,7 +60,11 @@ let lastScannedTicket: { id: string; timestamp: number } | null = null;
 // Audio feedback for scanning
 const playSuccessSound = () => {
   try {
-    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const audioContext = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext
+    )();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -68,10 +72,13 @@ const playSuccessSound = () => {
     gainNode.connect(audioContext.destination);
 
     oscillator.frequency.value = 800; // Higher pitch for success
-    oscillator.type = 'sine';
+    oscillator.type = "sine";
 
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.1,
+    );
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.1);
@@ -82,7 +89,11 @@ const playSuccessSound = () => {
 
 const playErrorSound = () => {
   try {
-    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const audioContext = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext
+    )();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -90,10 +101,13 @@ const playErrorSound = () => {
     gainNode.connect(audioContext.destination);
 
     oscillator.frequency.value = 200; // Lower pitch for error
-    oscillator.type = 'sawtooth';
+    oscillator.type = "sawtooth";
 
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.2,
+    );
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.2);
@@ -198,10 +212,10 @@ const retryWithBackoff = async <T,>(
     // Check if it's a network error (worth retrying)
     const errorMessage = error instanceof Error ? error.message : String(error);
     const isNetworkError =
-      errorMessage.includes('network') ||
-      errorMessage.includes('timeout') ||
-      errorMessage.includes('fetch') ||
-      errorMessage.includes('connection');
+      errorMessage.includes("network") ||
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("fetch") ||
+      errorMessage.includes("connection");
 
     if (!isNetworkError) {
       // Don't retry validation errors like TICKET_NOT_FOUND
@@ -209,7 +223,7 @@ const retryWithBackoff = async <T,>(
     }
 
     // Wait before retrying
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
     return retryWithBackoff(fn, retries - 1, delay * 1.5); // Exponential backoff
   }
 };
@@ -223,7 +237,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   const [errorCode, setErrorCode] = useState<string | null>(null); // Track error type for UI differentiation
   const [isVerified, setIsVerified] = useState(false);
   const [wasJustAdmitted, setWasJustAdmitted] = useState(false);
-  const [flashColor, setFlashColor] = useState<'green' | 'red' | null>(null);
+  const [flashColor, setFlashColor] = useState<"green" | "red" | null>(null);
 
   // Check for cached PIN on component mount
   useEffect(() => {
@@ -262,26 +276,41 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   }, [ticketId, isVerified, ticketData]);
 
   // Helper to parse error codes from database exceptions
-  const parseErrorMessage = (errorMessage: string): { code: string; message: string } => {
+  const parseErrorMessage = (
+    errorMessage: string,
+  ): { code: string; message: string } => {
     const match = errorMessage.match(/^([A-Z_]+):\s*(.+)$/);
     if (match) {
       return { code: match[1], message: match[2] };
     }
-    return { code: 'UNKNOWN_ERROR', message: errorMessage };
+    return { code: "UNKNOWN_ERROR", message: errorMessage };
   };
 
   // Helper to get user-friendly error message
-  const getUserFriendlyError = useCallback((errorCode: string, defaultMessage: string): string => {
-    const errorMap: Record<string, string> = {
-      'TICKET_NOT_FOUND': t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
-      'INVALID_TICKET_ID': t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
-      'UNPAID_TICKET': 'This ticket has not been paid for. Please check payment status.',
-      'ORPHANED_TICKET': 'Ticket data is incomplete. Please contact support.',
-      'ALREADY_USED': t(currentLanguage, "ticketVerification.errors.alreadyUsed"),
-      'DUPLICATE_SCAN': 'Please wait a moment before scanning again.',
-    };
-    return errorMap[errorCode] || defaultMessage;
-  }, [currentLanguage]);
+  const getUserFriendlyError = useCallback(
+    (errorCode: string, defaultMessage: string): string => {
+      const errorMap: Record<string, string> = {
+        TICKET_NOT_FOUND: t(
+          currentLanguage,
+          "ticketVerification.errors.ticketNotFound",
+        ),
+        INVALID_TICKET_ID: t(
+          currentLanguage,
+          "ticketVerification.errors.ticketNotFound",
+        ),
+        UNPAID_TICKET:
+          "This ticket has not been paid for. Please check payment status.",
+        ORPHANED_TICKET: "Ticket data is incomplete. Please contact support.",
+        ALREADY_USED: t(
+          currentLanguage,
+          "ticketVerification.errors.alreadyUsed",
+        ),
+        DUPLICATE_SCAN: "Please wait a moment before scanning again.",
+      };
+      return errorMap[errorCode] || defaultMessage;
+    },
+    [currentLanguage],
+  );
 
   const verifyTicket = useCallback(
     async (ticketIdentifier: string) => {
@@ -292,7 +321,10 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
       // Check for duplicate scan
       const now = Date.now();
-      if (lastScannedTicket && lastScannedTicket.id === ticketIdentifier.trim()) {
+      if (
+        lastScannedTicket &&
+        lastScannedTicket.id === ticketIdentifier.trim()
+      ) {
         if (now - lastScannedTicket.timestamp < DUPLICATE_SCAN_WINDOW) {
           setError("Please wait before scanning this ticket again.");
           setIsLoading(false);
@@ -302,16 +334,19 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
       try {
         const result = await retryWithBackoff(async () => {
-          const { data, error: rpcError } = await supabase.rpc("verify_ticket", {
-            p_ticket_identifier: ticketIdentifier.trim(),
-          });
+          const { data, error: rpcError } = await supabase.rpc(
+            "verify_ticket",
+            {
+              p_ticket_identifier: ticketIdentifier.trim(),
+            },
+          );
 
           if (rpcError) {
             throw new Error(rpcError.message);
           }
 
           if (!data || data.length === 0) {
-            throw new Error('TICKET_NOT_FOUND: No ticket found');
+            throw new Error("TICKET_NOT_FOUND: No ticket found");
           }
 
           return data[0];
@@ -323,21 +358,22 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
         // Success feedback
         playSuccessSound();
-        setFlashColor('green');
+        setFlashColor("green");
         setTimeout(() => setFlashColor(null), 300);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Verification failed";
+        const errorMessage =
+          err instanceof Error ? err.message : "Verification failed";
         const { code, message } = parseErrorMessage(errorMessage);
         const friendlyMessage = getUserFriendlyError(code, message);
         setError(friendlyMessage);
         setErrorCode(code);
 
         // Error feedback - use orange flash for ALREADY_USED, red for other errors
-        if (code === 'ALREADY_USED') {
-          setFlashColor('red'); // Still flash to get attention
+        if (code === "ALREADY_USED") {
+          setFlashColor("red"); // Still flash to get attention
         } else {
           playErrorSound();
-          setFlashColor('red');
+          setFlashColor("red");
         }
         setTimeout(() => setFlashColor(null), 500);
       } finally {
@@ -345,7 +381,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentLanguage, setIsLoading, setError, setTicketData, getUserFriendlyError],
+    [
+      currentLanguage,
+      setIsLoading,
+      setError,
+      setTicketData,
+      getUserFriendlyError,
+    ],
   );
 
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -436,7 +478,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       // Refresh ticket data
       await verifyTicket(ticketId.trim());
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to mark ticket as used";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to mark ticket as used";
       const { code, message } = parseErrorMessage(errorMessage);
       const friendlyMessage = getUserFriendlyError(code, message);
       setError(friendlyMessage);
@@ -474,12 +517,14 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   // Get status colors and icons based on ticket state
   const getTicketStatus = () => {
     // Show orange styling for ALREADY_USED errors (ticket is valid but was already admitted)
-    if (error && errorCode === 'ALREADY_USED') {
+    if (error && errorCode === "ALREADY_USED") {
       return {
         bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
         borderColor: "border-orange-300 dark:border-orange-700",
         textColor: "text-orange-800 dark:text-orange-200",
-        icon: <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />,
+        icon: (
+          <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+        ),
         badgeVariant: "secondary" as const,
         badgeText: t(currentLanguage, "ticketVerification.badges.alreadyUsed"),
         statusText: t(currentLanguage, "ticketVerification.status.alreadyUsed"),
@@ -728,11 +773,10 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       {/* Flash Feedback Overlay */}
       {flashColor && (
         <div
-          className={`fixed inset-0 pointer-events-none z-50 ${flashColor === 'green'
-            ? 'bg-green-500/30'
-            : 'bg-red-500/30'
-            }`}
-          style={{ animation: 'flash 0.4s ease-out' }}
+          className={`fixed inset-0 pointer-events-none z-50 ${
+            flashColor === "green" ? "bg-green-500/30" : "bg-red-500/30"
+          }`}
+          style={{ animation: "flash 0.4s ease-out" }}
         />
       )}
 
@@ -784,7 +828,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <p className="text-sm text-gray-400">
                           {/* Differentiate between individual and legacy ticket display */}
                           {ticketData.use_count !== undefined &&
-                            ticketData.total_quantity ? (
+                          ticketData.total_quantity ? (
                             <span>
                               {ticketData.use_count} /{" "}
                               {ticketData.total_quantity}{" "}
@@ -798,13 +842,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                               {ticketData.quantity}{" "}
                               {ticketData.quantity > 1
                                 ? t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
+                                    currentLanguage,
+                                    "ticketVerification.quantity.people",
+                                  )
                                 : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
-                                )}
+                                    currentLanguage,
+                                    "ticketVerification.quantity.person",
+                                  )}
                             </span>
                           )}
                         </p>
@@ -820,15 +864,15 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     <div className="text-center mt-3">
                       <p className="text-orange-800 dark:text-orange-200 font-medium">
                         {ticketData.use_count !== undefined &&
-                          ticketData.total_quantity
+                        ticketData.total_quantity
                           ? t(
-                            currentLanguage,
-                            "ticketVerification.warnings.fullyUsed",
-                          )
+                              currentLanguage,
+                              "ticketVerification.warnings.fullyUsed",
+                            )
                           : t(
-                            currentLanguage,
-                            "ticketVerification.warnings.alreadyUsed",
-                          )}
+                              currentLanguage,
+                              "ticketVerification.warnings.alreadyUsed",
+                            )}
                       </p>
                       <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
                         {t(
@@ -855,13 +899,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                             people:
                               ticketData?.quantity && ticketData.quantity > 1
                                 ? t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
+                                    currentLanguage,
+                                    "ticketVerification.quantity.people",
+                                  )
                                 : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
-                                ),
+                                    currentLanguage,
+                                    "ticketVerification.quantity.person",
+                                  ),
                           },
                         )}
                       </p>
@@ -1006,9 +1050,15 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
       <style jsx global>{`
         @keyframes flash {
-          0% { opacity: 0; }
-          50% { opacity: 1; }
-          100% { opacity: 0; }
+          0% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
         }
       `}</style>
     </>

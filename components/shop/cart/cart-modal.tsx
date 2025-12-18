@@ -41,11 +41,17 @@ const CartItems = ({
   return (
     <div className="flex flex-col justify-between h-full overflow-hidden">
       <CartContainer className="flex justify-between items-center px-2 text-sm text-muted-foreground mb-4">
-        <span className="font-medium">{t(currentLanguage, "cartModal.products")}</span>
+        <span className="font-medium">
+          {t(currentLanguage, "cartModal.products")}
+        </span>
         <span className="bg-muted/50 px-2 py-1 rounded-sm text-xs">
           {cart.lines.length === 1
-            ? t(currentLanguage, "cartModal.itemCount", { count: cart.lines.length })
-            : t(currentLanguage, "cartModal.itemCountPlural", { count: cart.lines.length })}
+            ? t(currentLanguage, "cartModal.itemCount", {
+                count: cart.lines.length,
+              })
+            : t(currentLanguage, "cartModal.itemCountPlural", {
+                count: cart.lines.length,
+              })}
         </span>
       </CartContainer>
       <div className="relative flex-1 min-h-0 py-4 overflow-x-hidden">
@@ -68,11 +74,17 @@ const CartItems = ({
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
             <div className="flex justify-between items-center py-3">
-              <p className="font-medium text-foreground">{t(currentLanguage, "cartModal.shipping")}</p>
-              <p className="text-muted-foreground">{t(currentLanguage, "cartModal.calculatedAtCheckout")}</p>
+              <p className="font-medium text-foreground">
+                {t(currentLanguage, "cartModal.shipping")}
+              </p>
+              <p className="text-muted-foreground">
+                {t(currentLanguage, "cartModal.calculatedAtCheckout")}
+              </p>
             </div>
             <div className="flex justify-between items-center py-2">
-              <p className="text-lg font-bold text-foreground">{t(currentLanguage, "cartModal.total")}</p>
+              <p className="text-lg font-bold text-foreground">
+                {t(currentLanguage, "cartModal.total")}
+              </p>
               <p className="text-xl font-bold text-primary">
                 {Number(cart.cost.totalAmount.amount).toLocaleString("fr-FR")} F
                 CFA
@@ -80,7 +92,10 @@ const CartItems = ({
             </div>
           </CartContainer>
         </div>
-        <CheckoutButton onProceedToCheckout={onProceedToCheckout} currentLanguage={currentLanguage} />
+        <CheckoutButton
+          onProceedToCheckout={onProceedToCheckout}
+          currentLanguage={currentLanguage}
+        />
       </CartContainer>
     </div>
   );
@@ -318,7 +333,9 @@ function CheckoutButton({
             {isLoading ? (
               <Loader />
             ) : (
-              <span className="font-semibold">{t(currentLanguage, "cartModal.proceedToCheckout")}</span>
+              <span className="font-semibold">
+                {t(currentLanguage, "cartModal.proceedToCheckout")}
+              </span>
             )}
           </motion.div>
         </AnimatePresence>

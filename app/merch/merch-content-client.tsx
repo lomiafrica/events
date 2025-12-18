@@ -97,22 +97,12 @@ export default function MerchContentClient({
           {/* Hero Section */}
           <div className="relative pt-24 md:pt-32 mb-12">
             <div className="text-center">
-              <motion.h1
-                className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
+              <h1 className="text-4xl sm:text-5xl md:text-7xl tracking-tighter font-regular text-zinc-800 dark:text-white mb-6">
                 {t(currentLanguage, "merchPage.title")}
-              </motion.h1>
-              <motion.div
-                className="text-muted-foreground text-lg mt-4 mb-8 max-w-3xl mx-auto leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
+              </h1>
+              <div className="text-muted-foreground text-lg mt-4 mb-8 max-w-3xl mx-auto leading-relaxed">
                 {t(currentLanguage, "merchPage.subtitle")}
-              </motion.div>
+              </div>
             </div>
           </div>
 
@@ -198,15 +188,15 @@ export default function MerchContentClient({
             >
               <h2 className="text-2xl font-semibold mb-4 text-zinc-900 dark:text-white">
                 {searchQuery ||
-                  selectedCategory !== "all" ||
-                  selectedTag !== "all"
+                selectedCategory !== "all" ||
+                selectedTag !== "all"
                   ? "No products found"
                   : t(currentLanguage, "merchPage.comingSoon.title")}
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                 {searchQuery ||
-                  selectedCategory !== "all" ||
-                  selectedTag !== "all"
+                selectedCategory !== "all" ||
+                selectedTag !== "all"
                   ? "Try adjusting your filters or search terms."
                   : t(currentLanguage, "merchPage.comingSoon.description")}
               </p>

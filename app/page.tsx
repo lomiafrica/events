@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Header from "@/components/landing/header";
 import { HeroSection } from "@/components/landing/hero-section";
 import Footer from "@/components/landing/footer";
-import { getHomepageContent, getHomepagePromoEvent } from "@/lib/sanity/queries";
+import {
+  getHomepageContent,
+  getHomepagePromoEvent,
+} from "@/lib/sanity/queries";
 import FloatingPromo from "@/components/landing/floating-promo";
 
 // Use the general site metadata for the home page
@@ -31,7 +34,7 @@ export default async function Home() {
           imageUrl={promoEventData.flyerUrl}
           href={`/events/${promoEventData.slug}`}
           title={promoEventData.title || "View Event"} // Use event title for alt text or a default
-        // onClose can be implemented here if needed, e.g., to set a cookie to not show again
+          // onClose can be implemented here if needed, e.g., to set a cookie to not show again
         />
       )}
     </div>

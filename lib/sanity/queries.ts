@@ -280,7 +280,7 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
   return {
     defaultShippingCost: result?.defaultShippingCost ?? 0,
   };
-}
+};
 
 // ================================= Homepage Content ================================
 
@@ -368,8 +368,6 @@ export const getHomepageContent = async (): Promise<HomepageData | null> => {
 
   return result;
 };
-
-;
 
 // Define interface for the data returned by getEventsForScroller
 interface EventScrollerData {
