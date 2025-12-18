@@ -177,48 +177,95 @@ export async function getStory() {
 // Helper function to get cache configuration based on environment
 const getCacheConfig = (tags: string[]) => ({
   next: {
-    revalidate: process.env.NODE_ENV === "production" ? 900 : 0, // No cache in development, 15 minutes in production
+    revalidate: 0, // Disable ISR caching for now to avoid issues
     tags,
   },
 });
 
 // Products (Enhanced Section)
 export async function getAllProducts() {
-  return client.fetch(
-    `
-    *[_type == "product"] | order(name asc) {
-      _id,
-      name,
-      "slug": slug.current,
-      productId,
-      "mainImage": images[0].asset->url,
-      "price": basePrice,
-      "stock": baseStock,
-      description,
-      "categories": categories[]->{
+  try {
+    // In development, use the proxy API to avoid CORS issues
+    if (process.env.NODE_ENV === 'development') {
+      const query = `*[_type == "product"] | order(name asc) {
         _id,
-        title,
-        "slug": slug.current
-      },
-      tags,
-      shippingFee,
-      images[]{
-        asset->{
+        name,
+        "slug": slug.current,
+        productId,
+        "mainImage": images[0].asset->url,
+        "price": basePrice,
+        "stock": baseStock,
+        description,
+        "categories": categories[]->{
           _id,
-          url,
-          metadata {
-            dimensions,
-            lqip
-          }
+          title,
+          "slug": slug.current
         },
-        alt,
-        caption
+        tags,
+        shippingFee,
+        images[]{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions,
+              lqip
+            }
+          },
+          alt,
+          caption
+        }
+      }`;
+
+      const response = await fetch(`/api/sanity-proxy?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error(`Proxy API error: ${response.status}`);
       }
+      const data = await response.json();
+      return data.result || [];
     }
-  `,
-    {},
-    getCacheConfig(["products"]),
-  );
+
+    // In production, use the normal Sanity client
+    const result = await client.fetch(
+      `
+      *[_type == "product"] | order(name asc) {
+        _id,
+        name,
+        "slug": slug.current,
+        productId,
+        "mainImage": images[0].asset->url,
+        "price": basePrice,
+        "stock": baseStock,
+        description,
+        "categories": categories[]->{
+          _id,
+          title,
+          "slug": slug.current
+        },
+        tags,
+        shippingFee,
+        images[]{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions,
+              lqip
+            }
+          },
+          alt,
+          caption
+        }
+      }
+    `,
+      {},
+      getCacheConfig(["products"]),
+    );
+    return result;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return []; // Return empty array as fallback
+  }
 }
 
 export async function getProductBySlug(slug: string) {
@@ -269,17 +316,39 @@ export interface ShippingSettings {
 }
 
 export const getShippingSettings = async (): Promise<ShippingSettings> => {
-  const query = `*[_type == "homepage"][0] {
-    defaultShippingCost
-  }`;
-  const result = await client.fetch<{ defaultShippingCost?: number }>(
-    query,
-    {},
-    getCacheConfig(["homepage", "settings"]),
-  );
-  return {
-    defaultShippingCost: result?.defaultShippingCost ?? 0,
-  };
+  try {
+    const query = `*[_type == "homepage"][0] {
+      defaultShippingCost
+    }`;
+
+    // In development, use the proxy API to avoid CORS issues
+    if (process.env.NODE_ENV === 'development') {
+      const response = await fetch(`/api/sanity-proxy?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error(`Proxy API error: ${response.status}`);
+      }
+      const data = await response.json();
+      const result = data.result;
+      return {
+        defaultShippingCost: result?.defaultShippingCost ?? 0,
+      };
+    }
+
+    // In production, use the normal Sanity client
+    const result = await client.fetch<{ defaultShippingCost?: number }>(
+      query,
+      {},
+      getCacheConfig(["homepage", "settings"]),
+    );
+    return {
+      defaultShippingCost: result?.defaultShippingCost ?? 0,
+    };
+  } catch (error) {
+    console.error('Error fetching shipping settings:', error);
+    return {
+      defaultShippingCost: 0, // Return default value
+    };
+  }
 };
 
 // ================================= Homepage Content ================================

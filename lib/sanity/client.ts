@@ -5,7 +5,7 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: false, // Set to true for production
+  useCdn: process.env.NODE_ENV === 'production', // Use CDN in production, direct API in development
 });
 
 export const config = {

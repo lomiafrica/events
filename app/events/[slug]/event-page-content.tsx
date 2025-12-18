@@ -12,6 +12,8 @@ import { t } from "@/lib/i18n/translations";
 import CheckoutButton from "@/components/event/CheckoutButton";
 import ArtistCard from "@/components/event/ArtistCard";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { trackViewContent } from "@/components/FacebookPixel";
+import { useEffect } from "react";
 
 interface TicketTypeData {
   _key: string;
@@ -174,6 +176,11 @@ const renderFormattedText = (text: string) => {
 
 export default function EventPageContent({ event }: EventPageContentProps) {
   const { currentLanguage } = useTranslation();
+
+  // Track event page view
+  useEffect(() => {
+    trackViewContent('event', [event._id]);
+  }, [event._id]);
 
   let mapEmbedSrc = null;
   if (event.location && (event.location.venueName || event.location.address)) {

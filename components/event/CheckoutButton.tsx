@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Ticket, Package } from "lucide-react";
 import { t } from "@/lib/i18n/translations";
 import Link from "next/link";
+import { trackEvent } from "@/components/FacebookPixel";
 
 export interface CheckoutItemData {
   id: string;
@@ -166,6 +167,17 @@ export default function CheckoutButton({
             href={item.paymentLink}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              // Track purchase initiation
+              trackEvent('InitiateCheckout', {
+                content_name: item.name,
+                content_ids: [item.productId || item.id],
+                content_type: item.isBundle ? 'bundle' : 'ticket',
+                value: item.price,
+                currency: 'XOF',
+                num_items: 1
+              });
+            }}
           >
             {item.isBundle ? (
               <Package className="mr-2 h-4 w-4" />
@@ -186,7 +198,22 @@ export default function CheckoutButton({
         : "bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium h-10 px-6 uppercase w-full justify-center";
       return (
         <>
-          <Button onClick={handleOpenPurchaseModal} className={buttonClassName}>
+          <Button
+            onClick={() => {
+              // Track purchase initiation
+              trackEvent('InitiateCheckout', {
+                content_name: item.name,
+                content_ids: [item.productId || item.id],
+                content_type: item.isBundle ? 'bundle' : 'ticket',
+                value: item.price,
+                currency: 'XOF',
+                num_items: 1
+              });
+              // Open the purchase modal
+              handleOpenPurchaseModal();
+            }}
+            className={buttonClassName}
+          >
             {isBundle ? (
               <Package className="mr-2 h-4 w-4" />
             ) : (

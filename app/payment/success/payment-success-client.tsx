@@ -8,6 +8,8 @@ import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
+import { trackPurchase } from "@/components/FacebookPixel";
+import { useEffect } from "react";
 
 interface PaymentSuccessClientProps {
   purchaseId?: string;
@@ -17,6 +19,12 @@ export function PaymentSuccessClient({
   purchaseId,
 }: PaymentSuccessClientProps) {
   const { currentLanguage } = useTranslation();
+
+  // Track purchase completion
+  useEffect(() => {
+    // Track successful purchase - you can enhance this with actual purchase value
+    trackPurchase(0, 'XOF'); // Replace 0 with actual purchase amount when available
+  }, []);
 
   return (
     <>
