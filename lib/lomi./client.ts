@@ -11,7 +11,7 @@ if (!apiKey) {
   process.exit(1);
 }
 
-OpenAPI.BASE = baseUrl || "https://api.lomi.africa/v1";
+OpenAPI.BASE = baseUrl || "https://api.lomi.africa";
 OpenAPI.HEADERS = {
   Authorization: `Bearer `,
 };
