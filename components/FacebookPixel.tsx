@@ -5,8 +5,8 @@ import Script from "next/script";
 // Type declarations for Facebook Pixel
 declare global {
   interface Window {
-    fbq: (...args: any[]) => void;
-    _fbq: any;
+    fbq: (...args: unknown[]) => void;
+    _fbq: unknown;
   }
 }
 
@@ -61,7 +61,10 @@ const getTrafficSource = (): { source: string; medium: string; campaign: string;
   }
 };
 
-export const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
+// Facebook Pixel event parameters type
+type FacebookPixelParameters = Record<string, string | number | boolean | string[] | undefined>;
+
+export const trackEvent = (eventName: string, parameters?: FacebookPixelParameters) => {
   if (typeof window !== 'undefined' && window.fbq) {
     // Add automatic source tracking
     const trafficSource = getTrafficSource();
@@ -119,7 +122,7 @@ export function FacebookPixel() {
     <>
       <Script
         id="facebook-pixel"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -136,6 +139,7 @@ export function FacebookPixel() {
         }}
       />
       <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           height={1}
           width={1}
