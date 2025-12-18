@@ -106,7 +106,7 @@ export function HeroSection({
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -246,27 +246,27 @@ export function HeroSection({
     }
   }, [isMuted]);
 
-    // Auto-play carousel
-    useEffect(() => {
-        if (!isHovered && content.length > 1) {
-            autoPlayIntervalRef.current = setInterval(() => {
-                setCurrentIndex((prev) => (prev + 1) % content.length);
-                // Reset video playing state when auto-advancing
-                setIsPlaying(false);
-            }, 5000); // Change slide every 5 seconds
-        } else {
-            if (autoPlayIntervalRef.current) {
-                clearInterval(autoPlayIntervalRef.current);
-                autoPlayIntervalRef.current = null;
-            }
-        }
+  // Auto-play carousel
+  useEffect(() => {
+    if (!isHovered && content.length > 1) {
+      autoPlayIntervalRef.current = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % content.length);
+        // Reset video playing state when auto-advancing
+        setIsPlaying(false);
+      }, 5000); // Change slide every 5 seconds
+    } else {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+    }
 
-        return () => {
-            if (autoPlayIntervalRef.current) {
-                clearInterval(autoPlayIntervalRef.current);
-            }
-        };
-    }, [isHovered, content.length]);
+    return () => {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+    };
+  }, [isHovered, content.length]);
 
   // Handle mouse movement to show/hide controls and navigation
   useEffect(() => {
@@ -308,20 +308,20 @@ export function HeroSection({
     };
   }, []);
 
-    const goToNext = useCallback(() => {
-        setCurrentIndex((prev) => (prev + 1) % content.length);
-        setIsPlaying(false);
-    }, [content.length]);
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % content.length);
+    setIsPlaying(false);
+  }, [content.length]);
 
-    const goToPrev = useCallback(() => {
-        setCurrentIndex((prev) => (prev - 1 + content.length) % content.length);
-        setIsPlaying(false);
-    }, [content.length]);
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + content.length) % content.length);
+    setIsPlaying(false);
+  }, [content.length]);
 
-    const goToIndex = useCallback((index: number) => {
-        setCurrentIndex(index);
-        setIsPlaying(false);
-    }, []);
+  const goToIndex = useCallback((index: number) => {
+    setCurrentIndex(index);
+    setIsPlaying(false);
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -449,8 +449,8 @@ export function HeroSection({
             {currentItem.description && (
               <p
                 className={`font-medium tracking-wide text-white/90 mb-8 drop-shadow-md ${currentItem.type === "event"
-                    ? "text-base sm:text-lg md:text-xl opacity-95"
-                    : "text-xl sm:text-2xl md:text-3xl"
+                  ? "text-base sm:text-lg md:text-xl opacity-95"
+                  : "text-xl sm:text-2xl md:text-3xl"
                   }`}
               >
                 {currentItem.type === "event"
@@ -519,8 +519,8 @@ export function HeroSection({
                   <button
                     onClick={togglePlayPause}
                     className={`p-4 rounded-sm border-2 transition-all duration-300 ${showControls
-                        ? "opacity-100 scale-100"
-                        : "opacity-0 scale-95"
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95"
                       } ${isPlaying
                         ? "bg-white/20 border-white text-white hover:bg-white/30"
                         : "bg-white border-white text-white hover:bg-white/90"
@@ -658,8 +658,8 @@ export function HeroSection({
                 goToIndex(index);
               }}
               className={`w-3 h-1.5 rounded-sm transition-all duration-200 cursor-pointer ${index === currentIndex
-                  ? "bg-white scale-110"
-                  : "bg-white/30 hover:bg-white/50"
+                ? "bg-white scale-110"
+                : "bg-white/30 hover:bg-white/50"
                 }`}
               aria-label={`Go to content ${index + 1}`}
             />
