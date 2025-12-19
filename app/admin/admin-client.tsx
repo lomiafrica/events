@@ -15,13 +15,20 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Mail,
@@ -203,6 +210,13 @@ export default function AdminClient() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-select the most recent event when events are loaded
+  useEffect(() => {
+    if (events.length > 0 && !selectedEvent) {
+      setSelectedEvent(events[0].event_id);
+    }
+  }, [events, selectedEvent]);
 
   // Reload data when selected event or status filter changes
   useEffect(() => {
@@ -696,411 +710,466 @@ export default function AdminClient() {
           </div>
         </div>
 
-        {/* Event Filter and Stats - Mobile Optimized */}
-        <div className="mb-6 sm:mb-8">
-          <Label className="text-zinc-200 font-medium text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 block">
-            Event Filter
-          </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <select
-              value={selectedEvent || ""}
-              onChange={(e) => setSelectedEvent(e.target.value || null)}
-              className="rounded-sm bg-card/30 backdrop-blur-sm border-slate-700 text-gray-100 h-10 sm:h-12 px-3 text-sm sm:text-base"
-            >
-              <option value="">All Events</option>
-              {events.map((event) => (
-                <option key={event.event_id} value={event.event_id}>
-                  {event.event_title}
-                </option>
-              ))}
-            </select>
+        {/* Event Filter */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="flex-1 max-w-md">
+              <Label className="text-zinc-200 font-medium text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 block">
+                Event Filter
+              </Label>
+              <select
+                value={selectedEvent || ""}
+                onChange={(e) => setSelectedEvent(e.target.value || null)}
+                className="rounded-sm bg-card/30 backdrop-blur-sm border-slate-700 text-gray-100 h-10 sm:h-12 px-3 pr-8 text-sm sm:text-base w-full appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: "right 0.5rem center",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "1.5em 1.5em",
+                  paddingRight: "2.5rem",
+                }}
+              >
+                <option value="">All Events</option>
+                {events.map((event) => (
+                  <option key={event.event_id} value={event.event_id}>
+                    {event.event_title}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {currentEventStats && (
-              <>
-                <Card className="rounded-sm border-slate-700 bg-blue-900/20">
-                  <CardContent className="p-2 sm:p-3">
-                    <div className="text-xs text-blue-300">Total Tickets</div>
-                    <div className="text-xl sm:text-2xl font-bold text-blue-100">
-                      {currentEventStats.total_tickets}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="rounded-sm border-slate-700 bg-green-900/20">
-                  <CardContent className="p-2 sm:p-3">
-                    <div className="text-xs text-green-300">Scanned</div>
-                    <div className="text-xl sm:text-2xl font-bold text-green-100">
-                      {currentEventStats.scanned_tickets}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="rounded-sm border-slate-700 bg-orange-900/20">
-                  <CardContent className="p-2 sm:p-3">
-                    <div className="text-xs text-orange-300">Remaining</div>
-                    <div className="text-xl sm:text-2xl font-bold text-orange-100">
-                      {(currentEventStats.total_tickets || 0) -
-                        (currentEventStats.scanned_tickets || 0)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
+            {/* Invite Guest Button */}
+            {selectedEvent && (
+              <div className="shrink-0">
+                <Button
+                  onClick={() => setIsInviteDialogOpen(true)}
+                  className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Invite Guest
+                </Button>
+              </div>
             )}
           </div>
-
-          {/* Invite Guest Button */}
-          {selectedEvent && (
-            <div className="mt-4 flex justify-end">
-              <Button
-                onClick={() => setIsInviteDialogOpen(true)}
-                className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Invite Guest
-              </Button>
-            </div>
-          )}
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full space-y-6"
-        >
-          <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
-            <TabsTrigger
-              value="purchases"
-              className="data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400"
+        {/* Stats Cards - Below Event Filter */}
+        {currentEventStats && (
+          <div className="mb-6 sm:mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <Card className="rounded-sm border-slate-700 bg-purple-900/20">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="text-xs text-purple-300">Purchases</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-100">
+                    {currentEventStats.total_purchases}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="rounded-sm border-slate-700 bg-blue-900/20">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="text-xs text-blue-300">Total Tickets</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-100">
+                    {currentEventStats.total_tickets}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="rounded-sm border-slate-700 bg-green-900/20">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="text-xs text-green-300">Scanned</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-100">
+                    {currentEventStats.scanned_tickets}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="rounded-sm border-slate-700 bg-orange-900/20">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="text-xs text-orange-300">Remaining</div>
+                  <div className="text-xl sm:text-2xl font-bold text-orange-100">
+                    {(currentEventStats.total_tickets || 0) -
+                      (currentEventStats.scanned_tickets || 0)}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        <div className="w-full space-y-6">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveTab("purchases")}
+              className={`rounded-sm text-xs sm:text-sm ${activeTab === "purchases"
+                ? "bg-slate-700 text-white hover:bg-slate-600"
+                : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                }`}
             >
               Purchases
-            </TabsTrigger>
-            <TabsTrigger
-              value="scans"
-              className="data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveTab("scans")}
+              className={`rounded-sm text-xs sm:text-sm ${activeTab === "scans"
+                ? "bg-slate-700 text-white hover:bg-slate-600"
+                : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                }`}
             >
               Logs
-            </TabsTrigger>
-          </TabsList>
+            </Button>
+          </div>
 
-          <TabsContent value="purchases" className="space-y-6">
-            {/* Filters and Search - Mobile Optimized */}
-            <div className="mb-6 sm:mb-12">
-              <div className="flex flex-col gap-4">
-                {/* Mobile Filter Toggle */}
-                <div className="flex items-center justify-between">
-                  <Label className="text-zinc-200 font-medium text-xs sm:text-sm uppercase tracking-wider">
-                    Purchases ({filteredPurchases.length})
-                  </Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 sm:hidden"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filters
-                  </Button>
-                </div>
-
-                {/* Filters - Collapsible on mobile */}
-                <div
-                  className={`space-y-3 ${showFilters ? "block" : "hidden sm:block"}`}
-                >
-                  {/* Status Filter */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {activeTab === "purchases" && (
+            <div className="space-y-6">
+              {/* Filters and Search - Mobile Optimized */}
+              <div className="mb-6 sm:mb-12">
+                <div className="flex flex-col gap-4">
+                  {/* Mobile Filter Toggle */}
+                  <div className="flex items-center justify-between">
+                    <Label className="text-zinc-200 font-medium text-xs sm:text-sm uppercase tracking-wider">
+                      Purchases ({filteredPurchases.length})
+                    </Label>
                     <Button
-                      variant={statusFilter === "paid" ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
-                      onClick={() => setStatusFilter("paid")}
-                      className="rounded-sm text-xs sm:text-sm"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 sm:hidden"
                     >
-                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      Paid Only
-                    </Button>
-                    <Button
-                      variant={statusFilter === "all" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setStatusFilter("all")}
-                      className="rounded-sm text-xs sm:text-sm"
-                    >
-                      All Status
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "pending" ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setStatusFilter("pending")}
-                      className="rounded-sm text-xs sm:text-sm"
-                    >
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      Pending
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "failed" ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setStatusFilter("failed")}
-                      className="rounded-sm text-xs sm:text-sm"
-                    >
-                      <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      Failed
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filters
                     </Button>
                   </div>
 
-                  {/* Search and Actions */}
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                    <div className="flex-1 flex gap-2">
-                      <Input
-                        id="search"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="rounded-sm bg-card/30 backdrop-blur-sm border-slate-700 text-gray-100 placeholder:text-gray-400 h-9 sm:h-12 flex-1 text-sm sm:text-base"
-                      />
+                  {/* Filters - Collapsible on mobile */}
+                  <div
+                    className={`space-y-3 ${showFilters ? "block" : "hidden sm:block"}`}
+                  >
+                    {/* Status Filter */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <Button
-                        onClick={searchPurchases}
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 shrink-0"
-                        disabled={loading}
+                        onClick={() => setStatusFilter("paid")}
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "paid"
+                          ? "bg-slate-700 text-white hover:bg-slate-600"
+                          : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                          }`}
                       >
-                        <Search className="h-4 w-4" />
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        Paid Only
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStatusFilter("all")}
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "all"
+                          ? "bg-slate-700 text-white hover:bg-slate-600"
+                          : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                          }`}
+                      >
+                        All Status
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStatusFilter("pending")}
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "pending"
+                          ? "bg-slate-700 text-white hover:bg-slate-600"
+                          : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                          }`}
+                      >
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        Pending
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStatusFilter("failed")}
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "failed"
+                          ? "bg-slate-700 text-white hover:bg-slate-600"
+                          : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                          }`}
+                      >
+                        <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        Failed
                       </Button>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={loadPurchases}
-                        variant="outline"
-                        size="sm"
-                        className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 flex-1 sm:flex-none"
-                        disabled={loading}
-                      >
-                        <RefreshCw
-                          className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+
+                    {/* Search and Actions */}
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <div className="flex-1 flex gap-2">
+                        <Input
+                          id="search"
+                          placeholder="Search..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="rounded-sm bg-card/30 backdrop-blur-sm border-slate-700 text-gray-100 placeholder:text-gray-400 h-9 sm:h-12 flex-1 text-sm sm:text-base"
                         />
-                        <span className="ml-2 sm:hidden">Refresh</span>
-                      </Button>
-                      <Button
-                        onClick={downloadCSV}
-                        variant="outline"
-                        size="sm"
-                        className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 flex-1 sm:flex-none"
-                        disabled={loading}
-                      >
-                        <Download className="h-4 w-4" />
-                        <span className="ml-2 sm:hidden">Export</span>
-                      </Button>
+                        <Button
+                          onClick={searchPurchases}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 shrink-0"
+                          disabled={loading}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={loadPurchases}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 flex-1 sm:flex-none"
+                          disabled={loading}
+                        >
+                          <RefreshCw
+                            className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                          />
+                          <span className="ml-2 sm:hidden">Refresh</span>
+                        </Button>
+                        <Button
+                          onClick={downloadCSV}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 h-9 sm:h-12 px-2 sm:px-3 flex-1 sm:flex-none"
+                          disabled={loading}
+                        >
+                          <Download className="h-4 w-4" />
+                          <span className="ml-2 sm:hidden">Export</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Purchases - Mobile-First Card View */}
-            <Card className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm">
-              <CardContent className="p-3 sm:p-6">
-                {loading ? (
-                  <LoadingSpinner />
-                ) : filteredPurchases.length === 0 ? (
-                  <motion.div
-                    className="text-center py-12 sm:py-20"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-white">
-                      No purchases found
-                    </h2>
-                    <p className="text-zinc-400 max-w-md mx-auto">
-                      Try adjusting your search or filters to find what
-                      you&apos;re looking for.
-                    </p>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-3 sm:space-y-4">
-                    {filteredPurchases.map((purchase) => {
-                      const EmailIcon = getEmailButtonIcon(purchase);
-                      return (
-                        <Card
-                          key={purchase.purchase_id}
-                          className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm"
-                        >
-                          <CardContent className="p-3 sm:p-4">
-                            <div className="space-y-3">
-                              {/* Header: Customer and Status */}
-                              <div className="flex justify-between items-start gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-100 text-sm sm:text-base truncate">
+              {/* Purchases Table - Mobile-Friendly */}
+              <Card className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm">
+                <CardContent className="p-0">
+                  {loading ? (
+                    <LoadingSpinner />
+                  ) : filteredPurchases.length === 0 ? (
+                    <motion.div
+                      className="text-center py-12 sm:py-20"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-white">
+                        No purchases found
+                      </h2>
+                      <p className="text-zinc-400 mb-6 text-sm sm:text-base">
+                        Try adjusting your filters or search query
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-left">Customer</TableHead>
+                          <TableHead className="text-left hidden sm:table-cell">
+                            Event
+                          </TableHead>
+                          <TableHead className="text-center">Tickets</TableHead>
+                          <TableHead className="text-center">Status</TableHead>
+                          <TableHead className="text-center">Email</TableHead>
+                          <TableHead className="text-center">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPurchases.map((purchase) => {
+                          const EmailIcon = getEmailButtonIcon(purchase);
+                          return (
+                            <TableRow key={purchase.purchase_id}>
+                              {/* Customer Info */}
+                              <TableCell>
+                                <div className="min-w-0">
+                                  <div className="font-medium text-gray-100 truncate max-w-[150px] sm:max-w-none">
                                     {purchase.customer_name}
                                   </div>
-                                  <div className="text-xs sm:text-sm text-gray-400 truncate">
+                                  <div className="text-xs text-gray-400 truncate max-w-[150px] sm:max-w-none">
                                     {purchase.customer_email}
                                   </div>
                                 </div>
-                                <div className="flex flex-col gap-1 items-end">
-                                  {getPaymentStatusBadge(purchase.status)}
-                                  {purchase.is_used && (
-                                    <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm text-xs">
-                                      <QrCode className="h-3 w-3 mr-1" />
-                                      Scanned
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
+                              </TableCell>
 
-                              {/* Event Info */}
-                              <div className="bg-muted/30 rounded-sm p-2">
-                                <div className="text-xs font-medium text-gray-400 mb-1">
-                                  Event
-                                </div>
-                                <div className="text-sm font-medium text-gray-100">
+                              {/* Event Info - Hidden on mobile */}
+                              <TableCell className="hidden sm:table-cell">
+                                <div className="text-sm text-gray-100 truncate max-w-[120px]">
                                   {purchase.event_title}
                                 </div>
-                                <div className="text-xs text-gray-400 mt-1">
-                                  {purchase.ticket_name} × {purchase.quantity} •{" "}
+                                <div className="text-xs text-gray-400">
+                                  {purchase.ticket_name} × {purchase.quantity}
+                                </div>
+                              </TableCell>
+
+                              {/* Tickets & Amount */}
+                              <TableCell className="text-center">
+                                <div className="text-sm font-medium text-gray-100">
+                                  {purchase.quantity}
+                                </div>
+                                <div className="text-xs text-gray-400">
                                   {purchase.total_amount}{" "}
                                   {purchase.currency_code}
                                 </div>
-                              </div>
+                                {purchase.is_used && (
+                                  <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm text-xs mt-1">
+                                    <QrCode className="h-2 w-2 mr-1" />
+                                    Used
+                                  </Badge>
+                                )}
+                              </TableCell>
+
+                              {/* Payment Status */}
+                              <TableCell className="text-center">
+                                {getPaymentStatusBadge(purchase.status)}
+                              </TableCell>
 
                               {/* Email Status */}
-                              <div className="flex items-center justify-between gap-2 text-xs">
-                                <div className="flex items-center gap-2">
+                              <TableCell className="text-center">
+                                <div className="flex flex-col items-center gap-1">
                                   {getStatusBadge(
                                     purchase.email_dispatch_status,
                                   )}
                                   {purchase.pdf_ticket_sent_at && (
-                                    <span className="text-gray-500">
+                                    <span className="text-xs text-gray-500">
                                       {formatRelativeTime(
                                         purchase.pdf_ticket_sent_at,
                                       )}
                                     </span>
                                   )}
                                 </div>
-                              </div>
+                              </TableCell>
 
                               {/* Actions */}
-                              <div className="flex gap-2 pt-2 border-t border-slate-700">
+                              <TableCell className="text-center">
                                 <Button
                                   size="sm"
                                   onClick={() => openEmailDialog(purchase)}
-                                  className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white flex-1 text-xs sm:text-sm"
+                                  className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white text-xs"
                                   disabled={!canSendEmail(purchase)}
                                 >
-                                  <EmailIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                  {getEmailButtonText(purchase)}
+                                  <EmailIcon className="h-3 w-3 mr-1" />
+                                  <span className="hidden sm:inline ml-1">
+                                    {getEmailButtonText(purchase)}
+                                  </span>
+                                  <span className="sm:hidden">Email</span>
                                 </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-          <TabsContent value="scans" className="space-y-6">
-            {/* Scan Logs */}
-            <Card className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-100">
-                  Scan history
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Recent verification attempts help identify issues with
-                  scanning.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border border-slate-800 overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-400 uppercase bg-slate-900/50">
-                      <tr>
-                        <th className="px-4 py-3">Time</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3">Customer</th>
-                        <th className="px-4 py-3">Event</th>
-                        <th className="px-4 py-3">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800">
-                      {scanLogs.length === 0 ? (
+          {activeTab === "scans" && (
+            <div className="space-y-6">
+              {/* Scan Logs */}
+              <Card className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-100">
+                    Scan history
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Recent verification attempts help identify issues with
+                    scanning.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border border-slate-800 overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs text-slate-400 uppercase bg-slate-900/50">
                         <tr>
-                          <td
-                            colSpan={5}
-                            className="px-4 py-8 text-center text-slate-500"
-                          >
-                            No scan logs found
-                          </td>
+                          <th className="px-4 py-3">Time</th>
+                          <th className="px-4 py-3">Status</th>
+                          <th className="px-4 py-3">Customer</th>
+                          <th className="px-4 py-3">Event</th>
+                          <th className="px-4 py-3">Details</th>
                         </tr>
-                      ) : (
-                        scanLogs.map((log) => (
-                          <tr
-                            key={log.id}
-                            className="bg-slate-900/20 hover:bg-slate-900/40"
-                          >
-                            <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
-                              {formatRelativeTime(log.attempt_timestamp)}
-                              <div className="text-xs text-slate-500">
-                                {new Date(
-                                  log.attempt_timestamp,
-                                ).toLocaleTimeString()}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              {log.success ? (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
-                                  SUCCESS
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-900/30 text-red-400">
-                                  FAILED
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
-                              <div
-                                className="truncate max-w-[150px]"
-                                title={log.customer_name}
-                              >
-                                {log.customer_name || "Unknown"}
-                              </div>
-                              <div className="text-xs text-slate-500 truncate">
-                                {log.customer_email}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
-                              <div
-                                className="truncate max-w-[150px]"
-                                title={log.event_title}
-                              >
-                                {log.event_title || "Unknown Event"}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
-                              {log.error_message ? (
-                                <div className="text-red-400 text-xs">
-                                  {log.error_message}
-                                </div>
-                              ) : (
-                                <div className="text-slate-500 text-xs">
-                                  Verified successfully
-                                </div>
-                              )}
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {scanLogs.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-4 py-8 text-center text-slate-500"
+                            >
+                              No scan logs found
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                        ) : (
+                          scanLogs.map((log) => (
+                            <tr
+                              key={log.id}
+                              className="bg-slate-900/20 hover:bg-slate-900/40"
+                            >
+                              <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
+                                {formatRelativeTime(log.attempt_timestamp)}
+                                <div className="text-xs text-slate-500">
+                                  {new Date(
+                                    log.attempt_timestamp,
+                                  ).toLocaleTimeString()}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                {log.success ? (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
+                                    SUCCESS
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-900/30 text-red-400">
+                                    FAILED
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-slate-300">
+                                <div
+                                  className="truncate max-w-[150px]"
+                                  title={log.customer_name}
+                                >
+                                  {log.customer_name || "Unknown"}
+                                </div>
+                                <div className="text-xs text-slate-500 truncate">
+                                  {log.customer_email}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-slate-300">
+                                <div
+                                  className="truncate max-w-[150px]"
+                                  title={log.event_title}
+                                >
+                                  {log.event_title || "Unknown Event"}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-slate-300">
+                                {log.error_message ? (
+                                  <div className="text-red-400 text-xs">
+                                    {log.error_message}
+                                  </div>
+                                ) : (
+                                  <div className="text-slate-500 text-xs">
+                                    Verified successfully
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
 
         {/* Email Dialog */}
         <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>

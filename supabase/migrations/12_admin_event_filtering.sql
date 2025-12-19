@@ -2,6 +2,9 @@
 -- Add functions to support event-based filtering in admin dashboard
 
 -- Function to get list of events with purchase counts
+-- Drop the existing function first
+DROP FUNCTION IF EXISTS public.get_admin_events_list();
+
 CREATE OR REPLACE FUNCTION public.get_admin_events_list()
 RETURNS TABLE(
     event_id TEXT,
@@ -18,18 +21,33 @@ SET search_path = ''
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-        p.event_id,
-        MAX(p.event_title) as event_title,
-        MAX(p.event_date_text) as event_date_text,
-        COUNT(DISTINCT p.id) as total_purchases,
-        SUM(p.quantity) as total_tickets,
-        COUNT(CASE WHEN p.is_used = TRUE THEN 1 END) as scanned_tickets,
-        MAX(p.created_at) as last_purchase_date
-    FROM public.purchases p
-    WHERE p.status = 'paid'
-    GROUP BY p.event_id
-    ORDER BY last_purchase_date DESC;
+    SELECT
+        event_stats.event_id,
+        event_stats.event_title,
+        event_stats.event_date_text,
+        event_stats.total_purchases,
+        event_stats.total_tickets,
+        -- Count scanned tickets from both systems
+        event_stats.individual_scanned + event_stats.legacy_scanned as scanned_tickets,
+        event_stats.last_purchase_date
+    FROM (
+        SELECT
+            p.event_id,
+            MAX(p.event_title) as event_title,
+            MAX(p.event_date_text) as event_date_text,
+            COUNT(DISTINCT p.id) as total_purchases,
+            SUM(p.quantity) as total_tickets,
+            MAX(p.created_at) as last_purchase_date,
+            -- Count individual tickets that are used
+            COUNT(CASE WHEN it.is_used = TRUE THEN 1 END) as individual_scanned,
+            -- Count legacy purchases that are used (but don't have individual tickets)
+            COUNT(CASE WHEN p.is_used = TRUE AND it.purchase_id IS NULL THEN 1 END) as legacy_scanned
+        FROM public.purchases p
+        LEFT JOIN public.individual_tickets it ON it.purchase_id = p.id
+        WHERE p.status = 'paid'
+        GROUP BY p.event_id
+    ) event_stats
+    ORDER BY event_stats.last_purchase_date DESC;
 END;
 $$;
 
@@ -115,7 +133,7 @@ GRANT EXECUTE ON FUNCTION public.get_admin_purchases_by_event(TEXT) TO authentic
 
 -- Comments
 COMMENT ON FUNCTION public.get_admin_events_list()
-IS 'Returns list of all events with purchase statistics for admin filtering';
+IS 'Returns list of all events with purchase statistics for admin filtering, counting scanned tickets from both individual ticket system and legacy purchase-level scanning';
 
 COMMENT ON FUNCTION public.get_admin_purchases_by_event(TEXT)
 IS 'Returns purchases filtered by specific event ID';
