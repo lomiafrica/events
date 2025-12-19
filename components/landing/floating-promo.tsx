@@ -18,8 +18,8 @@ interface FloatingPromoProps {
 
 export default function FloatingPromo({
   imageUrl = "/placeholder.svg?height=180&width=320",
-  onClose = () => { },
-  onButtonClick = () => { },
+  onClose = () => {},
+  onButtonClick = () => {},
   href,
   title = "Promotional event flyer",
   buttonText = "Get your ticket",
@@ -92,9 +92,9 @@ export default function FloatingPromo({
                 className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center"
                 onClick={() => {
                   // Track promo button click
-                  trackEvent('Lead', {
-                    content_name: title || 'Floating Promo',
-                    content_category: 'promo'
+                  trackEvent("Lead", {
+                    content_name: title || "Floating Promo",
+                    content_category: "promo",
                   });
                 }}
               >
@@ -106,9 +106,9 @@ export default function FloatingPromo({
             <button
               onClick={() => {
                 // Track promo button click
-                trackEvent('Lead', {
-                  content_name: title || 'Floating Promo',
-                  content_category: 'promo'
+                trackEvent("Lead", {
+                  content_name: title || "Floating Promo",
+                  content_category: "promo",
                 });
                 // Call the original onClick handler
                 onButtonClick();

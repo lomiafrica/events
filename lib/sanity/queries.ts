@@ -186,7 +186,7 @@ const getCacheConfig = (tags: string[]) => ({
 export async function getAllProducts() {
   try {
     // In development, use the proxy API to avoid CORS issues
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       const query = `*[_type == "product"] | order(name asc) {
         _id,
         name,
@@ -217,7 +217,9 @@ export async function getAllProducts() {
         }
       }`;
 
-      const response = await fetch(`/api/sanity-proxy?query=${encodeURIComponent(query)}`);
+      const response = await fetch(
+        `/api/sanity-proxy?query=${encodeURIComponent(query)}`,
+      );
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
@@ -263,7 +265,7 @@ export async function getAllProducts() {
     );
     return result;
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error("Error fetching products:", error);
     return []; // Return empty array as fallback
   }
 }
@@ -322,8 +324,10 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
     }`;
 
     // In development, use the proxy API to avoid CORS issues
-    if (process.env.NODE_ENV === 'development') {
-      const response = await fetch(`/api/sanity-proxy?query=${encodeURIComponent(query)}`);
+    if (process.env.NODE_ENV === "development") {
+      const response = await fetch(
+        `/api/sanity-proxy?query=${encodeURIComponent(query)}`,
+      );
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
@@ -344,7 +348,7 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
       defaultShippingCost: result?.defaultShippingCost ?? 0,
     };
   } catch (error) {
-    console.error('Error fetching shipping settings:', error);
+    console.error("Error fetching shipping settings:", error);
     return {
       defaultShippingCost: 0, // Return default value
     };

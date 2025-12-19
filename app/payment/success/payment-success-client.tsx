@@ -23,7 +23,7 @@ export function PaymentSuccessClient({
   // Track purchase completion
   useEffect(() => {
     // Track successful purchase - you can enhance this with actual purchase value
-    trackPurchase(0, 'XOF'); // Replace 0 with actual purchase amount when available
+    trackPurchase(0, "XOF"); // Replace 0 with actual purchase amount when available
   }, []);
 
   return (

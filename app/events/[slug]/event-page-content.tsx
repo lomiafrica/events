@@ -179,7 +179,7 @@ export default function EventPageContent({ event }: EventPageContentProps) {
 
   // Track event page view
   useEffect(() => {
-    trackViewContent('event', [event._id]);
+    trackViewContent("event", [event._id]);
   }, [event._id]);
 
   let mapEmbedSrc = null;

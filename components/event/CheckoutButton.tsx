@@ -169,13 +169,13 @@ export default function CheckoutButton({
             rel="noopener noreferrer"
             onClick={() => {
               // Track purchase initiation
-              trackEvent('InitiateCheckout', {
+              trackEvent("InitiateCheckout", {
                 content_name: item.name,
                 content_ids: [item.productId || item.id],
-                content_type: item.isBundle ? 'bundle' : 'ticket',
+                content_type: item.isBundle ? "bundle" : "ticket",
                 value: item.price,
-                currency: 'XOF',
-                num_items: 1
+                currency: "XOF",
+                num_items: 1,
               });
             }}
           >
@@ -201,13 +201,13 @@ export default function CheckoutButton({
           <Button
             onClick={() => {
               // Track purchase initiation
-              trackEvent('InitiateCheckout', {
+              trackEvent("InitiateCheckout", {
                 content_name: item.name,
                 content_ids: [item.productId || item.id],
-                content_type: item.isBundle ? 'bundle' : 'ticket',
+                content_type: item.isBundle ? "bundle" : "ticket",
                 value: item.price,
-                currency: 'XOF',
-                num_items: 1
+                currency: "XOF",
+                num_items: 1,
               });
               // Open the purchase modal
               handleOpenPurchaseModal();
