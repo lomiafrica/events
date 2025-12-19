@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import supabase from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -78,12 +78,15 @@ interface EventInfo {
 
 interface ScanLog {
   id: string;
+  ticket_identifier: string;
+  event_id: string;
+  event_title: string;
+  customer_name: string;
+  customer_email: string;
   attempt_timestamp: string;
   success: boolean;
-  customer_name?: string;
-  customer_email?: string;
-  event_title?: string;
-  error_message?: string;
+  error_code: string | null;
+  error_message: string | null;
 }
 
 export default function AdminClient() {
@@ -106,10 +109,6 @@ export default function AdminClient() {
   const [events, setEvents] = useState<EventInfo[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
-  // Scanner Tab State
-  const [activeTab, setActiveTab] = useState("purchases");
-  const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
-
   // New: Status filter (defaults to 'paid' only)
   const [statusFilter, setStatusFilter] = useState<string>("paid");
   const [showFilters, setShowFilters] = useState(false);
@@ -122,25 +121,9 @@ export default function AdminClient() {
   const [inviteTicketCount, setInviteTicketCount] = useState(1);
   const [inviteLoading, setInviteLoading] = useState(false);
 
-  // Load scan logs function (declared before useEffect hooks)
-  const loadScanLogs = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.rpc(
-        "get_admin_verification_logs",
-        {
-          p_event_id: selectedEvent,
-          p_limit: 50,
-        },
-      );
-      if (error) {
-        console.error("Error loading scan logs:", error);
-      } else {
-        setScanLogs(data || []);
-      }
-    } catch (error) {
-      console.error("Error loading scan logs:", error);
-    }
-  }, [selectedEvent]);
+  // Scanner Tab State
+  const [activeTab, setActiveTab] = useState("purchases");
+  const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
 
   // Helper function to format relative time
   const formatRelativeTime = (timestamp: string | null) => {
@@ -215,6 +198,7 @@ export default function AdminClient() {
     if (authStatus === "true") {
       setIsAuthenticated(true);
       loadEvents();
+      loadEvents();
       loadPurchases();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,7 +218,7 @@ export default function AdminClient() {
     if (isAuthenticated && activeTab === "scans") {
       loadScanLogs();
     }
-  }, [activeTab, selectedEvent, isAuthenticated, loadScanLogs]);
+  }, [activeTab, selectedEvent, isAuthenticated]);
 
   const handleAuth = async () => {
     setAuthError("");
@@ -314,6 +298,25 @@ export default function AdminClient() {
       }
     } catch (error) {
       console.error("Error loading events:", error);
+    }
+  };
+
+  const loadScanLogs = async () => {
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_admin_verification_logs",
+        {
+          p_event_id: selectedEvent,
+          p_limit: 50,
+        },
+      );
+      if (error) {
+        console.error("Error loading scan logs:", error);
+      } else {
+        setScanLogs(data || []);
+      }
+    } catch (error) {
+      console.error("Error loading scan logs:", error);
     }
   };
 
@@ -748,7 +751,7 @@ export default function AdminClient() {
             <div className="mt-4 flex justify-end">
               <Button
                 onClick={() => setIsInviteDialogOpen(true)}
-                className="rounded-sm bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
+                className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Invite Guest
@@ -914,189 +917,85 @@ export default function AdminClient() {
                     </p>
                   </motion.div>
                 ) : (
-                  <div className="space-y-4">
-                    {/* Desktop Table View - Hidden on Mobile */}
-                    <div className="hidden lg:block overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-slate-700/50">
-                            <th className="text-left p-4 text-zinc-400 font-medium text-sm uppercase tracking-wider">
-                              Customer
-                            </th>
-                            <th className="text-left p-4 text-zinc-400 font-medium text-sm uppercase tracking-wider">
-                              Event
-                            </th>
-                            <th className="text-left p-4 text-zinc-400 font-medium text-sm uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="text-left p-4 text-zinc-400 font-medium text-sm uppercase tracking-wider">
-                              Email
-                            </th>
-                            <th className="text-left p-4 text-zinc-400 font-medium text-sm uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredPurchases.map((purchase) => {
-                            const EmailIcon = getEmailButtonIcon(purchase);
-                            return (
-                              <tr
-                                key={purchase.purchase_id}
-                                className="border-b border-slate-700/30 hover:bg-slate-800/30 transition-colors"
-                              >
-                                <td className="p-4">
-                                  <div>
-                                    <div className="font-medium text-gray-100">
-                                      {purchase.customer_name}
-                                    </div>
-                                    <div className="text-sm text-gray-400">
-                                      {purchase.customer_email}
-                                    </div>
-                                    {purchase.customer_phone && (
-                                      <div className="text-sm text-gray-500">
-                                        {purchase.customer_phone}
-                                      </div>
-                                    )}
+                  <div className="space-y-3 sm:space-y-4">
+                    {filteredPurchases.map((purchase) => {
+                      const EmailIcon = getEmailButtonIcon(purchase);
+                      return (
+                        <Card
+                          key={purchase.purchase_id}
+                          className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm"
+                        >
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="space-y-3">
+                              {/* Header: Customer and Status */}
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-gray-100 text-sm sm:text-base truncate">
+                                    {purchase.customer_name}
                                   </div>
-                                </td>
-                                <td className="p-4">
-                                  <div>
-                                    <div className="font-medium text-gray-100">
-                                      {purchase.event_title}
-                                    </div>
-                                    <div className="text-sm text-gray-400">
-                                      {purchase.ticket_name} x{" "}
-                                      {purchase.quantity}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {purchase.total_amount}{" "}
-                                      {purchase.currency_code}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="p-4">
-                                  <div className="flex flex-col gap-2">
-                                    {getPaymentStatusBadge(purchase.status)}
-                                    <div className="text-xs text-gray-500">
-                                      {formatRelativeTime(purchase.created_at)}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="p-4">
-                                  <div className="flex items-center gap-2">
-                                    {getStatusBadge(
-                                      purchase.email_dispatch_status,
-                                    )}
-                                    {purchase.email_dispatch_error && (
-                                      <div
-                                        className="w-5 h-5 flex items-center justify-center rounded-full bg-red-900/50 cursor-help"
-                                        title={purchase.email_dispatch_error}
-                                      >
-                                        <AlertCircle className="w-3 h-3 text-red-400" />
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="p-4">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => openEmailDialog(purchase)}
-                                    className="rounded-sm bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-800/50"
-                                    disabled={!canSendEmail(purchase)}
-                                  >
-                                    <EmailIcon className="h-3.5 w-3.5 mr-2" />
-                                    {getEmailButtonText(purchase)}
-                                  </Button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Mobile Card View - Visible on Mobile */}
-                    <div className="lg:hidden space-y-4">
-                      {filteredPurchases.map((purchase) => {
-                        const EmailIcon = getEmailButtonIcon(purchase);
-                        return (
-                          <Card
-                            key={purchase.purchase_id}
-                            className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm"
-                          >
-                            <CardContent className="p-3 sm:p-4">
-                              <div className="space-y-3">
-                                {/* Header: Customer and Status */}
-                                <div className="flex justify-between items-start gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-medium text-gray-100 text-sm sm:text-base truncate">
-                                      {purchase.customer_name}
-                                    </div>
-                                    <div className="text-xs sm:text-sm text-gray-400 truncate">
-                                      {purchase.customer_email}
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col gap-1 items-end">
-                                    {getPaymentStatusBadge(purchase.status)}
-                                    {purchase.is_used && (
-                                      <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm text-xs">
-                                        <QrCode className="h-3 w-3 mr-1" />
-                                        Scanned
-                                      </Badge>
-                                    )}
+                                  <div className="text-xs sm:text-sm text-gray-400 truncate">
+                                    {purchase.customer_email}
                                   </div>
                                 </div>
-
-                                {/* Event Info */}
-                                <div className="bg-muted/30 rounded-sm p-2">
-                                  <div className="text-xs font-medium text-gray-400 mb-1">
-                                    Event
-                                  </div>
-                                  <div className="text-sm font-medium text-gray-100">
-                                    {purchase.event_title}
-                                  </div>
-                                  <div className="text-xs text-gray-400 mt-1">
-                                    {purchase.ticket_name} × {purchase.quantity}{" "}
-                                    • {purchase.total_amount}{" "}
-                                    {purchase.currency_code}
-                                  </div>
-                                </div>
-
-                                {/* Email Status */}
-                                <div className="flex items-center justify-between gap-2 text-xs">
-                                  <div className="flex items-center gap-2">
-                                    {getStatusBadge(
-                                      purchase.email_dispatch_status,
-                                    )}
-                                    {purchase.pdf_ticket_sent_at && (
-                                      <span className="text-gray-500">
-                                        {formatRelativeTime(
-                                          purchase.pdf_ticket_sent_at,
-                                        )}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex gap-2 pt-2 border-t border-slate-700">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => openEmailDialog(purchase)}
-                                    className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white flex-1 text-xs sm:text-sm"
-                                    disabled={!canSendEmail(purchase)}
-                                  >
-                                    <EmailIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                                    {getEmailButtonText(purchase)}
-                                  </Button>
+                                <div className="flex flex-col gap-1 items-end">
+                                  {getPaymentStatusBadge(purchase.status)}
+                                  {purchase.is_used && (
+                                    <Badge className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 rounded-sm text-xs">
+                                      <QrCode className="h-3 w-3 mr-1" />
+                                      Scanned
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
+
+                              {/* Event Info */}
+                              <div className="bg-muted/30 rounded-sm p-2">
+                                <div className="text-xs font-medium text-gray-400 mb-1">
+                                  Event
+                                </div>
+                                <div className="text-sm font-medium text-gray-100">
+                                  {purchase.event_title}
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {purchase.ticket_name} × {purchase.quantity} •{" "}
+                                  {purchase.total_amount}{" "}
+                                  {purchase.currency_code}
+                                </div>
+                              </div>
+
+                              {/* Email Status */}
+                              <div className="flex items-center justify-between gap-2 text-xs">
+                                <div className="flex items-center gap-2">
+                                  {getStatusBadge(
+                                    purchase.email_dispatch_status,
+                                  )}
+                                  {purchase.pdf_ticket_sent_at && (
+                                    <span className="text-gray-500">
+                                      {formatRelativeTime(
+                                        purchase.pdf_ticket_sent_at,
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-2 pt-2 border-t border-slate-700">
+                                <Button
+                                  size="sm"
+                                  onClick={() => openEmailDialog(purchase)}
+                                  className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white flex-1 text-xs sm:text-sm"
+                                  disabled={!canSendEmail(purchase)}
+                                >
+                                  <EmailIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                  {getEmailButtonText(purchase)}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -1108,7 +1007,7 @@ export default function AdminClient() {
             <Card className="rounded-sm border-slate-700 bg-card/30 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-100">
-                  Scan History
+                  Scan history
                 </CardTitle>
                 <CardDescription className="text-gray-400">
                   Recent verification attempts help identify issues with
@@ -1205,72 +1104,99 @@ export default function AdminClient() {
 
         {/* Email Dialog */}
         <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-          <DialogContent className="rounded-sm border-slate-700 bg-background max-w-md mx-4">
+          <DialogContent className="rounded-sm border-slate-700 bg-card/90 backdrop-blur-sm shadow-2xl max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-gray-100">
+              <DialogTitle className="text-gray-100 text-base sm:text-lg">
                 {selectedPurchase &&
-                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                  selectedPurchase.email_dispatch_attempts === 0)
+                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                    selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
-              <DialogDescription className="text-gray-300">
+              <DialogDescription className="text-gray-300 text-xs sm:text-sm">
                 Update customer information and send the ticket email
               </DialogDescription>
             </DialogHeader>
             {selectedPurchase && (
-              <div className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-200">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label
+                      htmlFor="newName"
+                      className="text-gray-200 text-xs sm:text-sm"
+                    >
+                      Customer Name
+                    </Label>
+                    <Input
+                      id="newName"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder="Enter correct name"
+                      className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label
+                      htmlFor="newPhone"
+                      className="text-gray-200 text-xs sm:text-sm"
+                    >
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="newPhone"
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value)}
+                      placeholder="Enter correct phone"
+                      className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label
+                    htmlFor="newEmail"
+                    className="text-gray-200 text-xs sm:text-sm"
+                  >
                     Email Address
                   </Label>
                   <Input
-                    id="email"
+                    id="newEmail"
+                    type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder={selectedPurchase.customer_email}
-                    className="rounded-sm bg-background border-slate-700 text-gray-100"
+                    placeholder="Enter correct email"
+                    className="rounded-sm bg-background border-slate-700 text-gray-100 placeholder:text-gray-400 text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-gray-200">
-                    Customer Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder={selectedPurchase.customer_name}
-                    className="rounded-sm bg-background border-slate-700 text-gray-100"
-                  />
+                <div className="bg-card/50 backdrop-blur-sm p-3 rounded-sm border border-slate-700">
+                  <h4 className="font-medium mb-2 text-gray-100 text-sm">
+                    Purchase Details
+                  </h4>
+                  <div className="text-xs sm:text-sm space-y-1 text-gray-300">
+                    <div className="truncate">
+                      Event: {selectedPurchase.event_title}
+                    </div>
+                    <div>
+                      Ticket: {selectedPurchase.ticket_name} ×{" "}
+                      {selectedPurchase.quantity}
+                    </div>
+                    <div>
+                      Amount: {selectedPurchase.total_amount}{" "}
+                      {selectedPurchase.currency_code}
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-200">
-                    Phone Number (Optional)
-                  </Label>
-                  <Input
-                    id="phone"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder={
-                      selectedPurchase.customer_phone || "No phone number"
-                    }
-                    className="rounded-sm bg-background border-slate-700 text-gray-100"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 mt-6">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                   <Button
                     variant="outline"
                     onClick={() => setIsEmailDialogOpen(false)}
-                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-slate-800"
-                    disabled={emailActionLoading}
+                    className="rounded-sm border-slate-700 text-gray-100 hover:bg-card/70 w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleEmailAction}
-                    className="rounded-sm bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={emailActionLoading}
+                    disabled={emailActionLoading || !newEmail.trim()}
+                    className="rounded-sm w-full sm:w-auto"
                   >
                     {emailActionLoading ? (
                       <>
@@ -1279,8 +1205,19 @@ export default function AdminClient() {
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Email
+                        {selectedPurchase.email_dispatch_status ===
+                          "NOT_INITIATED" ||
+                          selectedPurchase.email_dispatch_attempts === 0 ? (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Send Email
+                          </>
+                        ) : (
+                          <>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Resend Email
+                          </>
+                        )}
                       </>
                     )}
                   </Button>
@@ -1298,8 +1235,8 @@ export default function AdminClient() {
                 Invite Guest
               </DialogTitle>
               <DialogDescription className="text-gray-300 text-xs sm:text-sm">
-                Create a complimentary ticket for a guest and send them an email
-                with their QR code.
+                Create a ticket for a guest and send them an email with their QR
+                code.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -1404,7 +1341,7 @@ export default function AdminClient() {
                     !inviteGuestEmail.trim() ||
                     !inviteGuestName.trim()
                   }
-                  className="rounded-sm bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
+                  className="rounded-sm bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                 >
                   {inviteLoading ? (
                     <>
@@ -1414,7 +1351,7 @@ export default function AdminClient() {
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Create & Send Ticket
+                      Send ticket
                     </>
                   )}
                 </Button>
