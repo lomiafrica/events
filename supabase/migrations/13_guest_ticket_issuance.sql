@@ -45,8 +45,8 @@ BEGIN
         -- Update customer info if they exist
         UPDATE public.customers
         SET name = p_guest_name,
-        phone = COALESCE(p_guest_phone, phone),
-        updated_at = NOW()
+            phone = COALESCE(p_guest_phone, phone),
+            updated_at = NOW()
         WHERE id = v_customer_id;
     END IF;
     
@@ -84,7 +84,7 @@ BEGIN
         p_quantity,
         0.00, -- Complimentary, no charge
         0.00,
-        'XAF',
+        'XOF',
         'paid', -- Mark as paid so it works with verification
         v_ticket_id,
         'NOT_INITIATED',
@@ -102,12 +102,10 @@ BEGIN
             INSERT INTO public.individual_tickets (
                 purchase_id,
                 ticket_identifier,
-                ticket_number,
                 status
             ) VALUES (
                 v_purchase_id,
                 v_individual_ticket_id,
-                i,
                 'valid'
             );
             

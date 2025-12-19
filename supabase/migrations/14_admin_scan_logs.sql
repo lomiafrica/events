@@ -1,7 +1,8 @@
--- Migration: Admin Scan Logs Function
--- Adds RPC to fetch all verification logs for the admin dashboard
 
 -- Function to get verification logs (both success and failure)
+-- Drop the existing function first
+DROP FUNCTION IF EXISTS public.get_admin_verification_logs(TEXT, INTEGER, INTEGER);
+
 CREATE OR REPLACE FUNCTION public.get_admin_verification_logs(
     p_event_id TEXT DEFAULT NULL,
     p_limit INTEGER DEFAULT 50,
@@ -37,7 +38,14 @@ BEGIN
         va.error_code,
         va.error_message
     FROM public.verification_attempts va
-    LEFT JOIN public.purchases p ON va.ticket_identifier = p.unique_ticket_identifier
+    -- First try to join through individual_tickets (for new tickets)
+    LEFT JOIN public.individual_tickets it ON va.ticket_identifier = it.ticket_identifier
+    LEFT JOIN public.purchases p ON (
+        -- If found in individual_tickets, use its purchase_id
+        (it.purchase_id IS NOT NULL AND p.id = it.purchase_id)
+        -- Otherwise, fall back to direct join for legacy tickets
+        OR (it.purchase_id IS NULL AND va.ticket_identifier = p.unique_ticket_identifier)
+    )
     LEFT JOIN public.customers c ON p.customer_id = c.id
     WHERE (p_event_id IS NULL OR va.event_id = p_event_id)
     ORDER BY va.attempt_timestamp DESC
@@ -50,4 +58,4 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_admin_verification_logs(TEXT, INTEGER, INTEGER) TO service_role;
 GRANT EXECUTE ON FUNCTION public.get_admin_verification_logs(TEXT, INTEGER, INTEGER) TO authenticated;
 
-COMMENT ON FUNCTION public.get_admin_verification_logs(TEXT, INTEGER, INTEGER) IS 'Returns paginated verification logs for admin review';
+COMMENT ON FUNCTION public.get_admin_verification_logs(TEXT, INTEGER, INTEGER) IS 'Returns paginated verification logs for admin review with proper customer data for both individual and legacy tickets';

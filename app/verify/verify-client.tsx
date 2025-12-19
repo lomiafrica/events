@@ -54,8 +54,21 @@ const DUPLICATE_SCAN_WINDOW = 2000; // 2 seconds in milliseconds
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000; // 1 second
 
-// Track last scanned ticket to prevent rapid duplicates
-let lastScannedTicket: { id: string; timestamp: number } | null = null;
+// Track last scanned tickets to prevent rapid duplicates (ticket-specific)
+// eslint-disable-next-line prefer-const
+let lastScannedTickets: Map<string, number> = new Map();
+
+// Clean up old scan records to prevent memory leaks
+const cleanupOldScanRecords = () => {
+  const now = Date.now();
+  const cutoffTime = now - DUPLICATE_SCAN_WINDOW * 2; // Keep records for 2x the window
+
+  for (const [ticketId, timestamp] of lastScannedTickets.entries()) {
+    if (timestamp < cutoffTime) {
+      lastScannedTickets.delete(ticketId);
+    }
+  }
+};
 
 // Audio feedback for scanning
 const playSuccessSound = () => {
@@ -267,6 +280,16 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     checkCachedPin();
   }, []);
 
+  // Reset state when ticketId changes (for continuous scanning workflow)
+  useEffect(() => {
+    if (ticketId) {
+      setError(null);
+      setErrorCode(null);
+      setTicketData(null);
+      setWasJustAdmitted(false);
+    }
+  }, [ticketId]);
+
   // Auto-verify ticket when page loads with ID and user is verified
   useEffect(() => {
     if (ticketId && isVerified && !ticketData) {
@@ -313,20 +336,26 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
   );
 
   const verifyTicket = useCallback(
-    async (ticketIdentifier: string) => {
+    async (ticketIdentifier: string, isRefreshCall: boolean = false) => {
       setIsLoading(true);
-      setError(null);
-      setErrorCode(null);
-      setTicketData(null);
 
-      // Check for duplicate scan
-      const now = Date.now();
-      if (
-        lastScannedTicket &&
-        lastScannedTicket.id === ticketIdentifier.trim()
-      ) {
-        if (now - lastScannedTicket.timestamp < DUPLICATE_SCAN_WINDOW) {
-          setError("Please wait before scanning this ticket again.");
+      // Don't clear error/success state if this is a refresh call after successful admission
+      if (!isRefreshCall) {
+        setError(null);
+        setErrorCode(null);
+        setTicketData(null);
+      }
+
+      // Check for duplicate scan (only for initial scans, not refresh calls)
+      if (!isRefreshCall) {
+        const now = Date.now();
+        const trimmedId = ticketIdentifier.trim();
+        const lastScanTime = lastScannedTickets.get(trimmedId);
+
+        if (lastScanTime && now - lastScanTime < DUPLICATE_SCAN_WINDOW) {
+          setError(
+            "This ticket was just scanned. Please wait before scanning again.",
+          );
           setIsLoading(false);
           return;
         }
@@ -352,30 +381,44 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           return data[0];
         });
 
-        // Update last scanned ticket
-        lastScannedTicket = { id: ticketIdentifier.trim(), timestamp: now };
+        // Update last scanned ticket (only for initial scans)
+        if (!isRefreshCall) {
+          const trimmedId = ticketIdentifier.trim();
+          lastScannedTickets.set(trimmedId, Date.now());
+          // Clean up old records periodically
+          if (lastScannedTickets.size > 100) {
+            // Clean up when we have too many records
+            cleanupOldScanRecords();
+          }
+        }
         setTicketData(result);
 
-        // Success feedback
-        playSuccessSound();
-        setFlashColor("green");
-        setTimeout(() => setFlashColor(null), 300);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Verification failed";
-        const { code, message } = parseErrorMessage(errorMessage);
-        const friendlyMessage = getUserFriendlyError(code, message);
-        setError(friendlyMessage);
-        setErrorCode(code);
-
-        // Error feedback - use orange flash for ALREADY_USED, red for other errors
-        if (code === "ALREADY_USED") {
-          setFlashColor("red"); // Still flash to get attention
-        } else {
-          playErrorSound();
-          setFlashColor("red");
+        // Success feedback (only for initial scans)
+        if (!isRefreshCall) {
+          playSuccessSound();
+          setFlashColor("green");
+          setTimeout(() => setFlashColor(null), 300);
         }
-        setTimeout(() => setFlashColor(null), 500);
+      } catch (err) {
+        // Only set error if this is not a refresh call or if wasJustAdmitted is not true
+        if (!isRefreshCall || !wasJustAdmitted) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Verification failed";
+          const { code, message } = parseErrorMessage(errorMessage);
+          const friendlyMessage = getUserFriendlyError(code, message);
+          setError(friendlyMessage);
+          setErrorCode(code);
+
+          // Error feedback - use orange flash for ALREADY_USED, red for other errors
+          if (code === "ALREADY_USED") {
+            setFlashColor("red"); // Still flash to get attention
+          } else {
+            playErrorSound();
+            setFlashColor("red");
+          }
+          setTimeout(() => setFlashColor(null), 500);
+        }
+        // If this is a refresh call and wasJustAdmitted is true, silently ignore errors
       } finally {
         setIsLoading(false);
       }
@@ -387,6 +430,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       setError,
       setTicketData,
       getUserFriendlyError,
+      wasJustAdmitted,
     ],
   );
 
@@ -475,8 +519,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         setErrorCode(null);
       }
 
-      // Refresh ticket data
-      await verifyTicket(ticketId.trim());
+      // Refresh ticket data (don't show errors if admission already succeeded)
+      await verifyTicket(ticketId.trim(), true);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to mark ticket as used";
