@@ -968,14 +968,14 @@ export default function AdminClient() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-left">Customer</TableHead>
-                          <TableHead className="text-left hidden sm:table-cell">
+                          <TableHead className="text-left w-[20%]">Customer</TableHead>
+                          <TableHead className="text-left hidden sm:table-cell w-[25%]">
                             Event
                           </TableHead>
-                          <TableHead className="text-center">Tickets</TableHead>
-                          <TableHead className="text-center">Status</TableHead>
-                          <TableHead className="text-center">Email</TableHead>
-                          <TableHead className="text-center">Actions</TableHead>
+                          <TableHead className="text-center w-[10%]">Tickets</TableHead>
+                          <TableHead className="text-center w-[12%]">Status</TableHead>
+                          <TableHead className="text-center w-[15%]">Email</TableHead>
+                          <TableHead className="text-center w-[18%]">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -984,29 +984,29 @@ export default function AdminClient() {
                           return (
                             <TableRow key={purchase.purchase_id}>
                               {/* Customer Info */}
-                              <TableCell>
+                              <TableCell className="w-[20%]">
                                 <div className="min-w-0">
-                                  <div className="font-medium text-gray-100 truncate max-w-[150px] sm:max-w-none">
+                                  <div className="font-medium text-gray-100 truncate max-w-[120px] sm:max-w-none">
                                     {purchase.customer_name}
                                   </div>
-                                  <div className="text-xs text-gray-400 truncate max-w-[150px] sm:max-w-none">
+                                  <div className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-none">
                                     {purchase.customer_email}
                                   </div>
                                 </div>
                               </TableCell>
 
                               {/* Event Info - Hidden on mobile */}
-                              <TableCell className="hidden sm:table-cell">
-                                <div className="text-sm text-gray-100 truncate max-w-[120px]">
+                              <TableCell className="hidden sm:table-cell w-[25%]">
+                                <div className="text-sm text-gray-100 truncate max-w-[150px]">
                                   {purchase.event_title}
                                 </div>
-                                <div className="text-xs text-gray-400">
+                                <div className="text-xs text-gray-400 truncate max-w-[150px]">
                                   {purchase.ticket_name} × {purchase.quantity}
                                 </div>
                               </TableCell>
 
                               {/* Tickets & Amount */}
-                              <TableCell className="text-center">
+                              <TableCell className="text-center w-[10%]">
                                 <div className="text-sm font-medium text-gray-100">
                                   {purchase.quantity}
                                 </div>
@@ -1023,12 +1023,12 @@ export default function AdminClient() {
                               </TableCell>
 
                               {/* Payment Status */}
-                              <TableCell className="text-center">
+                              <TableCell className="text-center w-[12%]">
                                 {getPaymentStatusBadge(purchase.status)}
                               </TableCell>
 
                               {/* Email Status */}
-                              <TableCell className="text-center">
+                              <TableCell className="text-center w-[15%]">
                                 <div className="flex flex-col items-center gap-1">
                                   {getStatusBadge(
                                     purchase.email_dispatch_status,
@@ -1044,7 +1044,7 @@ export default function AdminClient() {
                               </TableCell>
 
                               {/* Actions */}
-                              <TableCell className="text-center">
+                              <TableCell className="text-center w-[18%]">
                                 <Button
                                   size="sm"
                                   onClick={() => openEmailDialog(purchase)}
