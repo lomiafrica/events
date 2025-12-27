@@ -323,16 +323,17 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           currentLanguage,
           "ticketVerification.errors.ticketNotFound",
         ),
-        VERIFICATION_FAILED: 'Ticket verification failed. Please try again.',
-        PROCESSING: 'This ticket is currently being processed. Please wait.',
+        VERIFICATION_FAILED: "Ticket verification failed. Please try again.",
+        PROCESSING: "This ticket is currently being processed. Please wait.",
         ORPHANED_TICKET: "Ticket data is incomplete. Please contact support.",
         ALREADY_USED: t(
           currentLanguage,
           "ticketVerification.warnings.alreadyUsed",
         ),
         DUPLICATE_SCAN: "Please wait a moment before scanning again.",
-        ADMISSION_FAILED: 'Ticket verified but admission failed. Please try again.',
-        INTERNAL_ERROR: 'System error. Please contact support.',
+        ADMISSION_FAILED:
+          "Ticket verified but admission failed. Please try again.",
+        INTERNAL_ERROR: "System error. Please contact support.",
       };
       return errorMap[errorCode] || defaultMessage;
     },
@@ -369,23 +370,21 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       try {
         const result = await retryWithBackoff(async () => {
           // Call the edge function for atomic verification and admission
-          const { data: response, error: edgeError } = await supabase.functions.invoke(
-            'verify-ticket',
-            {
+          const { data: response, error: edgeError } =
+            await supabase.functions.invoke("verify-ticket", {
               body: {
                 ticket_identifier: trimmedId,
-                verified_by: 'staff_portal',
-                auto_admit: true // Always auto-admit valid tickets
-              }
-            }
-          );
+                verified_by: "staff_portal",
+                auto_admit: true, // Always auto-admit valid tickets
+              },
+            });
 
           if (edgeError) {
             throw new Error(`Edge function error: ${edgeError.message}`);
           }
 
-          if (!response || typeof response !== 'object') {
-            throw new Error('Invalid response from verification service');
+          if (!response || typeof response !== "object") {
+            throw new Error("Invalid response from verification service");
           }
 
           return response;
@@ -415,40 +414,45 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
         if (!typedResult.success) {
           // Handle verification failure
-          const errorCode = typedResult.error_code || 'UNKNOWN_ERROR';
-          const errorMessage = typedResult.error_message || 'Verification failed';
+          const errorCode = typedResult.error_code || "UNKNOWN_ERROR";
+          const errorMessage =
+            typedResult.error_message || "Verification failed";
 
           const friendlyMessage = getUserFriendlyError(errorCode, errorMessage);
           setError(friendlyMessage);
           setErrorCode(errorCode);
 
           // Error feedback - use orange flash for ALREADY_USED, red for other errors
-          if (errorCode === 'ALREADY_USED') {
-            setFlashColor('red'); // Still flash to get attention
+          if (errorCode === "ALREADY_USED") {
+            setFlashColor("red"); // Still flash to get attention
           } else {
             playErrorSound();
-            setFlashColor('red');
+            setFlashColor("red");
           }
           setTimeout(() => setFlashColor(null), 500);
           return;
         }
 
         // Check if admission failed even if verification was successful (e.g., already used)
-        if (typedResult.success && !typedResult.admitted && typedResult.error_code) {
+        if (
+          typedResult.success &&
+          !typedResult.admitted &&
+          typedResult.error_code
+        ) {
           const errorCode = typedResult.error_code;
-          const errorMessage = typedResult.error_message || 'Admission failed';
+          const errorMessage = typedResult.error_message || "Admission failed";
 
           const friendlyMessage = getUserFriendlyError(errorCode, errorMessage);
           setError(friendlyMessage);
           setErrorCode(errorCode);
 
-          if (errorCode === 'ALREADY_USED') {
+          if (errorCode === "ALREADY_USED") {
             // For already used tickets, we show them as orange/warning but with ticket data
             // No need for loud error sound, maybe a softer warning sound if we had one
-            setFlashColor('red');
+            setFlashColor("red");
           } else {
             playErrorSound();
-            setFlashColor('red');
+            setFlashColor("red");
           }
           setTimeout(() => setFlashColor(null), 500);
           return;
@@ -462,24 +466,23 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
           if (!isRefreshCall) {
             playSuccessSound();
-            setFlashColor('green');
+            setFlashColor("green");
             setTimeout(() => setFlashColor(null), 300);
           }
         }
-
       } catch (err) {
-        console.error('Verification error:', err);
+        console.error("Verification error:", err);
         // Only set error if this is not a refresh call or if wasJustAdmitted is not true
         if (!isRefreshCall || !wasJustAdmitted) {
           const errorMessage =
-            err instanceof Error ? err.message : 'Verification failed';
+            err instanceof Error ? err.message : "Verification failed";
           const { code, message } = parseErrorMessage(errorMessage);
           const friendlyMessage = getUserFriendlyError(code, message);
           setError(friendlyMessage);
           setErrorCode(code);
 
           playErrorSound();
-          setFlashColor('red');
+          setFlashColor("red");
           setTimeout(() => setFlashColor(null), 500);
         }
       } finally {
@@ -494,7 +497,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       setTicketData,
       getUserFriendlyError,
       wasJustAdmitted,
-    ]
+    ],
   );
 
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -821,8 +824,9 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       {/* Flash Feedback Overlay */}
       {flashColor && (
         <div
-          className={`fixed inset-0 pointer-events-none z-50 ${flashColor === "green" ? "bg-green-500/30" : "bg-red-500/30"
-            }`}
+          className={`fixed inset-0 pointer-events-none z-50 ${
+            flashColor === "green" ? "bg-green-500/30" : "bg-red-500/30"
+          }`}
           style={{ animation: "flash 0.4s ease-out" }}
         />
       )}
@@ -875,36 +879,43 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <p className="text-sm text-gray-400">
                           {ticketData.remaining_tickets !== undefined ? (
                             <span>
-                              {ticketData.remaining_tickets} {t(currentLanguage, "ticketVerification.quantity.remaining")}
+                              {ticketData.remaining_tickets}{" "}
+                              {t(
+                                currentLanguage,
+                                "ticketVerification.quantity.remaining",
+                              )}
                               <span className="mx-2">/</span>
-                              {ticketData.total_quantity || 1} {t(currentLanguage, "ticketVerification.quantity.people")}
+                              {ticketData.total_quantity || 1}{" "}
+                              {t(
+                                currentLanguage,
+                                "ticketVerification.quantity.people",
+                              )}
+                            </span>
+                          ) : /* Fallback older logic */
+                          ticketData.use_count !== undefined &&
+                            ticketData.total_quantity ? (
+                            <span>
+                              {ticketData.use_count} /{" "}
+                              {ticketData.total_quantity}{" "}
+                              {t(
+                                currentLanguage,
+                                "ticketVerification.quantity.scanned",
+                              )}
                             </span>
                           ) : (
-                            /* Fallback older logic */
-                            ticketData.use_count !== undefined &&
-                              ticketData.total_quantity ? (
-                              <span>
-                                {ticketData.use_count} /{" "}
-                                {ticketData.total_quantity}{" "}
-                                {t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.scanned",
-                                )}
-                              </span>
-                            ) : (
-                              <span>
-                                {ticketData.quantity}{" "}
-                                {ticketData.quantity > 1
-                                  ? t(
+                            <span>
+                              {ticketData.quantity}{" "}
+                              {ticketData.quantity > 1
+                                ? t(
                                     currentLanguage,
                                     "ticketVerification.quantity.people",
                                   )
-                                  : t(
+                                : t(
                                     currentLanguage,
                                     "ticketVerification.quantity.person",
                                   )}
-                              </span>
-                            ))}
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -953,8 +964,16 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">ID: {ticketId.substring(0, 12)}</span>
-                    <span className="font-bold">Total {new Intl.NumberFormat("fr-FR").format(ticketData.total_amount)} {ticketData.currency_code}</span>
+                    <span className="text-gray-400">
+                      ID: {ticketId.substring(0, 12)}
+                    </span>
+                    <span className="font-bold">
+                      Total{" "}
+                      {new Intl.NumberFormat("fr-FR").format(
+                        ticketData.total_amount,
+                      )}{" "}
+                      {ticketData.currency_code}
+                    </span>
                   </div>
                 </div>
               </CardContent>
