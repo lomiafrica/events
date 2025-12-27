@@ -5,7 +5,9 @@
 -- Drop the existing function first
 DROP FUNCTION IF EXISTS public.get_admin_events_list();
 
-CREATE OR REPLACE FUNCTION public.get_admin_events_list()
+CREATE OR REPLACE FUNCTION public.get_admin_events_list(
+    p_status_filter TEXT DEFAULT 'paid'
+)
 RETURNS TABLE(
     event_id TEXT,
     event_title TEXT,
@@ -44,7 +46,14 @@ BEGIN
             COUNT(CASE WHEN p.is_used = TRUE AND it.purchase_id IS NULL THEN 1 END) as legacy_scanned
         FROM public.purchases p
         LEFT JOIN public.individual_tickets it ON it.purchase_id = p.id
-        WHERE p.status = 'paid'
+        WHERE
+            CASE
+                WHEN p_status_filter = 'paid' THEN p.status = 'paid'
+                WHEN p_status_filter = 'pending' THEN p.status = 'pending_payment'
+                WHEN p_status_filter = 'failed' THEN p.status = 'payment_failed'
+                WHEN p_status_filter = 'all' THEN TRUE
+                ELSE p.status = 'paid' -- Default to paid
+            END
         GROUP BY p.event_id
     ) event_stats
     ORDER BY event_stats.last_purchase_date DESC;
@@ -124,16 +133,16 @@ END;
 $$;
 
 -- Grant execute permissions
-GRANT EXECUTE ON FUNCTION public.get_admin_events_list() TO service_role;
+GRANT EXECUTE ON FUNCTION public.get_admin_events_list(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION public.get_admin_purchases_by_event(TEXT) TO service_role;
 
 -- Also grant to authenticated for admin panel access
-GRANT EXECUTE ON FUNCTION public.get_admin_events_list() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_events_list(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_admin_purchases_by_event(TEXT) TO authenticated;
 
 -- Comments
-COMMENT ON FUNCTION public.get_admin_events_list()
-IS 'Returns list of all events with purchase statistics for admin filtering, counting scanned tickets from both individual ticket system and legacy purchase-level scanning';
+COMMENT ON FUNCTION public.get_admin_events_list(TEXT)
+IS 'Returns list of all events with purchase statistics for admin filtering based on status filter (paid/pending/failed/all), counting scanned tickets from both individual ticket system and legacy purchase-level scanning';
 
 COMMENT ON FUNCTION public.get_admin_purchases_by_event(TEXT)
 IS 'Returns purchases filtered by specific event ID';
