@@ -46,13 +46,31 @@ interface TicketData {
   verified_by?: string;
   use_count?: number; // How many times a legacy ticket has been used
   total_quantity?: number; // The total number of admissions on a legacy ticket
+  remaining_tickets?: number; // Calculated remaining admissions
 }
 
 const PIN_CACHE_KEY = "staff_verification_pin";
 const PIN_CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 
-// Simplified: Edge function handles all duplicate prevention and processing locks
-// No need for client-side tracking anymore
+const DUPLICATE_SCAN_WINDOW = 2000; // 2 seconds in milliseconds
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 1000; // 1 second
+
+// Track last scanned tickets to prevent rapid duplicates (ticket-specific)
+// eslint-disable-next-line prefer-const
+let lastScannedTickets: Map<string, number> = new Map();
+
+// Clean up old scan records to prevent memory leaks
+const cleanupOldScanRecords = () => {
+  const now = Date.now();
+  const cutoffTime = now - DUPLICATE_SCAN_WINDOW * 2; // Keep records for 2x the window
+
+  for (const [ticketId, timestamp] of lastScannedTickets.entries()) {
+    if (timestamp < cutoffTime) {
+      lastScannedTickets.delete(ticketId);
+    }
+  }
+};
 
 // Audio feedback for scanning
 const playSuccessSound = () => {
@@ -195,7 +213,35 @@ interface VerifyClientProps {
   ticketId?: string;
 }
 
-// Retry logic is now handled by the edge function
+// Retry helper with exponential backoff
+const retryWithBackoff = async <T,>(
+  fn: () => Promise<T>,
+  retries: number = MAX_RETRY_ATTEMPTS,
+  delay: number = RETRY_DELAY_MS,
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+
+    // Check if it's a network error (worth retrying)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isNetworkError =
+      errorMessage.includes("network") ||
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("fetch") ||
+      errorMessage.includes("connection");
+
+    if (!isNetworkError) {
+      // Don't retry validation errors like TICKET_NOT_FOUND
+      throw error;
+    }
+
+    // Wait before retrying
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 1.5); // Exponential backoff
+  }
+};
 
 export function VerifyClient({ ticketId }: VerifyClientProps) {
   const { currentLanguage } = useTranslation();
@@ -282,7 +328,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         ORPHANED_TICKET: "Ticket data is incomplete. Please contact support.",
         ALREADY_USED: t(
           currentLanguage,
-          "ticketVerification.errors.alreadyUsed",
+          "ticketVerification.warnings.alreadyUsed",
         ),
         DUPLICATE_SCAN: "Please wait a moment before scanning again.",
         ADMISSION_FAILED: 'Ticket verified but admission failed. Please try again.',
@@ -306,28 +352,47 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
 
       const trimmedId = ticketIdentifier.trim();
 
+      // Check for duplicate scan (only for initial scans, not refresh calls)
+      if (!isRefreshCall) {
+        const now = Date.now();
+        const lastScanTime = lastScannedTickets.get(trimmedId);
+
+        if (lastScanTime && now - lastScanTime < DUPLICATE_SCAN_WINDOW) {
+          setError(
+            "This ticket was just scanned. Please wait before scanning again.",
+          );
+          setIsLoading(false);
+          return;
+        }
+      }
+
       try {
-        // Call the edge function for atomic verification and admission
-        const { data: response, error: edgeError } = await supabase.functions.invoke(
-          'verify-ticket',
-          {
-            body: {
-              ticket_identifier: trimmedId,
-              verified_by: 'staff_portal',
-              auto_admit: true // Always auto-admit valid tickets
+        const result = await retryWithBackoff(async () => {
+          // Call the edge function for atomic verification and admission
+          const { data: response, error: edgeError } = await supabase.functions.invoke(
+            'verify-ticket',
+            {
+              body: {
+                ticket_identifier: trimmedId,
+                verified_by: 'staff_portal',
+                auto_admit: true // Always auto-admit valid tickets
+              }
             }
+          );
+
+          if (edgeError) {
+            throw new Error(`Edge function error: ${edgeError.message}`);
           }
-        );
 
-        if (edgeError) {
-          throw new Error(`Edge function error: ${edgeError.message}`);
-        }
+          if (!response || typeof response !== 'object') {
+            throw new Error('Invalid response from verification service');
+          }
 
-        if (!response || typeof response !== 'object') {
-          throw new Error('Invalid response from verification service');
-        }
+          return response;
+        });
 
-        const result = response as {
+        // Type the result from retryWithBackoff
+        const typedResult = result as {
           success: boolean;
           ticket_data?: TicketData;
           error_code?: string;
@@ -335,10 +400,23 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           admitted?: boolean;
         };
 
-        if (!result.success) {
+        if (typedResult.ticket_data) {
+          setTicketData(typedResult.ticket_data);
+
+          // Update last scanned ticket (only for initial scans)
+          if (!isRefreshCall) {
+            lastScannedTickets.set(trimmedId, Date.now());
+            // Clean up old records periodically
+            if (lastScannedTickets.size > 100) {
+              cleanupOldScanRecords();
+            }
+          }
+        }
+
+        if (!typedResult.success) {
           // Handle verification failure
-          const errorCode = result.error_code || 'UNKNOWN_ERROR';
-          const errorMessage = result.error_message || 'Verification failed';
+          const errorCode = typedResult.error_code || 'UNKNOWN_ERROR';
+          const errorMessage = typedResult.error_message || 'Verification failed';
 
           const friendlyMessage = getUserFriendlyError(errorCode, errorMessage);
           setError(friendlyMessage);
@@ -355,18 +433,33 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           return;
         }
 
-        // Verification successful
-        if (result.ticket_data) {
-          setTicketData(result.ticket_data);
+        // Check if admission failed even if verification was successful (e.g., already used)
+        if (typedResult.success && !typedResult.admitted && typedResult.error_code) {
+          const errorCode = typedResult.error_code;
+          const errorMessage = typedResult.error_message || 'Admission failed';
 
-          // Set admission status
-          if (result.admitted) {
-            setWasJustAdmitted(true);
-            setError(null);
-            setErrorCode(null);
+          const friendlyMessage = getUserFriendlyError(errorCode, errorMessage);
+          setError(friendlyMessage);
+          setErrorCode(errorCode);
+
+          if (errorCode === 'ALREADY_USED') {
+            // For already used tickets, we show them as orange/warning but with ticket data
+            // No need for loud error sound, maybe a softer warning sound if we had one
+            setFlashColor('red');
+          } else {
+            playErrorSound();
+            setFlashColor('red');
           }
+          setTimeout(() => setFlashColor(null), 500);
+          return;
+        }
 
-          // Success feedback
+        // Verification successful and admission successful (or not needed)
+        if (typedResult.success && typedResult.admitted) {
+          setWasJustAdmitted(true);
+          setError(null);
+          setErrorCode(null);
+
           if (!isRefreshCall) {
             playSuccessSound();
             setFlashColor('green');
@@ -485,10 +578,24 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       };
     }
 
+    if (ticketData?.remaining_tickets === 0) {
+      return {
+        bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
+        borderColor: "border-orange-300 dark:border-orange-700",
+        textColor: "text-orange-800 dark:text-orange-200",
+        icon: (
+          <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+        ),
+        badgeVariant: "secondary" as const,
+        badgeText: t(currentLanguage, "ticketVerification.badges.fullyUsed"),
+        statusText: t(currentLanguage, "ticketVerification.status.fullyUsed"),
+      };
+    }
+
     if (ticketData?.use_count !== undefined && ticketData.total_quantity) {
-      // This is a legacy multi-person ticket
       const remaining = ticketData.total_quantity - ticketData.use_count;
       if (remaining <= 0) {
+        // Fallback for logic consistency
         return {
           bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
           borderColor: "border-orange-300 dark:border-orange-700",
@@ -502,7 +609,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         };
       }
     } else if (ticketData?.is_used) {
-      // This is an individual ticket that has been used
+      // Fallback for legacy / simple tickets
       return {
         bgColor: "bg-orange-50/30 dark:bg-orange-900/20",
         borderColor: "border-orange-300 dark:border-orange-700",
@@ -752,9 +859,9 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     <div className="text-center space-y-3">
                       {/* Prominent Ticket Type Badge */}
                       <div className="flex justify-center">
-                        <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-sm px-4 py-2 flex items-center gap-2">
-                          <Tag className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          <span className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                        <div className="bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-sm px-4 py-2 flex items-center gap-2 backdrop-blur-sm">
+                          <Tag className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                          <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                             {ticketData.ticket_name}
                           </span>
                         </div>
@@ -766,31 +873,38 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                           {ticketData.customer_name}
                         </p>
                         <p className="text-sm text-gray-400">
-                          {/* Differentiate between individual and legacy ticket display */}
-                          {ticketData.use_count !== undefined &&
-                            ticketData.total_quantity ? (
+                          {ticketData.remaining_tickets !== undefined ? (
                             <span>
-                              {ticketData.use_count} /{" "}
-                              {ticketData.total_quantity}{" "}
-                              {t(
-                                currentLanguage,
-                                "ticketVerification.quantity.scanned",
-                              )}
+                              {ticketData.remaining_tickets} {t(currentLanguage, "ticketVerification.quantity.remaining")}
+                              <span className="mx-2">/</span>
+                              {ticketData.total_quantity || 1} {t(currentLanguage, "ticketVerification.quantity.people")}
                             </span>
                           ) : (
-                            <span>
-                              {ticketData.quantity}{" "}
-                              {ticketData.quantity > 1
-                                ? t(
+                            /* Fallback older logic */
+                            ticketData.use_count !== undefined &&
+                              ticketData.total_quantity ? (
+                              <span>
+                                {ticketData.use_count} /{" "}
+                                {ticketData.total_quantity}{" "}
+                                {t(
                                   currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
-                                : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
+                                  "ticketVerification.quantity.scanned",
                                 )}
-                            </span>
-                          )}
+                              </span>
+                            ) : (
+                              <span>
+                                {ticketData.quantity}{" "}
+                                {ticketData.quantity > 1
+                                  ? t(
+                                    currentLanguage,
+                                    "ticketVerification.quantity.people",
+                                  )
+                                  : t(
+                                    currentLanguage,
+                                    "ticketVerification.quantity.person",
+                                  )}
+                              </span>
+                            ))}
                         </p>
                       </div>
                     </div>
@@ -800,207 +914,70 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                       {error}
                     </p>
                   )}
-                  {ticketData?.is_used && !wasJustAdmitted && (
-                    <div className="text-center mt-3">
-                      <p className="text-orange-800 dark:text-orange-200 font-medium">
-                        {ticketData.use_count !== undefined &&
-                          ticketData.total_quantity
-                          ? t(
-                            currentLanguage,
-                            "ticketVerification.warnings.fullyUsed",
-                          )
-                          : t(
-                            currentLanguage,
-                            "ticketVerification.warnings.alreadyUsed",
-                          )}
-                      </p>
-                      <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                        {t(
-                          currentLanguage,
-                          "ticketVerification.warnings.entryNotPermitted",
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  {wasJustAdmitted && (
-                    <div className="text-center mt-3">
-                      <p className="text-green-800 dark:text-green-200 font-medium">
-                        {t(
-                          currentLanguage,
-                          "ticketVerification.success.admitted",
-                        )}
-                      </p>
-                      <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                        {t(
-                          currentLanguage,
-                          "ticketVerification.success.entryGranted",
-                          {
-                            quantity: ticketData?.quantity,
-                            people:
-                              ticketData?.quantity && ticketData.quantity > 1
-                                ? t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.people",
-                                )
-                                : t(
-                                  currentLanguage,
-                                  "ticketVerification.quantity.person",
-                                ),
-                          },
-                        )}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Detailed Ticket Information */}
+          {/* Event Details Card */}
           {ticketData && (
             <Card className="rounded-sm">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                   <Ticket className="h-5 w-5" />
-                  {t(currentLanguage, "ticketVerification.eventDetails")}
-                </CardTitle>
+                  <CardTitle className="text-lg font-semibold">
+                    {t(currentLanguage, "ticketVerification.eventDetails")}
+                  </CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Ticket Type Details */}
-                <div className="bg-muted/50 rounded-sm p-3 border border-border">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Tag className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-400">
-                      Ticket Type & Purchase Details
+                {/* Simplified event details for quick scanning */}
+                <div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                    <Tag className="h-3 w-3" />
+                    <span>Ticket Type & Purchase Details</span>
+                  </div>
+                  <p className="font-bold text-xl uppercase tracking-wide">
+                    {ticketData.ticket_name} - {ticketData.event_title}
+                  </p>
+                  <div className="flex justify-between mt-2 pt-2 border-t border-gray-800 text-sm">
+                    <span className="text-gray-400">
+                      Quantity: {ticketData.total_quantity || 1} ticket
+                      {(ticketData.total_quantity || 1) > 1 ? "s" : ""}
+                    </span>
+                    <span className="font-mono">
+                      {new Intl.NumberFormat("fr-FR").format(
+                        ticketData.price_per_ticket,
+                      )}{" "}
+                      {ticketData.currency_code} each
                     </span>
                   </div>
-                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    {ticketData.ticket_name}
-                  </p>
-                  <div className="flex justify-between items-center mt-2">
-                    <p className="text-sm text-gray-400">
-                      Quantity: {ticketData.quantity}{" "}
-                      {ticketData.quantity > 1 ? "tickets" : "ticket"}
-                    </p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {ticketData.price_per_ticket.toLocaleString()}{" "}
-                      {ticketData.currency_code} each
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <p className="text-xs text-gray-500 dark:text-gray-500">
-                      ID: {ticketData.ticket_type_id}
-                    </p>
-                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                      Total {ticketData.total_amount.toLocaleString()}{" "}
-                      {ticketData.currency_code}
-                    </p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">ID: {ticketId.substring(0, 12)}</span>
+                    <span className="font-bold">Total {new Intl.NumberFormat("fr-FR").format(ticketData.total_amount)} {ticketData.currency_code}</span>
                   </div>
                 </div>
-
-                {/* Legacy Ticket Scan Counter */}
-                {ticketData.use_count !== undefined &&
-                  ticketData.total_quantity && (
-                    <div className="pt-4 border-t">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-400">
-                          Legacy Ticket Status
-                        </span>
-                      </div>
-                      <p className="text-base font-bold text-gray-900 dark:text-gray-100">
-                        Scanned: {ticketData.use_count} of{" "}
-                        {ticketData.total_quantity}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        This is a multi-person ticket. It can be scanned{" "}
-                        {ticketData.total_quantity - ticketData.use_count} more
-                        time(s).
-                      </p>
-                    </div>
-                  )}
-
-                {/* Customer Contact Info */}
-                <div className="flex items-start gap-2 pt-4 border-t">
-                  <User className="h-4 w-4 text-gray-500 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {ticketData.customer_email}
-                    </p>
-                    {ticketData.customer_phone && (
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {ticketData.customer_phone}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Event Info */}
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <div>
-                    <p className="font-medium">{ticketData.event_title}</p>
-                    <p className="text-sm text-gray-500">
-                      {ticketData.event_date_text} at{" "}
-                      {ticketData.event_time_text}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Venue */}
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-500" />
-                  <p className="text-sm">{ticketData.event_venue_name}</p>
-                </div>
-
-                {/* Usage Info */}
-                {ticketData.is_used && ticketData.used_at && (
-                  <div className="pt-2 border-t">
-                    <p className="text-sm text-orange-600">
-                      <span className="font-medium">
-                        {t(
-                          currentLanguage,
-                          "ticketVerification.checkedInLabel",
-                        )}
-                      </span>{" "}
-                      {new Date(ticketData.used_at).toLocaleString()}
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           )}
 
-          {/* Automatic Admission Status */}
-          {ticketData && !ticketData.is_used && isLoading && (
-            <Card className="border-2 border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20 rounded-sm">
-              <CardContent className="pt-6 text-center">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600 dark:text-blue-400" />
-                <p className="text-blue-700 dark:text-blue-300 font-medium">
-                  {t(
-                    currentLanguage,
-                    "ticketVerification.loading.autoAdmitting",
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <div className="text-center">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setError(null);
+                setErrorCode(null);
+                setTicketData(null);
+                setWasJustAdmitted(false);
+              }}
+              className="w-full"
+            >
+              <QrCode className="mr-2 h-4 w-4" />
+              Scan New Ticket
+            </Button>
+          </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes flash {
-          0% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
-      `}</style>
     </>
   );
 }

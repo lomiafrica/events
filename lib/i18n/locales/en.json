@@ -409,13 +409,15 @@
       "invalid": "Invalid ticket",
       "unpaid": "Payment required",
       "alreadyUsed": "Already checked in",
-      "valid": "Ready for entry"
+      "valid": "Ready for entry",
+      "fullyUsed": "Ticket Fully Used"
     },
     "badges": {
       "invalid": "❌ INVALID",
       "unpaid": "💰 UNPAID",
       "alreadyUsed": "⚠️ ALREADY USED",
-      "valid": "✅ VALID"
+      "valid": "✅ VALID",
+      "fullyUsed": "Fully Used"
     },
     "loading": {
       "ticketDetails": "Loading ticket details...",
@@ -428,7 +430,8 @@
     },
     "warnings": {
       "alreadyUsed": "⚠️ This ticket has already been used",
-      "entryNotPermitted": "Entry not permitted unless customer shows proof of previous entrance"
+      "entryNotPermitted": "Entry not permitted unless customer shows proof of previous entrance",
+      "fullyUsed": "This ticket has already been used."
     },
     "success": {
       "admitted": "✅ Successfully admitted!",
@@ -436,7 +439,9 @@
     },
     "quantity": {
       "people": "people",
-      "person": "person"
+      "person": "person",
+      "scanned": "scanned",
+      "remaining": "remaining"
     },
     "checkedInLabel": "Checked in:"
   }
