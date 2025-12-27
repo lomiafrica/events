@@ -50,25 +50,9 @@ interface TicketData {
 
 const PIN_CACHE_KEY = "staff_verification_pin";
 const PIN_CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-const DUPLICATE_SCAN_WINDOW = 2000; // 2 seconds in milliseconds
-const MAX_RETRY_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 1000; // 1 second
 
-// Track last scanned tickets to prevent rapid duplicates (ticket-specific)
-// eslint-disable-next-line prefer-const
-let lastScannedTickets: Map<string, number> = new Map();
-
-// Clean up old scan records to prevent memory leaks
-const cleanupOldScanRecords = () => {
-  const now = Date.now();
-  const cutoffTime = now - DUPLICATE_SCAN_WINDOW * 2; // Keep records for 2x the window
-
-  for (const [ticketId, timestamp] of lastScannedTickets.entries()) {
-    if (timestamp < cutoffTime) {
-      lastScannedTickets.delete(ticketId);
-    }
-  }
-};
+// Simplified: Edge function handles all duplicate prevention and processing locks
+// No need for client-side tracking anymore
 
 // Audio feedback for scanning
 const playSuccessSound = () => {
@@ -211,35 +195,7 @@ interface VerifyClientProps {
   ticketId?: string;
 }
 
-// Retry helper with exponential backoff
-const retryWithBackoff = async <T,>(
-  fn: () => Promise<T>,
-  retries: number = MAX_RETRY_ATTEMPTS,
-  delay: number = RETRY_DELAY_MS,
-): Promise<T> => {
-  try {
-    return await fn();
-  } catch (error) {
-    if (retries <= 0) throw error;
-
-    // Check if it's a network error (worth retrying)
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const isNetworkError =
-      errorMessage.includes("network") ||
-      errorMessage.includes("timeout") ||
-      errorMessage.includes("fetch") ||
-      errorMessage.includes("connection");
-
-    if (!isNetworkError) {
-      // Don't retry validation errors like TICKET_NOT_FOUND
-      throw error;
-    }
-
-    // Wait before retrying
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    return retryWithBackoff(fn, retries - 1, delay * 1.5); // Exponential backoff
-  }
-};
+// Retry logic is now handled by the edge function
 
 export function VerifyClient({ ticketId }: VerifyClientProps) {
   const { currentLanguage } = useTranslation();
@@ -317,10 +273,12 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           currentLanguage,
           "ticketVerification.errors.ticketNotFound",
         ),
-        INVALID_TICKET_ID: t(
+        INVALID_INPUT: t(
           currentLanguage,
           "ticketVerification.errors.ticketNotFound",
         ),
+        VERIFICATION_FAILED: 'Ticket verification failed. Please try again.',
+        PROCESSING: 'This ticket is currently being processed. Please wait.',
         UNPAID_TICKET:
           "This ticket has not been paid for. Please check payment status.",
         ORPHANED_TICKET: "Ticket data is incomplete. Please contact support.",
@@ -329,6 +287,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
           "ticketVerification.errors.alreadyUsed",
         ),
         DUPLICATE_SCAN: "Please wait a moment before scanning again.",
+        ADMISSION_FAILED: 'Ticket verified but admission failed. Please try again.',
+        INTERNAL_ERROR: 'System error. Please contact support.',
       };
       return errorMap[errorCode] || defaultMessage;
     },
@@ -346,79 +306,91 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         setTicketData(null);
       }
 
-      // Check for duplicate scan (only for initial scans, not refresh calls)
-      if (!isRefreshCall) {
-        const now = Date.now();
-        const trimmedId = ticketIdentifier.trim();
-        const lastScanTime = lastScannedTickets.get(trimmedId);
-
-        if (lastScanTime && now - lastScanTime < DUPLICATE_SCAN_WINDOW) {
-          setError(
-            "This ticket was just scanned. Please wait before scanning again.",
-          );
-          setIsLoading(false);
-          return;
-        }
-      }
+      const trimmedId = ticketIdentifier.trim();
 
       try {
-        const result = await retryWithBackoff(async () => {
-          const { data, error: rpcError } = await supabase.rpc(
-            "verify_ticket",
-            {
-              p_ticket_identifier: ticketIdentifier.trim(),
-            },
-          );
+        // Call the edge function for atomic verification and admission
+        const { data: response, error: edgeError } = await supabase.functions.invoke(
+          'verify-ticket',
+          {
+            body: {
+              ticket_identifier: trimmedId,
+              verified_by: 'staff_portal',
+              auto_admit: true // Always auto-admit valid tickets
+            }
+          }
+        );
 
-          if (rpcError) {
-            throw new Error(rpcError.message);
+        if (edgeError) {
+          throw new Error(`Edge function error: ${edgeError.message}`);
+        }
+
+        if (!response || typeof response !== 'object') {
+          throw new Error('Invalid response from verification service');
+        }
+
+        const result = response as {
+          success: boolean;
+          ticket_data?: TicketData;
+          error_code?: string;
+          error_message?: string;
+          admitted?: boolean;
+        };
+
+        if (!result.success) {
+          // Handle verification failure
+          const errorCode = result.error_code || 'UNKNOWN_ERROR';
+          const errorMessage = result.error_message || 'Verification failed';
+
+          const friendlyMessage = getUserFriendlyError(errorCode, errorMessage);
+          setError(friendlyMessage);
+          setErrorCode(errorCode);
+
+          // Error feedback - use orange flash for ALREADY_USED, red for other errors
+          if (errorCode === 'ALREADY_USED') {
+            setFlashColor('red'); // Still flash to get attention
+          } else {
+            playErrorSound();
+            setFlashColor('red');
+          }
+          setTimeout(() => setFlashColor(null), 500);
+          return;
+        }
+
+        // Verification successful
+        if (result.ticket_data) {
+          setTicketData(result.ticket_data);
+
+          // Set admission status
+          if (result.admitted) {
+            setWasJustAdmitted(true);
+            setError(null);
+            setErrorCode(null);
           }
 
-          if (!data || data.length === 0) {
-            throw new Error("TICKET_NOT_FOUND: No ticket found");
-          }
-
-          return data[0];
-        });
-
-        // Update last scanned ticket (only for initial scans)
-        if (!isRefreshCall) {
-          const trimmedId = ticketIdentifier.trim();
-          lastScannedTickets.set(trimmedId, Date.now());
-          // Clean up old records periodically
-          if (lastScannedTickets.size > 100) {
-            // Clean up when we have too many records
-            cleanupOldScanRecords();
+          // Success feedback
+          if (!isRefreshCall) {
+            playSuccessSound();
+            setFlashColor('green');
+            setTimeout(() => setFlashColor(null), 300);
           }
         }
-        setTicketData(result);
 
-        // Success feedback (only for initial scans)
-        if (!isRefreshCall) {
-          playSuccessSound();
-          setFlashColor("green");
-          setTimeout(() => setFlashColor(null), 300);
-        }
       } catch (err) {
+        console.error('Verification error:', err);
         // Only set error if this is not a refresh call or if wasJustAdmitted is not true
         if (!isRefreshCall || !wasJustAdmitted) {
           const errorMessage =
-            err instanceof Error ? err.message : "Verification failed";
+            err instanceof Error ? err.message : 'Verification failed';
           const { code, message } = parseErrorMessage(errorMessage);
           const friendlyMessage = getUserFriendlyError(code, message);
           setError(friendlyMessage);
           setErrorCode(code);
 
-          // Error feedback - use orange flash for ALREADY_USED, red for other errors
-          if (code === "ALREADY_USED") {
-            setFlashColor("red"); // Still flash to get attention
-          } else {
-            playErrorSound();
-            setFlashColor("red");
-          }
+          playErrorSound();
+          setFlashColor('red');
           setTimeout(() => setFlashColor(null), 500);
         }
-        // If this is a refresh call and wasJustAdmitted is true, silently ignore errors
       } finally {
         setIsLoading(false);
       }
@@ -431,7 +403,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       setTicketData,
       getUserFriendlyError,
       wasJustAdmitted,
-    ],
+    ]
   );
 
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -479,84 +451,11 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
     }
   };
 
-  const markTicketAsUsed = useCallback(async () => {
-    if (!ticketData || !ticketId) return;
+  // markTicketAsUsed is now handled by the edge function automatically
+  // No separate admission function needed
 
-    setIsLoading(true);
-    try {
-      const result = await retryWithBackoff(async () => {
-        const { data: result, error } = await supabase.rpc("mark_ticket_used", {
-          p_ticket_identifier: ticketId.trim(),
-          p_verified_by: "staff_portal",
-        });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        return result;
-      });
-
-      // Handle the response from the unified mark_ticket_used function
-      if (result === "ALREADY_USED") {
-        setError(t(currentLanguage, "ticketVerification.errors.alreadyUsed"));
-        setErrorCode("ALREADY_USED");
-        return;
-      } else if (result === "NOT_FOUND") {
-        setError(
-          t(currentLanguage, "ticketVerification.errors.ticketNotFound"),
-        );
-        setErrorCode("NOT_FOUND");
-        return;
-      } else if (result === "DUPLICATE_SCAN") {
-        setError("This ticket was just scanned. Please wait a moment.");
-        setErrorCode("DUPLICATE_SCAN");
-        return;
-      } else if (result === "SUCCESS") {
-        // Set flag to show "Successfully Admitted" instead of "Already Used"
-        setWasJustAdmitted(true);
-        setError(null);
-        setErrorCode(null);
-      }
-
-      // Refresh ticket data (don't show errors if admission already succeeded)
-      await verifyTicket(ticketId.trim(), true);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to mark ticket as used";
-      const { code, message } = parseErrorMessage(errorMessage);
-      const friendlyMessage = getUserFriendlyError(code, message);
-      setError(friendlyMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [
-    ticketData,
-    ticketId,
-    setIsLoading,
-    setWasJustAdmitted,
-    setError,
-    verifyTicket,
-    currentLanguage,
-    getUserFriendlyError,
-  ]);
-
-  // Auto-admit valid tickets
-  useEffect(() => {
-    if (ticketData && !isLoading && !wasJustAdmitted) {
-      // For individual tickets, check is_used
-      // For legacy tickets, check if use_count is less than total_quantity
-      const canBeUsed =
-        ticketData.use_count !== undefined && ticketData.total_quantity
-          ? ticketData.use_count < ticketData.total_quantity
-          : !ticketData.is_used;
-
-      if (canBeUsed) {
-        // Automatically mark ticket as used when it's valid and not already used
-        markTicketAsUsed();
-      }
-    }
-  }, [ticketData, isLoading, wasJustAdmitted, markTicketAsUsed]);
+  // Auto-admission is now handled by the edge function
+  // No separate useEffect needed - verification includes admission
 
   // Get status colors and icons based on ticket state
   const getTicketStatus = () => {
@@ -817,9 +716,8 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
       {/* Flash Feedback Overlay */}
       {flashColor && (
         <div
-          className={`fixed inset-0 pointer-events-none z-50 ${
-            flashColor === "green" ? "bg-green-500/30" : "bg-red-500/30"
-          }`}
+          className={`fixed inset-0 pointer-events-none z-50 ${flashColor === "green" ? "bg-green-500/30" : "bg-red-500/30"
+            }`}
           style={{ animation: "flash 0.4s ease-out" }}
         />
       )}
@@ -872,7 +770,7 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                         <p className="text-sm text-gray-400">
                           {/* Differentiate between individual and legacy ticket display */}
                           {ticketData.use_count !== undefined &&
-                          ticketData.total_quantity ? (
+                            ticketData.total_quantity ? (
                             <span>
                               {ticketData.use_count} /{" "}
                               {ticketData.total_quantity}{" "}
@@ -886,13 +784,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                               {ticketData.quantity}{" "}
                               {ticketData.quantity > 1
                                 ? t(
-                                    currentLanguage,
-                                    "ticketVerification.quantity.people",
-                                  )
+                                  currentLanguage,
+                                  "ticketVerification.quantity.people",
+                                )
                                 : t(
-                                    currentLanguage,
-                                    "ticketVerification.quantity.person",
-                                  )}
+                                  currentLanguage,
+                                  "ticketVerification.quantity.person",
+                                )}
                             </span>
                           )}
                         </p>
@@ -908,15 +806,15 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                     <div className="text-center mt-3">
                       <p className="text-orange-800 dark:text-orange-200 font-medium">
                         {ticketData.use_count !== undefined &&
-                        ticketData.total_quantity
+                          ticketData.total_quantity
                           ? t(
-                              currentLanguage,
-                              "ticketVerification.warnings.fullyUsed",
-                            )
+                            currentLanguage,
+                            "ticketVerification.warnings.fullyUsed",
+                          )
                           : t(
-                              currentLanguage,
-                              "ticketVerification.warnings.alreadyUsed",
-                            )}
+                            currentLanguage,
+                            "ticketVerification.warnings.alreadyUsed",
+                          )}
                       </p>
                       <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
                         {t(
@@ -943,13 +841,13 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
                             people:
                               ticketData?.quantity && ticketData.quantity > 1
                                 ? t(
-                                    currentLanguage,
-                                    "ticketVerification.quantity.people",
-                                  )
+                                  currentLanguage,
+                                  "ticketVerification.quantity.people",
+                                )
                                 : t(
-                                    currentLanguage,
-                                    "ticketVerification.quantity.person",
-                                  ),
+                                  currentLanguage,
+                                  "ticketVerification.quantity.person",
+                                ),
                           },
                         )}
                       </p>
