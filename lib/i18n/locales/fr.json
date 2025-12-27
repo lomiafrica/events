@@ -407,11 +407,13 @@
     },
     "status": {
       "invalid": "Ticket invalide",
+      "unpaid": "Paiement requis",
       "alreadyUsed": "Déjà enregistré",
       "valid": "Prêt pour l'entrée"
     },
     "badges": {
       "invalid": "❌ INVALIDE",
+      "unpaid": "💰 NON PAYÉ",
       "alreadyUsed": "⚠️ DÉJÀ UTILISÉ",
       "valid": "✅ VALIDE"
     },
@@ -421,6 +423,7 @@
     },
     "errors": {
       "ticketNotFound": "❌ Ticket introuvable, invalide ou non payé",
+      "unpaidTicket": "💰 Ce ticket n'a pas été payé. Veuillez vérifier le statut du paiement.",
       "invalidPin": "❌ PIN invalide. Accès refusé."
     },
     "warnings": {

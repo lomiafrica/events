@@ -279,8 +279,6 @@ export function VerifyClient({ ticketId }: VerifyClientProps) {
         ),
         VERIFICATION_FAILED: 'Ticket verification failed. Please try again.',
         PROCESSING: 'This ticket is currently being processed. Please wait.',
-        UNPAID_TICKET:
-          "This ticket has not been paid for. Please check payment status.",
         ORPHANED_TICKET: "Ticket data is incomplete. Please contact support.",
         ALREADY_USED: t(
           currentLanguage,

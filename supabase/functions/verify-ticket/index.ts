@@ -74,6 +74,81 @@ Deno.serve(async (req: Request) => {
 
     if (verifyError) {
       console.error('Verification error:', verifyError);
+
+      // Parse error message to determine if we have ticket data
+      const errorMessage = verifyError.message || '';
+      const hasTicketData = ticketData && ticketData.length > 0;
+
+      // For UNPAID_TICKET, we can still return ticket data and allow admission
+      // since some tickets are valid even if unpaid (complimentary, promotional, etc.)
+      if (errorMessage.includes('UNPAID_TICKET') && hasTicketData) {
+        console.log(`Unpaid ticket found but proceeding with validation: ${trimmedId}`);
+
+        // Continue with normal processing - check if ticket can be admitted
+        const ticket = ticketData[0];
+        const canBeAdmitted =
+          ticket.use_count !== undefined && ticket.total_quantity
+            ? ticket.use_count < ticket.total_quantity
+            : !ticket.is_used;
+
+        // Auto-admit valid unpaid tickets
+        let admitted = false;
+        if (auto_admit && canBeAdmitted) {
+          console.log(`Auto-admitting unpaid ticket: ${trimmedId}`);
+
+          const { data: admitResult, error: admitError } = await supabase.rpc(
+            'mark_ticket_used',
+            {
+              p_ticket_identifier: trimmedId,
+              p_verified_by: verified_by || 'edge_function'
+            }
+          );
+
+          if (admitError) {
+            console.error('Admission error for unpaid ticket:', admitError);
+            return new Response(JSON.stringify({
+              success: true, // Verification succeeded (ticket exists)
+              ticket_data: ticket,
+              admitted: false,
+              error_code: 'ADMISSION_FAILED',
+              error_message: admitError.message
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          if (admitResult === 'SUCCESS') {
+            admitted = true;
+            console.log(`Unpaid ticket successfully admitted: ${trimmedId}`);
+          } else {
+            console.log(`Admission rejected for unpaid ticket: ${admitResult}`);
+            return new Response(JSON.stringify({
+              success: true,
+              ticket_data: ticket,
+              admitted: false,
+              error_code: admitResult,
+              error_message: admitResult === 'ALREADY_USED'
+                ? 'Ticket has already been used for entry'
+                : admitResult === 'DUPLICATE_SCAN'
+                ? 'Ticket scanned again too quickly'
+                : 'Admission failed'
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        }
+
+        // Success response for unpaid ticket
+        return new Response(JSON.stringify({
+          success: true,
+          ticket_data: ticket,
+          admitted: admitted
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // For other verification errors, fail completely
       return new Response(JSON.stringify({
         success: false,
         error_code: 'VERIFICATION_FAILED',
