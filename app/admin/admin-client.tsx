@@ -453,8 +453,24 @@ export default function AdminClient() {
         );
 
         if (updateError) {
-          toast.error("Failed to update customer information");
           console.error("Error updating customer:", updateError);
+          // Show more specific error message
+          let errorMessage = "Failed to update customer information";
+          if (updateError.message?.includes("duplicate key")) {
+            errorMessage = "Email already exists for another customer";
+          } else if (updateError.message?.includes("customer_email_valid")) {
+            errorMessage = "Invalid email format";
+          } else if (updateError.message?.includes("Manual review required")) {
+            errorMessage =
+              "Email already exists for a different customer. Manual review required.";
+          } else if (
+            updateError.message?.includes(
+              "already exists for a different customer",
+            )
+          ) {
+            errorMessage = updateError.message; // Use the full message from the function
+          }
+          toast.error(errorMessage);
           return;
         }
       }

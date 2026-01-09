@@ -150,6 +150,7 @@ END;
 $$;
 
 -- Function to update customer information for resending emails
+-- Handles the case where the target email already exists for another customer
 CREATE OR REPLACE FUNCTION public.update_customer_for_resend(
     p_customer_id UUID,
     p_new_email TEXT,
@@ -161,17 +162,56 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+DECLARE
+    existing_customer_id UUID;
+    current_customer_record RECORD;
 BEGIN
-    UPDATE public.customers
-    SET
-        email = p_new_email,
-        name = p_new_name,
-        phone = COALESCE(p_new_phone, phone),
-        updated_at = NOW()
+    -- Get current customer details
+    SELECT id, name, email, phone INTO current_customer_record
+    FROM public.customers
     WHERE id = p_customer_id;
 
     IF NOT FOUND THEN
         RAISE WARNING 'Customer ID % not found during update_customer_for_resend', p_customer_id;
+        RETURN;
+    END IF;
+
+    -- Check if the new email already exists for another customer
+    SELECT id INTO existing_customer_id
+    FROM public.customers
+    WHERE email = p_new_email AND id != p_customer_id;
+
+    IF FOUND THEN
+        -- Email exists for another customer, check if details are very similar
+        -- (same name, same phone number - suggesting it's the same person)
+        IF LOWER(TRIM(COALESCE(current_customer_record.name, ''))) = LOWER(TRIM(COALESCE(p_new_name, '')))
+           AND (
+               (current_customer_record.phone IS NULL AND (p_new_phone IS NULL OR p_new_phone = '')) OR
+               (p_new_phone IS NOT NULL AND p_new_phone != '' AND current_customer_record.phone = p_new_phone)
+           ) THEN
+            -- Very similar customer details, assume it's the same person
+            -- Reassign this purchase to the existing customer and delete the duplicate
+            UPDATE public.purchases
+            SET customer_id = existing_customer_id, updated_at = NOW()
+            WHERE customer_id = p_customer_id;
+
+            -- Delete the duplicate customer record
+            DELETE FROM public.customers WHERE id = p_customer_id;
+
+            RAISE NOTICE 'Merged duplicate customer % into existing customer % (same email and matching details)', p_customer_id, existing_customer_id;
+        ELSE
+            -- Email exists but details don't match - cannot automatically merge
+            RAISE EXCEPTION 'Email % already exists for a different customer. Manual review required.', p_new_email;
+        END IF;
+    ELSE
+        -- Email doesn't exist, safe to update normally
+        UPDATE public.customers
+        SET
+            email = p_new_email,
+            name = p_new_name,
+            phone = COALESCE(NULLIF(p_new_phone, ''), phone),
+            updated_at = NOW()
+        WHERE id = p_customer_id;
     END IF;
 END;
 $$;
@@ -259,7 +299,7 @@ COMMENT ON FUNCTION public.search_admin_purchases(TEXT)
 IS 'Searches purchases by customer name, email, event title, or purchase ID';
 
 COMMENT ON FUNCTION public.update_customer_for_resend(UUID, TEXT, TEXT, TEXT)
-IS 'Updates customer information when resending emails with corrected details';
+IS 'Updates customer information when resending emails. Handles duplicate emails by merging customers with matching details.';
 
 COMMENT ON FUNCTION public.reset_email_dispatch_status(UUID)
 IS 'Resets email dispatch status to allow resending ticket emails'; 
