@@ -16,9 +16,9 @@ interface TicketVerificationResponse {
 }
 
 // Environment variables
-const supabaseUrl = Deno.env.get("SUPABASE_URL") || Deno.env.get("URL");
+const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceRoleKey =
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SERVICE_ROLE_KEY");
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 // Validation
 if (!supabaseUrl || supabaseUrl.trim() === "") {

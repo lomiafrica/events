@@ -1,5 +1,12 @@
 import { client } from "./client";
 
+/** Base URL for server-side fetch (relative URLs fail in Node). */
+function getBaseUrl(): string {
+  if (typeof window !== "undefined") return "";
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
 // Events
 export async function getLatestEvents(limit = 3) {
   return client.fetch(
@@ -217,9 +224,8 @@ export async function getAllProducts() {
         }
       }`;
 
-      const response = await fetch(
-        `/api/sanity-proxy?query=${encodeURIComponent(query)}`,
-      );
+      const url = `${getBaseUrl()}/api/sanity-proxy?query=${encodeURIComponent(query)}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
@@ -325,9 +331,8 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
 
     // In development, use the proxy API to avoid CORS issues
     if (process.env.NODE_ENV === "development") {
-      const response = await fetch(
-        `/api/sanity-proxy?query=${encodeURIComponent(query)}`,
-      );
+      const url = `${getBaseUrl()}/api/sanity-proxy?query=${encodeURIComponent(query)}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
@@ -524,3 +529,107 @@ export const getHomepagePromoEvent =
     );
     return result?.promoEvent ?? null;
   };
+
+// ================================= Gallery ================================
+
+/** Raw image item as returned by the gallery GROQ query (with asset dereferenced). */
+interface GalleryImageRaw {
+  _key: string;
+  asset?: {
+    _id: string;
+    url?: string;
+    metadata?: {
+      dimensions?: { width?: number; height?: number };
+    };
+  };
+  alt?: string;
+}
+
+/** Raw gallery document as returned by the GROQ query (before transformation). */
+interface GalleryRaw {
+  _id: string;
+  title: string;
+  images: GalleryImageRaw[];
+}
+
+export interface GalleryImage {
+  _id: string;
+  _key: string;
+  url: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+  assetId?: string;
+}
+
+export interface Gallery {
+  _id: string;
+  title: string;
+  images: GalleryImage[];
+}
+
+export const getAllGalleries = async (): Promise<Gallery[]> => {
+  const query = `*[_type == "gallery"] | order(_createdAt desc) {
+    _id,
+    title,
+    images[]{
+      _key,
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height
+          }
+        }
+      },
+      alt
+    }
+  }`;
+
+  const result = await client.fetch<GalleryRaw[]>(
+    query,
+    {},
+    getCacheConfig(["gallery"]),
+  );
+
+  // Transform the data to flatten images and extract dimensions
+  return result.map((gallery) => ({
+    _id: gallery._id,
+    title: gallery.title,
+    images: gallery.images
+      .filter((img) => img.asset?.url) // Filter out images without URLs
+      .map((img) => ({
+        _id: img.asset?._id || img._key,
+        _key: img._key,
+        url: img.asset?.url || "",
+        width: img.asset?.metadata?.dimensions?.width,
+        height: img.asset?.metadata?.dimensions?.height,
+        alt: img.alt || "",
+        assetId: img.asset?._id,
+      })),
+  }));
+};
+
+// Get all gallery images flattened (all images from all galleries)
+export const getAllGalleryImages = async () => {
+  const galleries = await getAllGalleries();
+
+  // Flatten all images from all galleries into a single array
+  const allImages: Array<GalleryImage & { galleryTitle: string; id: number }> =
+    [];
+  let idCounter = 0;
+
+  galleries.forEach((gallery) => {
+    gallery.images.forEach((image) => {
+      allImages.push({
+        ...image,
+        galleryTitle: gallery.title,
+        id: idCounter++,
+      });
+    });
+  });
+
+  return allImages;
+};

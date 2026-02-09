@@ -159,43 +159,40 @@ export default function GalleryClientComponent() {
           {taggedImages.length > 0 && (
             <section className="mb-12">
               <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-                {taggedImages.map(
-                  ({ id, public_id, format, width, height, tags }, index) => {
-                    const numericWidth = parseInt(width, 10);
-                    const numericHeight = parseInt(height, 10);
-                    // console.log(`Tagged Image ${public_id} tags:`, tags);
-                    return (
-                      <div
-                        key={`tagged-${id}`}
-                        onClick={() => setZoomedImageId(id)}
-                        className={`
+                {taggedImages.map(({ id, url, width, height, tags }, index) => {
+                  const numericWidth = parseInt(width, 10);
+                  const numericHeight = parseInt(height, 10);
+                  return (
+                    <div
+                      key={`tagged-${id}`}
+                      onClick={() => setZoomedImageId(id)}
+                      className={`
                                         relative 
                                         mb-5 block w-full cursor-zoom-in
                                         after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
                                     `}
-                      >
-                        <Image
-                          alt="Gallery photo - Highlight"
-                          className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
-                          style={{ transform: "translate3d(0, 0, 0)" }}
-                          src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
-                          width={!isNaN(numericWidth) ? numericWidth : 720}
-                          height={!isNaN(numericHeight) ? numericHeight : 480}
-                          sizes="(max-width: 640px) 100vw,
+                    >
+                      <Image
+                        alt="Gallery photo - Highlight"
+                        className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
+                        style={{ transform: "translate3d(0, 0, 0)" }}
+                        src={url}
+                        width={!isNaN(numericWidth) ? numericWidth : 720}
+                        height={!isNaN(numericHeight) ? numericHeight : 480}
+                        sizes="(max-width: 640px) 100vw,
                                           (max-width: 1280px) 50vw,
                                           (max-width: 1536px) 33vw,
                                           25vw"
-                          priority={index < 3} // Priority for first few tagged images
-                        />
-                        {tags && tags.length > 0 && (
-                          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
-                            {tags[0]}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  },
-                )}
+                        priority={index < 3} // Priority for first few tagged images
+                      />
+                      {tags && tags.length > 0 && (
+                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
+                          {tags[0]}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -204,39 +201,36 @@ export default function GalleryClientComponent() {
           {untaggedImages.length > 0 && (
             <section>
               <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-                {untaggedImages.map(
-                  ({ id, public_id, format, width, height }, index) => {
-                    const numericWidth = parseInt(width, 10);
-                    const numericHeight = parseInt(height, 10);
-                    // console.log(`Untagged Image ${public_id} tags:`, tags);
-                    return (
-                      <div
-                        key={`untagged-${id}`}
-                        onClick={() => setZoomedImageId(id)}
-                        className={`
+                {untaggedImages.map(({ id, url, width, height }, index) => {
+                  const numericWidth = parseInt(width, 10);
+                  const numericHeight = parseInt(height, 10);
+                  return (
+                    <div
+                      key={`untagged-${id}`}
+                      onClick={() => setZoomedImageId(id)}
+                      className={`
                                         relative 
                                         mb-5 block w-full cursor-zoom-in
                                         after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
                                     `}
-                      >
-                        <Image
-                          alt="Gallery photo"
-                          className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
-                          style={{ transform: "translate3d(0, 0, 0)" }}
-                          src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720,f_auto,q_auto/${public_id}.${format}`}
-                          width={!isNaN(numericWidth) ? numericWidth : 720}
-                          height={!isNaN(numericHeight) ? numericHeight : 480}
-                          sizes="(max-width: 640px) 100vw,
+                    >
+                      <Image
+                        alt="Gallery photo"
+                        className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
+                        style={{ transform: "translate3d(0, 0, 0)" }}
+                        src={url}
+                        width={!isNaN(numericWidth) ? numericWidth : 720}
+                        height={!isNaN(numericHeight) ? numericHeight : 480}
+                        sizes="(max-width: 640px) 100vw,
                                           (max-width: 1280px) 50vw,
                                           (max-width: 1536px) 33vw,
                                           25vw"
-                          priority={index < 3 && taggedImages.length === 0} // Priority only if no tagged images were prioritized
-                        />
-                        {/* No tag display for untagged images, or could be an empty placeholder if design requires */}
-                      </div>
-                    );
-                  },
-                )}
+                        priority={index < 3 && taggedImages.length === 0} // Priority only if no tagged images were prioritized
+                      />
+                      {/* No tag display for untagged images, or could be an empty placeholder if design requires */}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -271,9 +265,11 @@ export default function GalleryClientComponent() {
                             ${containerMaxHeight}
                         `;
 
-            // Determine image source width based on orientation for better quality/speed balance
+            // Build optimized Sanity image URL for modal (larger size)
+            // Use the base URL and add width parameter for better quality
+            const baseUrl = zoomedImage.url.split("?")[0]; // Remove existing query params
             const imageSrcWidth = isLandscape ? 1080 : 720;
-            const imageSrc = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_${imageSrcWidth},f_auto,q_auto/${zoomedImage.public_id}.${zoomedImage.format}`;
+            const imageSrc = `${baseUrl}?w=${imageSrcWidth}&auto=format&q=85`;
 
             // Calculate base width/height for the Image component (guides aspect ratio)
             const baseWidth = numericWidth || (isLandscape ? 1080 : 720);

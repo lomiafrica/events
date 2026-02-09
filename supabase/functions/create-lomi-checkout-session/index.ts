@@ -17,8 +17,8 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
 const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 
 // lomi. API Config
-const LOMI_API_KEY = Deno.env.get("LOMI_API_KEY");
-const LOMI_API_BASE_URL =
+const LOMI_SECRET_KEY = Deno.env.get("LOMI_SECRET_KEY");
+const LOMI_API_URL =
   Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
 const LOMI_CHECKOUT_BASE_URL = "https://checkout.lomi.africa/pay";
@@ -63,8 +63,8 @@ serve(async (req: Request) => {
       },
     );
   }
-  if (!LOMI_API_KEY) {
-    console.error("LOMI_API_KEY is not set for the function.");
+  if (!LOMI_SECRET_KEY) {
+    console.error("LOMI_SECRET_KEY is not set for the function.");
     return new Response(
       JSON.stringify({
         error: "LOMI API key not configured for the function.",
@@ -262,16 +262,16 @@ serve(async (req: Request) => {
 
     console.log(
       "Calling lomi. API with URL:",
-      `${LOMI_API_BASE_URL}/checkout-sessions`,
+      `${LOMI_API_URL}/checkout-sessions`,
     );
     console.log("Final lomi.payload:", JSON.stringify(lomiPayload, null, 2));
 
     // --- Call lomi. API ---
-    const lomiResponse = await fetch(`${LOMI_API_BASE_URL}/checkout-sessions`, {
+    const lomiResponse = await fetch(`${LOMI_API_URL}/checkout-sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": LOMI_API_KEY,
+        "x-api-key": LOMI_SECRET_KEY,
       },
       body: JSON.stringify(lomiPayload),
     });

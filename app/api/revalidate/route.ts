@@ -73,9 +73,9 @@ export async function POST(request: NextRequest) {
     switch (_type) {
       case "event":
         // Revalidate by tags (more efficient)
-        revalidateTag("events");
+        revalidateTag("events", {});
         if (slug?.current) {
-          revalidateTag(`event-${slug.current}`);
+          revalidateTag(`event-${slug.current}`, {});
           console.log(`Revalidated event: ${slug.current}`);
         }
         // Also revalidate specific paths
@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
 
       case "post":
         // Revalidate by tags
-        revalidateTag("posts");
+        revalidateTag("posts", {});
         if (slug?.current) {
-          revalidateTag(`post-${slug.current}`);
+          revalidateTag(`post-${slug.current}`, {});
           console.log(`Revalidated blog post: ${slug.current}`);
         }
         // Also revalidate specific paths
@@ -97,9 +97,9 @@ export async function POST(request: NextRequest) {
 
       case "product":
         // Revalidate by tags
-        revalidateTag("products");
+        revalidateTag("products", {});
         if (slug?.current) {
-          revalidateTag(`product-${slug.current}`);
+          revalidateTag(`product-${slug.current}`, {});
           console.log(`Revalidated product: ${slug.current}`);
         }
         // Also revalidate specific paths
@@ -108,15 +108,15 @@ export async function POST(request: NextRequest) {
 
       case "story":
         // Revalidate story-related content
-        revalidateTag("story");
+        revalidateTag("story", {});
         revalidatePath("/story");
         revalidatePath("/");
         break;
 
       case "homepage":
         // Revalidate homepage-specific content
-        revalidateTag("homepage");
-        revalidateTag("videos");
+        revalidateTag("homepage", {});
+        revalidateTag("videos", {});
         revalidatePath("/");
         console.log("Revalidated homepage content");
         break;

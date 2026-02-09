@@ -139,6 +139,7 @@ export default function ParallaxGallery({ events }: ParallaxGalleryProps) {
         />
       </div>
 
+      {/* eslint-disable-next-line react/no-unknown-property -- styled-jsx uses jsx and global */}
       <style jsx global>{`
         html {
           scroll-snap-type: y mandatory;

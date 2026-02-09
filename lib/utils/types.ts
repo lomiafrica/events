@@ -4,6 +4,7 @@ export interface ImageProps {
   width: string;
   public_id: string;
   format: string;
+  url: string; // Sanity image URL
   blurDataUrl?: string;
   tags?: string[];
 }

@@ -87,20 +87,19 @@ export default function FloatingPromo({
         {/* Button */}
         <div className="w-full">
           {href ? (
-            <Link href={href} passHref legacyBehavior>
-              <a
-                className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center"
-                onClick={() => {
-                  // Track promo button click
-                  trackEvent("Lead", {
-                    content_name: title || "Floating Promo",
-                    content_category: "promo",
-                  });
-                }}
-              >
-                <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
-                {buttonText}
-              </a>
+            <Link
+              href={href}
+              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center"
+              onClick={() => {
+                // Track promo button click
+                trackEvent("Lead", {
+                  content_name: title || "Floating Promo",
+                  content_category: "promo",
+                });
+              }}
+            >
+              <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
+              {buttonText}
             </Link>
           ) : (
             <button

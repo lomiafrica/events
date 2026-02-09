@@ -10,13 +10,10 @@ import {
   CheckCircle,
   XCircle,
   Shield,
-  User,
   Calendar,
-  MapPin,
   Ticket,
   AlertCircle,
   QrCode,
-  Users,
   Tag,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";

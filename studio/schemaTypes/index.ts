@@ -5,5 +5,6 @@ import product from './product'
 import homepage from './homepage'
 import artist from './artist'
 import news from './news'
+import gallery from './gallery'
 
-export const schemaTypes = [homepage, event, author, category, product, artist, news]
+export const schemaTypes = [homepage, event, author, category, product, artist, news, gallery]
