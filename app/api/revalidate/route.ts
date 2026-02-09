@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           console.log(`Revalidated product: ${slug.current}`);
         }
         // Also revalidate specific paths
-        revalidatePath("/shop");
+        revalidatePath("/merch");
         break;
 
       case "story":

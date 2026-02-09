@@ -5,7 +5,7 @@ import { X, PartyPopper } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { trackEvent } from "@/components/FacebookPixel";
+import { trackEvent } from "@/components/ui/FacebookPixel";
 
 interface FloatingPromoProps {
   imageUrl?: string;
@@ -18,8 +18,8 @@ interface FloatingPromoProps {
 
 export default function FloatingPromo({
   imageUrl = "/placeholder.svg?height=180&width=320",
-  onClose = () => {},
-  onButtonClick = () => {},
+  onClose = () => { },
+  onButtonClick = () => { },
   href,
   title = "Promotional event flyer",
   buttonText = "Get your ticket",

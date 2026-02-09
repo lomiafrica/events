@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Ticket, Package } from "lucide-react";
 import { t } from "@/lib/i18n/translations";
 import Link from "next/link";
-import { trackEvent } from "@/components/FacebookPixel";
+import { trackEvent } from "@/components/ui/FacebookPixel";
 
 export interface CheckoutItemData {
   id: string;

@@ -58,7 +58,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
         </div>
 
         <Link
-          href={`/shop/${slug}`}
+          href={`/merch/${slug}`}
           className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label={`View details for ${product.name}, price ${product.price} F CFA`}
           prefetch
@@ -88,7 +88,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
 
       <CardContent className="pt-1 pb-4 px-4 flex flex-col min-h-[100px]">
         <div className="flex-1 space-y-1">
-          <Link href={`/shop/${slug}`} className="block">
+          <Link href={`/merch/${slug}`} className="block">
             <h3 className="font-medium text-base leading-tight hover:text-primary transition-colors line-clamp-2">
               {product.name}
             </h3>

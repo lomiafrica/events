@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import LoadingComponent from "@/components/ui/Bouncer";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
-import { ProductDetailContent } from "@/components/shop/product-detail-content";
+import { ProductDetailContent } from "@/components/merch/product-detail-content";
 
 type Props = {
   params: Promise<{ slug: string }>;

@@ -5,9 +5,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { TranslationProvider } from "@/lib/contexts/TranslationContext";
-import { CartProvider } from "@/components/shop/cart/cart-context";
-import { WishlistProvider } from "@/components/shop/wishlist/wishlist-context";
-import { FacebookPixel } from "@/components/FacebookPixel";
+import { CartProvider } from "@/components/merch/cart/cart-context";
+import { WishlistProvider } from "@/components/merch/wishlist/wishlist-context";
+import { FacebookPixel } from "@/components/ui/FacebookPixel";
 
 const inter = Inter({ subsets: ["latin"] });
 

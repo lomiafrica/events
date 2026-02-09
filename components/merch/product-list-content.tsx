@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductCard } from "@/components/shop/product-card";
+import { ProductCard } from "@/components/merch/product-card";
 import { Card } from "@/components/ui/card";
 import { SanityProduct } from "./types";
 

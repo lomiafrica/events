@@ -19,7 +19,7 @@ const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 // lomi. API Config
 const LOMI_SECRET_KEY = Deno.env.get("LOMI_SECRET_KEY");
 const LOMI_API_URL =
-  Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa/v1";
+  Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
 const APP_BASE_URL = (
   Deno.env.get("APP_BASE_URL") || "http://localhost:3000"
 ).replace(/\/$/, ""); // Remove trailing slash
@@ -169,8 +169,17 @@ serve(async (req: Request) => {
 
     console.log("Customer upserted successfully:", customerId);
 
+    // --- Validate and normalize currency code ---
+    let currencyCode = (payload.currencyCode || "XOF").toUpperCase();
+    const validCurrencies = ["XOF", "EUR", "USD"];
+    if (!validCurrencies.includes(currencyCode)) {
+      console.warn(
+        `Invalid currency code "${currencyCode}", defaulting to XOF`,
+      );
+      currencyCode = "XOF";
+    }
+
     // --- Calculate totals and create purchase records ---
-    const currencyCode = payload.currencyCode || "XOF";
     let totalAmount = 0;
     const purchaseIds: string[] = [];
 
@@ -214,75 +223,43 @@ serve(async (req: Request) => {
       `Created ${purchaseIds.length} purchase records, total amount: ${totalAmount}`,
     );
 
-    // --- Prepare lomi. Payload ---
+    // --- Prepare lomi. Payload (direct charge / amount-based only) ---
     const successRedirectPath = payload.successUrlPath || "/payment/success";
-    const cancelRedirectPath = payload.cancelUrlPath || "/payment/cancel";
+    const cancelRedirectPath = payload.cancelUrlPath || "/payment/error";
 
-    // Determine checkout approach based on productIds (similar to regular checkout)
-    const productIds = payload.cartItems
-      .map((item) => item.productId)
-      .filter(Boolean); // Remove null/undefined
+    // Title: simple label for payment UI
+    const title = "Pay for Merch";
+    // Description: human-readable line per item, capped for payment UI (like kysfactory)
+    const description = payload.cartItems
+      .map((item) => `${item.quantity} x ${item.title}`)
+      .join("\n\n")
+      .substring(0, 200);
 
-    let isProductBased = false;
-    let singleProductId: string | undefined;
-
-    if (productIds.length > 0) {
-      // Check if all items with productIds have the same productId
-      const uniqueProductIds = [...new Set(productIds)];
-      if (uniqueProductIds.length === 1 && payload.cartItems.length === 1) {
-        // Single item with productId - use product-based checkout
-        isProductBased = true;
-        singleProductId = uniqueProductIds[0];
-      }
-      // For multiple items or mixed productIds, fall back to amount-based
-    }
-
-    console.log(
-      "Cart checkout approach:",
-      isProductBased ? "product-based" : "amount-based",
-    );
-    console.log("Product ID (if applicable):", singleProductId);
-
-    const baseLomiPayload = {
+    const lomiPayload = {
       success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=success`,
       cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=cancelled`,
+      amount: totalAmount,
       currency_code: currencyCode,
       customer_email: payload.userEmail,
       customer_name: payload.userName,
       ...(payload.userPhone && { customer_phone: payload.userPhone }),
+      title,
+      description,
       allow_coupon_code:
         payload.allowCouponCode !== undefined ? payload.allowCouponCode : true,
       allow_quantity:
         payload.allowQuantity !== undefined ? payload.allowQuantity : false,
       metadata: {
-        internal_purchase_ids: purchaseIds,
+        internal_purchase_ids: purchaseIds.join(","),
         customer_id: customerId,
         app_source: "djaouli_merch_app",
         is_cart_checkout: true,
-        is_product_based: isProductBased,
         item_count: payload.cartItems.length,
       },
+      require_billing_address: true,
     };
 
-    const lomiPayload = isProductBased
-      ? {
-          ...baseLomiPayload,
-          product_id: singleProductId,
-          title: `${payload.cartItems[0].title} (x${payload.cartItems[0].quantity})`,
-          description: `Purchase: ${payload.cartItems[0].title}`,
-        }
-      : {
-          ...baseLomiPayload,
-          amount: totalAmount,
-          title: `Merch (${payload.cartItems.length} items)`,
-          description: `Your order: ${payload.cartItems.map((item) => `${item.quantity}x ${item.title}`).join(", ")}`,
-        };
-
-    console.log(
-      "Using",
-      isProductBased ? "product-based" : "amount-based",
-      "checkout for cart",
-    );
+    console.log("Using direct charge (amount-based) checkout for cart");
 
     console.log(
       "Calling lomi. API with URL:",
@@ -317,15 +294,17 @@ serve(async (req: Request) => {
       console.error("Failed to parse lomi. API response as JSON:", parseError);
       console.error("Response was:", lomiResponseText);
 
-      // Update purchase status to failed using RPC
+      // Record failure in payment_processor_details only; do NOT set lomi_session_id to a literal
+      // (e.g. "failed") because lomi_session_id is UNIQUE and would violate on multiple purchases or retries.
       for (const purchaseId of purchaseIds) {
         await supabase.rpc("update_purchase_lomi_session", {
           p_purchase_id: purchaseId,
-          p_lomi_session_id: "failed",
-          p_lomi_checkout_url: "failed",
+          p_lomi_session_id: null,
+          p_lomi_checkout_url: null,
           p_payment_processor_details: {
             error: "Invalid JSON response from lomi. API",
             response: lomiResponseText,
+            failure_reason: "invalid_json_response",
           },
         });
       }
@@ -346,13 +325,17 @@ serve(async (req: Request) => {
     if (!lomiResponse.ok || !lomiResponseData.checkout_session_id) {
       console.error("lomi. API error:", lomiResponseData);
 
-      // Update purchase with failure details using RPC
+      // Record failure in payment_processor_details only; do NOT set lomi_session_id to a literal
+      // (e.g. "failed") because lomi_session_id is UNIQUE and would violate on retries or other failed purchases.
       for (const purchaseId of purchaseIds) {
         await supabase.rpc("update_purchase_lomi_session", {
           p_purchase_id: purchaseId,
-          p_lomi_session_id: "failed",
-          p_lomi_checkout_url: "failed",
-          p_payment_processor_details: lomiResponseData,
+          p_lomi_session_id: null,
+          p_lomi_checkout_url: null,
+          p_payment_processor_details: {
+            ...lomiResponseData,
+            failure_reason: "lomi_api_error",
+          },
         });
       }
 

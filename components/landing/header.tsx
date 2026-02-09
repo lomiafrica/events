@@ -16,7 +16,7 @@ import {
 import styles from "@/lib/styles/header.module.css";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
-import CartModal from "@/components/shop/cart/cart-modal";
+import CartModal from "@/components/merch/cart/cart-modal";
 
 interface NavItem {
   nameKey: string;

@@ -20,7 +20,9 @@ const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 const LOMI_SECRET_KEY = Deno.env.get("LOMI_SECRET_KEY");
 const LOMI_API_URL =
   Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
+const APP_BASE_URL = (
+  Deno.env.get("APP_BASE_URL") || "http://localhost:3000"
+).replace(/\/$/, ""); // Remove trailing slash
 const LOMI_CHECKOUT_BASE_URL = "https://checkout.lomi.africa/pay";
 
 interface RequestPayload {
@@ -51,6 +53,11 @@ interface RequestPayload {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS preflight first so preflight always succeeds
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     return new Response(
       JSON.stringify({
@@ -74,10 +81,6 @@ serve(async (req: Request) => {
         status: 500,
       },
     );
-  }
-
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
@@ -153,9 +156,18 @@ serve(async (req: Request) => {
 
     console.log("Customer upserted successfully:", customerId);
 
+    // --- Validate and normalize currency code ---
+    let currencyCode = (payload.currencyCode || "XOF").toUpperCase();
+    const validCurrencies = ["XOF", "EUR", "USD"];
+    if (!validCurrencies.includes(currencyCode)) {
+      console.warn(
+        `Invalid currency code "${currencyCode}", defaulting to XOF`,
+      );
+      currencyCode = "XOF";
+    }
+
     // --- Create Purchase Record using RPC ---
     const totalAmount = payload.pricePerTicket * payload.quantity;
-    const currencyCode = payload.currencyCode || "XOF";
 
     // Calculate actual ticket quantity for bundles
     const isBundle = payload.isBundle || false;
@@ -237,6 +249,7 @@ serve(async (req: Request) => {
         app_source: "djaouli_events_app",
         is_product_based: isProductBased,
       },
+      require_billing_address: false,
     };
 
     const lomiPayload = isProductBased
@@ -293,14 +306,16 @@ serve(async (req: Request) => {
       console.error("Failed to parse lomi. API response as JSON:", parseError);
       console.error("Response was:", lomiResponseText);
 
-      // Update purchase status to failed using RPC
+      // Record failure in payment_processor_details only; do NOT set lomi_session_id to a literal
+      // because lomi_session_id is UNIQUE and would violate on retries or other failed purchases.
       await supabase.rpc("update_purchase_lomi_session", {
         p_purchase_id: purchaseId,
-        p_lomi_session_id: "failed",
-        p_lomi_checkout_url: "failed",
+        p_lomi_session_id: null,
+        p_lomi_checkout_url: null,
         p_payment_processor_details: {
           error: "Invalid JSON response from lomi. API",
           response: lomiResponseText,
+          failure_reason: "invalid_json_response",
         },
       });
 
@@ -320,12 +335,16 @@ serve(async (req: Request) => {
     if (!lomiResponse.ok || !lomiResponseData.checkout_session_id) {
       console.error("lomi. API error:", lomiResponseData);
 
-      // Update purchase with failure details using RPC
+      // Record failure in payment_processor_details only; do NOT set lomi_session_id to a literal
+      // because lomi_session_id is UNIQUE and would violate on retries or other failed purchases.
       await supabase.rpc("update_purchase_lomi_session", {
         p_purchase_id: purchaseId,
-        p_lomi_session_id: "failed",
-        p_lomi_checkout_url: "failed",
-        p_payment_processor_details: lomiResponseData,
+        p_lomi_session_id: null,
+        p_lomi_checkout_url: null,
+        p_payment_processor_details: {
+          ...lomiResponseData,
+          failure_reason: "lomi_api_error",
+        },
       });
 
       return new Response(
@@ -358,10 +377,19 @@ serve(async (req: Request) => {
     );
 
     if (updatePurchaseError) {
-      console.warn(
-        "Failed to update purchase record with lomi. details, but checkout URL obtained:",
-        updatePurchaseError,
+      const isDuplicateSessionError = updatePurchaseError.message?.includes(
+        "already has a lomi session ID",
       );
+      if (isDuplicateSessionError) {
+        console.log(
+          "Purchase already has lomi session details (likely from retry), proceeding with existing checkout URL",
+        );
+      } else {
+        console.warn(
+          "Failed to update purchase record with lomi. details, but checkout URL obtained:",
+          updatePurchaseError,
+        );
+      }
     }
 
     console.log(

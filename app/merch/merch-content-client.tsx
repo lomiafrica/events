@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
-import { ProductListContent } from "../../components/shop/product-list-content";
-import { ProductGrid } from "../../components/shop/product-grid";
-import { ProductCardSkeleton } from "../../components/shop/product-card-skeleton";
+import { ProductListContent } from "@/components/merch/product-list-content";
+import { ProductGrid } from "@/components/merch/product-grid";
+import { ProductCardSkeleton } from "@/components/merch/product-card-skeleton";
 import { Suspense, useState, useMemo } from "react";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
-import { SanityProduct } from "../../components/shop/types";
+import { SanityProduct } from "@/components/merch/types";
 
 interface MerchContentClientProps {
   products: SanityProduct[];
@@ -188,15 +188,15 @@ export default function MerchContentClient({
             >
               <h2 className="text-2xl font-semibold mb-4 text-zinc-900 dark:text-white">
                 {searchQuery ||
-                selectedCategory !== "all" ||
-                selectedTag !== "all"
+                  selectedCategory !== "all" ||
+                  selectedTag !== "all"
                   ? "No products found"
                   : t(currentLanguage, "merchPage.comingSoon.title")}
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                 {searchQuery ||
-                selectedCategory !== "all" ||
-                selectedTag !== "all"
+                  selectedCategory !== "all" ||
+                  selectedTag !== "all"
                   ? "Try adjusting your filters or search terms."
                   : t(currentLanguage, "merchPage.comingSoon.description")}
               </p>

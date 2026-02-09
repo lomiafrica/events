@@ -8,7 +8,7 @@ import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
-import { trackPurchase } from "@/components/FacebookPixel";
+import { trackPurchase } from "@/components/ui/FacebookPixel";
 import { useEffect } from "react";
 
 interface PaymentSuccessClientProps {
