@@ -1,20 +1,18 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
-        pathname: "/**", // Allow any path on this host
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "cdn.sanity.io",
         port: "",
-        pathname: "/images/**", // Allows images from any Sanity project/dataset
+        pathname: "/images/**",
       },
     ],
   },
