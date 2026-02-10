@@ -245,12 +245,6 @@ export default {
           type: 'object',
           fields: [
             {
-              name: 'paymentLink',
-              title: 'Direct payment link',
-              type: 'url',
-              description: 'URL for direct purchase of this specific ticket type.',
-            },
-            {
               name: 'name',
               title: 'Name',
               type: 'string',
@@ -295,13 +289,6 @@ export default {
               description:
                 'Is this ticket type currently available for sale (independent of stock/dates)?',
               initialValue: true,
-            },
-            {
-              name: 'maxPerOrder',
-              title: 'Max per order',
-              type: 'number',
-              initialValue: 10,
-              validation: (Rule: Rule) => Rule.integer().min(1),
             },
             {
               name: 'salesStart',
@@ -423,25 +410,11 @@ export default {
               validation: (Rule: Rule) => Rule.integer().min(0),
             },
             {
-              name: 'paymentLink',
-              title: 'Direct payment link',
-              type: 'url',
-              description: 'URL for direct purchase of this specific bundle.',
-            },
-            {
               name: 'active',
               title: 'Active',
               type: 'boolean',
               description: 'Is this bundle currently active for sale?',
               initialValue: true,
-            },
-            {
-              name: 'maxPerOrder',
-              title: 'Max per order',
-              type: 'number',
-              initialValue: 10,
-              description: 'Maximum number of this bundle that can be purchased in a single order.',
-              validation: (Rule: Rule) => Rule.integer().min(1),
             },
             {
               name: 'salesStart',

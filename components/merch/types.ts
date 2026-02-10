@@ -15,7 +15,6 @@ export interface SanityProduct {
   _id: string;
   name: string;
   slug: string | { current: string };
-  productId?: string;
   mainImage?: string;
   price: number;
   stock?: number;
@@ -26,14 +25,20 @@ export interface SanityProduct {
     slug: string;
   }>;
   tags?: string[];
-  shippingFee?: number;
+  colors?: Array<{
+    name: string;
+    image?: string;
+    available: boolean;
+  }>;
+  sizes?: Array<{
+    name: string;
+    available: boolean;
+  }>;
   images?: Array<{
-    url: string;
+    url?: string;
+    asset?: { url: string };
     metadata?: {
-      dimensions?: {
-        width: number;
-        height: number;
-      };
+      dimensions?: { width: number; height: number };
       lqip?: string;
     };
   }>;

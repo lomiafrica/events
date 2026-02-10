@@ -43,18 +43,20 @@ export default function Barcode() {
   }, []);
 
   return (
-    <div className="w-11/12 md:w-3/4 relative my-8 opacity-45 brightness-200 mx-auto select-none">
-      <canvas ref={canvasRef} className="w-full h-26" />
-      <div className="absolute top-2/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-2 sm:px-4 text-center">
-        <span className="text-sm tracking-normal sm:tracking-widest font-medium text-white">
-          M A D E &nbsp; I N &nbsp; B A B I
-        </span>
+    <div className="w-11/12 md:w-3/4 relative my-8 mx-auto select-none">
+      <div className="relative opacity-45 brightness-200">
+        <canvas ref={canvasRef} className="w-full h-26" />
+        <div className="absolute top-2/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-2 sm:px-4 text-center">
+          <span className="text-sm tracking-normal sm:tracking-widest font-medium text-white">
+            M A D E &nbsp; I N &nbsp; B A B I
+          </span>
+        </div>
       </div>
       <a
         href="https://github.com/djaoulient/djaoulient.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute -bottom-6 right-0 text-xs text-muted-foreground font-mono hover:underline"
+        className="absolute -bottom-6 right-0 text-xs text-muted-foreground font-mono hover:text-foreground underline-offset-4 hover:underline transition-colors"
       >
         {t(currentLanguage, "barcode.opensource")}
       </a>

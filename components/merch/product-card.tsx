@@ -3,35 +3,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-react";
 import { useCart } from "./cart/cart-context";
-import { useWishlist } from "./wishlist/wishlist-context";
 import { SanityProduct } from "./types";
 
 function ProductCardContent({ product }: { product: SanityProduct }) {
   const { addItem } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const slug =
     typeof product.slug === "string"
       ? product.slug
       : product.slug?.current || "";
-  const mainImage = product.mainImage || product.images?.[0]?.url;
+  const mainImage =
+    product.mainImage ||
+    product.images?.[0]?.asset?.url ||
+    product.images?.[0]?.url;
   const hasValidImage = mainImage && mainImage.trim() !== "";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product); // Now synchronous, no need for await
-  };
-
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
-    } else {
-      addToWishlist(product);
-    }
   };
 
   // Format price with non-breaking space instead of comma
@@ -42,21 +32,6 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 rounded-sm border-border/40 bg-card p-0 mb-6">
       <div className="relative rounded-t-sm overflow-hidden">
-        {/* Wishlist Button */}
-        <div
-          onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 z-10 cursor-pointer p-1.5 rounded-sm bg-black/10 hover:bg-black/20 text-white/70 hover:text-white transition-all"
-          aria-label={
-            isInWishlist(product._id)
-              ? "Remove from wishlist"
-              : "Add to wishlist"
-          }
-        >
-          <Heart
-            className={`h-6 w-6 ${isInWishlist(product._id) ? "fill-red-500 text-red-500" : ""}`}
-          />
-        </div>
-
         <Link
           href={`/merch/${slug}`}
           className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

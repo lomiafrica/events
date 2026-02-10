@@ -7,6 +7,8 @@ import {
   getHomepagePromoEvent,
 } from "@/lib/sanity/queries";
 import FloatingPromo from "@/components/landing/floating-promo";
+import { EventsCarousel } from "@/components/home/events-carousel";
+import { MerchCarousel } from "@/components/home/merch-carousel";
 
 // Use the general site metadata for the home page
 export const metadata: Metadata = {
@@ -26,6 +28,8 @@ export default async function Home() {
         sanityHeroItems={homepageData?.heroContent}
         featuredEvents={homepageData?.featuredEvents}
       />
+      <EventsCarousel />
+      <MerchCarousel />
       <Footer />
 
       {/* Floating Promo - Renders if promoEventData is found and has a flyer and slug */}

@@ -12,7 +12,8 @@ const defaultSettings: NavigationSettings = {
   showGalleryInNavigation: true,
 };
 
-const NavigationSettingsContext = createContext<NavigationSettings>(defaultSettings);
+const NavigationSettingsContext =
+  createContext<NavigationSettings>(defaultSettings);
 
 export function NavigationSettingsProvider({
   children,

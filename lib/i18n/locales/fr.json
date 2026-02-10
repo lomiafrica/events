@@ -1,8 +1,7 @@
 {
   "footer": {
     "links": {
-      "terms": "Conditions",
-      "privacy": "Confidentialité"
+      "terms": "Conditions"
     },
     "tagline": {
       "intro": "Nous apportons",
@@ -170,7 +169,8 @@
     "highlights": "Points forts",
     "moreShots": "Plus de photos",
     "gallery": "Galerie",
-    "noImages": "Aucune image trouvée. Vérifiez les logs de l'API."
+    "noImages": "Aucune image trouvée.",
+    "untitledSection": "Galerie"
   },
   "merchPage": {
     "title": "La boutique",
@@ -194,6 +194,7 @@
       "total": "Total",
       "outOfStock": "Rupture de stock",
       "addToCart": "Ajouter au panier",
+      "buyNow": "Acheter maintenant",
       "inStock": "en stock",
       "addToWishlist": "Ajouter à la liste d'envies",
       "removeFromWishlist": "Retirer de la liste d'envies",
@@ -310,6 +311,7 @@
     "startShopping": "Commencer les achats pour commencer →",
     "shipping": "Livraison",
     "calculatedAtCheckout": "Calculée à la caisse",
+    "freeShipping": "Livraison gratuite",
     "total": "Total",
     "cart": "Panier",
     "proceedToCheckout": "Procéder au paiement"
@@ -333,6 +335,7 @@
     },
     "shipping": "Livraison",
     "shippingCalculated": "Calculée à la caisse",
+    "freeShipping": "Livraison gratuite",
     "total": "Total",
     "currency": "F CFA",
     "buttons": {
@@ -378,6 +381,22 @@
     },
     "buttons": {
       "backToEvents": "Retour aux événements",
+      "browseGallery": "Parcourir la galerie"
+    },
+    "support": "Besoin d'aide ? Contactez notre équipe de support"
+  },
+  "paymentCancelMerch": {
+    "title": "Paiement annulé",
+    "description": "Le paiement de votre commande de produits a été annulé et aucun frais n'a été prélevé.",
+    "orderId": "ID commande : {orderId}",
+    "whatsNext": {
+      "title": "Et maintenant ?",
+      "tryAgain": "Vous pouvez essayer de finaliser votre commande à nouveau",
+      "differentMethod": "Choisissez un moyen de paiement différent",
+      "contactSupport": "Contactez le support si vous avez besoin d'aide"
+    },
+    "buttons": {
+      "backToEvents": "Retour à la boutique",
       "browseGallery": "Parcourir la galerie"
     },
     "support": "Besoin d'aide ? Contactez notre équipe de support"
@@ -444,5 +463,10 @@
       "remaining": "restant"
     },
     "checkedInLabel": "Enregistré :"
+  },
+  "homePage": {
+    "latestEvents": "Derniers événements",
+    "shopMerch": "Boutique",
+    "viewAll": "Tout voir"
   }
 }

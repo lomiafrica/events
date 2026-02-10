@@ -19,7 +19,10 @@ export function CartItemCard({ item }: CartItemCardProps) {
   const [isPending, startTransition] = useTransition();
 
   const { id, quantity, product } = item;
-  const image = product.mainImage || product.images?.[0]?.url;
+  const image =
+    product.mainImage ||
+    product.images?.[0]?.asset?.url ||
+    product.images?.[0]?.url;
   // const imageWidth = product.images?.[0]?.metadata?.dimensions?.width || 400;
   // const imageHeight = product.images?.[0]?.metadata?.dimensions?.height || 600;
 

@@ -132,6 +132,11 @@ export default function CheckoutButton({
     currentLanguage,
   );
 
+  console.log("[CheckoutButton] availability check", {
+    item,
+    availabilityStatus,
+  });
+
   const useDirectPaymentLink = !!item.paymentLink;
 
   const handleOpenPurchaseModal = () => {

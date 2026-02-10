@@ -1,4 +1,4 @@
-import { client } from "./client";
+import { client, clientNoCdn } from "./client";
 
 /** Base URL for server-side fetch (relative URLs fail in Node). */
 function getBaseUrl(): string {
@@ -198,7 +198,6 @@ export async function getAllProducts() {
         _id,
         name,
         "slug": slug.current,
-        productId,
         "mainImage": images[0].asset->url,
         "price": basePrice,
         "stock": baseStock,
@@ -209,16 +208,14 @@ export async function getAllProducts() {
           "slug": slug.current
         },
         tags,
-        shippingFee,
+        "colors": colors[]{
+          name,
+          "image": image.asset->url,
+          available
+        },
+        "sizes": sizes[]{name, available},
         images[]{
-          asset->{
-            _id,
-            url,
-            metadata {
-              dimensions,
-              lqip
-            }
-          },
+          asset->{url},
           alt,
           caption
         }
@@ -240,7 +237,6 @@ export async function getAllProducts() {
         _id,
         name,
         "slug": slug.current,
-        productId,
         "mainImage": images[0].asset->url,
         "price": basePrice,
         "stock": baseStock,
@@ -251,16 +247,14 @@ export async function getAllProducts() {
           "slug": slug.current
         },
         tags,
-        shippingFee,
+        "colors": colors[]{
+          name,
+          "image": image.asset->url,
+          available
+        },
+        "sizes": sizes[]{name, available},
         images[]{
-          asset->{
-            _id,
-            url,
-            metadata {
-              dimensions,
-              lqip
-            }
-          },
+          asset->{url},
           alt,
           caption
         }
@@ -283,34 +277,27 @@ export async function getProductBySlug(slug: string) {
       _id,
       "name": name,
       "slug": slug.current,
-      productId,
       "mainImage": images[0].asset->url,
       description,
       "images": images[]{
-        asset->{
-          url,
-          metadata {
-            dimensions,
-            lqip // Low Quality Image Placeholder
-          }
-        },
+        asset->{url},
         alt,
         caption
       },
       "price": basePrice,
       "stock": baseStock,
-      manageVariants,
-      variantOptions,
-      variantInventory,
+      "colors": colors[]{
+        name,
+        "image": image.asset->url,
+        available
+      },
+      "sizes": sizes[]{name, available},
       "categories": categories[]->{
         title,
         "slug": slug.current
       },
       tags,
-      requiresShipping,
-      weight,
-      dimensions,
-      shippingFee
+      requiresShipping
     }
   `,
     { slug },
@@ -368,18 +355,28 @@ export interface NavigationSettings {
 
 export const getNavigationSettings = async (): Promise<NavigationSettings> => {
   try {
-    const query = `*[_type == "homepage"][0] {
+    // Order by _updatedAt desc so we get the single/latest homepage document
+    const query = `*[_type == "homepage"] | order(_updatedAt desc) [0] {
       showBlogInNavigation,
       showGalleryInNavigation,
     }`;
-    const result = await client.fetch<NavigationSettings>(
+    const result = await clientNoCdn.fetch<NavigationSettings>(
       query,
       {},
       getCacheConfig(["homepage", "navigation"]),
     );
+    // Only default to true when value is explicitly undefined (missing); false must be respected
+    const showBlog =
+      result?.showBlogInNavigation === undefined
+        ? true
+        : Boolean(result.showBlogInNavigation);
+    const showGallery =
+      result?.showGalleryInNavigation === undefined
+        ? true
+        : Boolean(result.showGalleryInNavigation);
     return {
-      showBlogInNavigation: result?.showBlogInNavigation ?? true,
-      showGalleryInNavigation: result?.showGalleryInNavigation ?? true,
+      showBlogInNavigation: showBlog,
+      showGalleryInNavigation: showGallery,
     };
   } catch (error) {
     console.error("Error fetching navigation settings:", error);

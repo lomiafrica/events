@@ -8,19 +8,12 @@ export default defineType({
   // __experimental_actions: [/* 'create', */ 'update', /* 'delete', */ 'publish'],
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-      initialValue: 'Homepage',
-      readOnly: true, // Make title read-only for singleton
-    }),
-    defineField({
       name: 'defaultShippingCost',
-      title: 'Default Shipping Cost (XOF)',
+      title: 'Default shipping cost (F CFA)',
       type: 'number',
-      description:
-        'Default shipping cost for products without a specific fee. Used by the shop cart.',
-      initialValue: 0,
+      description: 'Set the default shipping costs. Leave at 0 if shipping is free.',
+      initialValue: 3000,
+      validation: (Rule) => Rule.min(0),
     }),
     defineField({
       name: 'promoEvent',
@@ -50,16 +43,16 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Red', value: 'red' },
-          { title: 'Amber', value: 'amber' },
-          { title: 'Cyan', value: 'cyan' },
-          { title: 'Teal', value: 'teal' },
-          { title: 'Sky', value: 'sky' },
-          { title: 'Pink', value: 'pink' },
-          { title: 'Purple', value: 'purple' },
-          { title: 'Yellow', value: 'yellow' },
-          { title: 'Emerald', value: 'emerald' },
-          { title: 'Blue', value: 'blue' },
+          {title: 'Red', value: 'red'},
+          {title: 'Amber', value: 'amber'},
+          {title: 'Cyan', value: 'cyan'},
+          {title: 'Teal', value: 'teal'},
+          {title: 'Sky', value: 'sky'},
+          {title: 'Pink', value: 'pink'},
+          {title: 'Purple', value: 'purple'},
+          {title: 'Yellow', value: 'yellow'},
+          {title: 'Emerald', value: 'emerald'},
+          {title: 'Blue', value: 'blue'},
         ],
         layout: 'dropdown',
       },
@@ -182,13 +175,12 @@ export default defineType({
   ],
   preview: {
     select: {
-      title: 'title',
       promoEventTitle: 'promoEvent.title',
       heroItems: 'heroContent',
       featuredEvents: 'featuredEvents',
     },
-    prepare({title, promoEventTitle, heroItems, featuredEvents}) {
-      let previewTitle = title || 'Homepage Settings'
+    prepare({promoEventTitle, heroItems, featuredEvents}) {
+      let previewTitle = 'Homepage Settings'
 
       const counts = []
       if (heroItems?.length) counts.push(`${heroItems.length} hero`)

@@ -18,8 +18,7 @@ const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 
 // lomi. API Config
 const LOMI_SECRET_KEY = Deno.env.get("LOMI_SECRET_KEY");
-const LOMI_API_URL =
-  Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
+const LOMI_API_URL = Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
 const APP_BASE_URL = (
   Deno.env.get("APP_BASE_URL") || "http://localhost:3000"
 ).replace(/\/$/, ""); // Remove trailing slash
@@ -231,7 +230,7 @@ serve(async (req: Request) => {
 
     const baseLomiPayload = {
       success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_id=${purchaseId}&status=success`,
-      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_id=${purchaseId}&status=cancelled`,
+      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_id=${purchaseId}&status=cancelled&flow=ticket`,
       currency_code: currencyCode,
       quantity: payload.quantity,
       customer_email: payload.userEmail,

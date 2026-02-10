@@ -188,15 +188,15 @@ export default function MerchContentClient({
             >
               <h2 className="text-2xl font-semibold mb-4 text-zinc-900 dark:text-white">
                 {searchQuery ||
-                  selectedCategory !== "all" ||
-                  selectedTag !== "all"
+                selectedCategory !== "all" ||
+                selectedTag !== "all"
                   ? "No products found"
                   : t(currentLanguage, "merchPage.comingSoon.title")}
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                 {searchQuery ||
-                  selectedCategory !== "all" ||
-                  selectedTag !== "all"
+                selectedCategory !== "all" ||
+                selectedTag !== "all"
                   ? "Try adjusting your filters or search terms."
                   : t(currentLanguage, "merchPage.comingSoon.description")}
               </p>

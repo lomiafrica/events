@@ -16,15 +16,27 @@ export default function GalleryClientComponent() {
   const [zoomedImageId, setZoomedImageId] = useState<number | null>(null); // State for zoomed image ID
   const [isFurtherZoomed, setIsFurtherZoomed] = useState(false); // State for secondary zoom
 
-  // Memoize filtered image lists
-  const taggedImages = useMemo(
-    () => images.filter((img) => img.tags && img.tags.length > 0),
-    [images],
-  );
-  const untaggedImages = useMemo(
-    () => images.filter((img) => !img.tags || img.tags.length === 0),
-    [images],
-  );
+  // Group images by gallery title (from Sanity gallery document title)
+  const imagesByTitle = useMemo(() => {
+    const groups: { title: string; images: ImageProps[] }[] = [];
+    const titleOrder: string[] = [];
+    const map = new Map<string, ImageProps[]>();
+
+    for (const img of images) {
+      const title = img.title?.trim() || t(currentLanguage, "galleryPage.untitledSection");
+      if (!map.has(title)) {
+        titleOrder.push(title);
+        map.set(title, []);
+      }
+      map.get(title)!.push(img);
+    }
+
+    for (const title of titleOrder) {
+      const list = map.get(title);
+      if (list?.length) groups.push({ title, images: list });
+    }
+    return groups;
+  }, [images, currentLanguage]);
 
   // Fetch images from the API route
   useEffect(() => {
@@ -155,16 +167,19 @@ export default function GalleryClientComponent() {
             </p>
           )}
 
-          {/* Tagged Images Section */}
-          {taggedImages.length > 0 && (
-            <section className="mb-12">
+          {/* Sections grouped by gallery title (from Sanity gallery document) */}
+          {imagesByTitle.map(({ title: sectionTitle, images: sectionImages }) => (
+            <section key={sectionTitle} className="mb-24 first:mt-0 mt-4">
+              <h2 className="text-2xl sm:text-3xl font-medium text-zinc-800 dark:text-white mb-6 tracking-tight">
+                {sectionTitle}
+              </h2>
               <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-                {taggedImages.map(({ id, url, width, height, tags }, index) => {
+                {sectionImages.map(({ id, url, width, height, tags }, index) => {
                   const numericWidth = parseInt(width, 10);
                   const numericHeight = parseInt(height, 10);
                   return (
                     <div
-                      key={`tagged-${id}`}
+                      key={`${sectionTitle}-${id}`}
                       onClick={() => setZoomedImageId(id)}
                       className={`
                                         relative 
@@ -173,7 +188,7 @@ export default function GalleryClientComponent() {
                                     `}
                     >
                       <Image
-                        alt="Gallery photo - Highlight"
+                        alt={sectionTitle ? `Gallery photo - ${sectionTitle}` : "Gallery photo"}
                         className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
                         style={{ transform: "translate3d(0, 0, 0)" }}
                         src={url}
@@ -183,7 +198,7 @@ export default function GalleryClientComponent() {
                                           (max-width: 1280px) 50vw,
                                           (max-width: 1536px) 33vw,
                                           25vw"
-                        priority={index < 3} // Priority for first few tagged images
+                        priority={index < 3}
                       />
                       {tags && tags.length > 0 && (
                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
@@ -195,45 +210,7 @@ export default function GalleryClientComponent() {
                 })}
               </div>
             </section>
-          )}
-
-          {/* Untagged Images Section */}
-          {untaggedImages.length > 0 && (
-            <section>
-              <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-                {untaggedImages.map(({ id, url, width, height }, index) => {
-                  const numericWidth = parseInt(width, 10);
-                  const numericHeight = parseInt(height, 10);
-                  return (
-                    <div
-                      key={`untagged-${id}`}
-                      onClick={() => setZoomedImageId(id)}
-                      className={`
-                                        relative 
-                                        mb-5 block w-full cursor-zoom-in
-                                        after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
-                                    `}
-                    >
-                      <Image
-                        alt="Gallery photo"
-                        className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
-                        style={{ transform: "translate3d(0, 0, 0)" }}
-                        src={url}
-                        width={!isNaN(numericWidth) ? numericWidth : 720}
-                        height={!isNaN(numericHeight) ? numericHeight : 480}
-                        sizes="(max-width: 640px) 100vw,
-                                          (max-width: 1280px) 50vw,
-                                          (max-width: 1536px) 33vw,
-                                          25vw"
-                        priority={index < 3 && taggedImages.length === 0} // Priority only if no tagged images were prioritized
-                      />
-                      {/* No tag display for untagged images, or could be an empty placeholder if design requires */}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+          ))}
         </div>
       </div>
 
@@ -294,7 +271,7 @@ export default function GalleryClientComponent() {
                   onClick={handleImageClick} // Click this whole area to further zoom/unzoom
                 >
                   <Image
-                    alt={`Zoomed gallery photo ${zoomedImage.id}`}
+                    alt={zoomedImage.title ? `Gallery - ${zoomedImage.title}` : `Zoomed gallery photo ${zoomedImage.id}`}
                     className="object-contain w-full h-full rounded-sm" // Transform class removed
                     style={{ transform: "translate3d(0, 0, 0)" }} // Keep for potential GPU layer promotion
                     src={imageSrc}
@@ -302,10 +279,19 @@ export default function GalleryClientComponent() {
                     height={baseHeight}
                     sizes={imageSizes}
                   />
-                  {/* Tag is now relative to this scaling wrapper */}
-                  {zoomedImage.tags && zoomedImage.tags.length > 0 && (
-                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
-                      {zoomedImage.tags[0]}
+                  {/* Gallery title and tag relative to this scaling wrapper */}
+                  {(zoomedImage.title || (zoomedImage.tags && zoomedImage.tags.length > 0)) && (
+                    <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center gap-2 z-10">
+                      {zoomedImage.title && (
+                        <span className="bg-black/70 text-white text-sm px-2 py-1 rounded-sm">
+                          {zoomedImage.title}
+                        </span>
+                      )}
+                      {zoomedImage.tags && zoomedImage.tags.length > 0 && (
+                        <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
+                          {zoomedImage.tags[0]}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>

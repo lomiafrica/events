@@ -1,8 +1,7 @@
 {
   "footer": {
     "links": {
-      "terms": "Terms",
-      "privacy": "Privacy"
+      "terms": "Terms"
     },
     "tagline": {
       "intro": "We bring",
@@ -170,7 +169,8 @@
     "highlights": "Highlights",
     "moreShots": "More shots",
     "gallery": "Gallery",
-    "noImages": "No images found. Check API route logs."
+    "noImages": "No images found.",
+    "untitledSection": "Gallery"
   },
   "merchPage": {
     "title": "Djaouli Shop",
@@ -194,6 +194,7 @@
       "total": "Total",
       "outOfStock": "Out of Stock",
       "addToCart": "Add to cart",
+      "buyNow": "Buy now",
       "inStock": "in stock",
       "addToWishlist": "Maybe next time",
       "removeFromWishlist": "Remove from wishlist",
@@ -310,6 +311,7 @@
     "startShopping": "Start shopping to get started →",
     "shipping": "Shipping",
     "calculatedAtCheckout": "Calculated at checkout",
+    "freeShipping": "Free",
     "total": "Total",
     "cart": "Cart",
     "proceedToCheckout": "Proceed to checkout"
@@ -333,6 +335,7 @@
     },
     "shipping": "Shipping",
     "shippingCalculated": "Calculated at checkout",
+    "freeShipping": "Free",
     "total": "Total",
     "currency": "F CFA",
     "buttons": {
@@ -378,6 +381,22 @@
     },
     "buttons": {
       "backToEvents": "Back to Events",
+      "browseGallery": "Browse Gallery"
+    },
+    "support": "Need help? Contact our support team"
+  },
+  "paymentCancelMerch": {
+    "title": "Payment Cancelled",
+    "description": "Your merch order payment was cancelled and no charges were made.",
+    "orderId": "Order ID: {orderId}",
+    "whatsNext": {
+      "title": "What's Next?",
+      "tryAgain": "You can try completing your order again",
+      "differentMethod": "Choose a different payment method",
+      "contactSupport": "Contact support if you need help"
+    },
+    "buttons": {
+      "backToEvents": "Back to Shop",
       "browseGallery": "Browse Gallery"
     },
     "support": "Need help? Contact our support team"
@@ -444,5 +463,10 @@
       "remaining": "remaining"
     },
     "checkedInLabel": "Checked in:"
+  },
+  "homePage": {
+    "latestEvents": "Latest events",
+    "shopMerch": "Shop merch",
+    "viewAll": "View all"
   }
 }

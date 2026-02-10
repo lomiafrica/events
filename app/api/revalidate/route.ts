@@ -48,6 +48,43 @@ export async function POST(request: NextRequest) {
     const body = await request.text();
     const signature = request.headers.get("sanity-webhook-signature") || "";
 
+    // If there's no Sanity webhook signature, treat this as a manual/internal revalidation
+    // request coming from the app (e.g. `/admin/revalidate`) and skip signature validation.
+    // This keeps the webhook path secure while allowing your internal tools to call
+    // `/api/revalidate` directly with a simple `{ tags, paths }` payload.
+    if (!signature) {
+      const payload = body ? JSON.parse(body) : {};
+      const { tags, paths } = payload as {
+        tags?: string[];
+        paths?: string[];
+      };
+
+      console.log("Manual revalidation request received:", { tags, paths });
+
+      if (Array.isArray(tags) && tags.length > 0) {
+        for (const tag of tags) {
+          revalidateTag(tag, {});
+        }
+      }
+
+      if (Array.isArray(paths) && paths.length > 0) {
+        for (const path of paths) {
+          revalidatePath(path);
+        }
+      }
+
+      // Fallback: if neither tags nor paths are provided, just revalidate homepage
+      if ((!tags || tags.length === 0) && (!paths || paths.length === 0)) {
+        revalidatePath("/");
+      }
+
+      return NextResponse.json({
+        message: "Manual revalidation triggered successfully",
+        tags,
+        paths,
+      });
+    }
+
     // Debug logging
     console.log("Webhook debug info:", {
       hasSecret: !!SANITY_WEBHOOK_SECRET,

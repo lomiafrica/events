@@ -32,7 +32,7 @@ export async function GET() {
       }
     };
 
-    // Transform Sanity images to match ImageProps interface
+    // Transform Sanity images to match ImageProps interface (includes gallery title from schema)
     const imageProps: ImageProps[] = sanityImages.map((img) => {
       // Extract format from URL (e.g., "image.jpg" -> "jpg")
       const urlParts = img.url.split(".");
@@ -41,6 +41,11 @@ export async function GET() {
       // Build optimized URL for grid view (720px width)
       const optimizedUrl = buildSanityImageUrl(img.url, 720);
 
+      const galleryTitle =
+        "galleryTitle" in img && typeof img.galleryTitle === "string"
+          ? img.galleryTitle
+          : undefined;
+
       return {
         id: img.id,
         height: img.height?.toString() || "480",
@@ -48,9 +53,8 @@ export async function GET() {
         public_id: img.assetId || img._id, // Use assetId or _id as public_id
         format: format,
         url: optimizedUrl || img.url, // Use optimized URL for grid view
-        // Note: tags are not part of the gallery schema, so we'll leave it empty
-        // If you want tags, you'd need to add them to the gallery schema
         tags: [],
+        title: galleryTitle,
       };
     });
 

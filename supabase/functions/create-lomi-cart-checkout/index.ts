@@ -18,8 +18,7 @@ const supabase = createClient(supabaseUrl || "", supabaseServiceRoleKey || "");
 
 // lomi. API Config
 const LOMI_SECRET_KEY = Deno.env.get("LOMI_SECRET_KEY");
-const LOMI_API_URL =
-  Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
+const LOMI_API_URL = Deno.env.get("LOMI_API_URL") || "https://api.lomi.africa";
 const APP_BASE_URL = (
   Deno.env.get("APP_BASE_URL") || "http://localhost:3000"
 ).replace(/\/$/, ""); // Remove trailing slash
@@ -225,7 +224,7 @@ serve(async (req: Request) => {
 
     // --- Prepare lomi. Payload (direct charge / amount-based only) ---
     const successRedirectPath = payload.successUrlPath || "/payment/success";
-    const cancelRedirectPath = payload.cancelUrlPath || "/payment/error";
+    const cancelRedirectPath = payload.cancelUrlPath || "/payment/cancel";
 
     // Title: simple label for payment UI
     const title = "Pay for Merch";
@@ -237,7 +236,7 @@ serve(async (req: Request) => {
 
     const lomiPayload = {
       success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=success`,
-      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=cancelled`,
+      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=cancelled&flow=merch`,
       amount: totalAmount,
       currency_code: currencyCode,
       customer_email: payload.userEmail,

@@ -7,7 +7,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { TranslationProvider } from "@/lib/contexts/TranslationContext";
 import { NavigationSettingsProvider } from "@/lib/contexts/NavigationSettingsContext";
 import { CartProvider } from "@/components/merch/cart/cart-context";
-import { WishlistProvider } from "@/components/merch/wishlist/wishlist-context";
 import { FacebookPixel } from "@/components/ui/FacebookPixel";
 import {
   getNavigationSettings,
@@ -16,6 +15,9 @@ import {
 import { ButtonThemeProvider } from "@/lib/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Ensure root layout always fetches fresh nav settings (no static cache)
+export const dynamic = "force-dynamic";
 
 const siteConfig = {
   name: "Djaouli Ent.",
@@ -93,9 +95,7 @@ export default async function RootLayout({
             >
               <TranslationProvider>
                 <CartProvider>
-                  <WishlistProvider>
-                    <main className="grow">{children}</main>
-                  </WishlistProvider>
+                  <main className="grow">{children}</main>
                 </CartProvider>
               </TranslationProvider>
             </NavigationSettingsProvider>

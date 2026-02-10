@@ -47,13 +47,13 @@ export interface ShippingSettings {
 
 type CartAction =
   | {
-    type: "UPDATE_ITEM";
-    payload: { merchandiseId: string; nextQuantity: number };
-  }
+      type: "UPDATE_ITEM";
+      payload: { merchandiseId: string; nextQuantity: number };
+    }
   | {
-    type: "ADD_ITEM";
-    payload: { product: SanityProduct; previousQuantity: number };
-  };
+      type: "ADD_ITEM";
+      payload: { product: SanityProduct; previousQuantity: number };
+    };
 
 type UseCartReturn = {
   isPending: boolean;
@@ -81,21 +81,18 @@ function updateCartTotals(
   defaultShippingCost: number,
 ): Pick<Cart, "totalQuantity" | "cost"> {
   const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotalAmount = lines.reduce(
-    (sum, item) => sum + Number(item.cost.totalAmount.amount),
-    0,
-  );
+  const subtotalAmount = lines.reduce((sum, item) => {
+    return sum + Number(item.cost.totalAmount.amount);
+  }, 0);
   const currencyCode = "XOF";
 
-  // Calculate shipping: sum of individual fees, or default if not specified
+  // Global shipping: apply one default shipping cost per order
+  // if there is at least one shippable item in the cart.
+  const hasShippableItems = lines.some(
+    (item) => item.product.requiresShipping !== false,
+  );
   const shippingAmount =
-    subtotalAmount > 0
-      ? lines.reduce((sum, item) => {
-        // Use product's shippingFee if it exists, otherwise use the default
-        const fee = item.product.shippingFee ?? defaultShippingCost;
-        return sum + fee * item.quantity; // Multiply by quantity
-      }, 0)
-      : 0;
+    subtotalAmount > 0 && hasShippableItems ? defaultShippingCost : 0;
 
   const totalAmount = subtotalAmount + shippingAmount;
 
@@ -185,39 +182,39 @@ function cartReducer(
 
       const updatedLines = existingItem
         ? currentCart.lines.map((item) => {
-          if (item.product._id !== product._id) return item;
+            if (item.product._id !== product._id) return item;
 
-          const newTotalAmount = calculateItemCost(
-            targetQuantity,
-            item.product.price,
-          );
+            const newTotalAmount = calculateItemCost(
+              targetQuantity,
+              item.product.price,
+            );
 
-          return {
-            ...item,
-            quantity: targetQuantity,
-            cost: {
-              ...item.cost,
-              totalAmount: {
-                ...item.cost.totalAmount,
-                amount: newTotalAmount,
+            return {
+              ...item,
+              quantity: targetQuantity,
+              cost: {
+                ...item.cost,
+                totalAmount: {
+                  ...item.cost.totalAmount,
+                  amount: newTotalAmount,
+                },
               },
-            },
-          } satisfies CartItem;
-        })
+            } satisfies CartItem;
+          })
         : [
-          {
-            id: `temp-${Date.now()}`,
-            quantity: targetQuantity,
-            product: product,
-            cost: {
-              totalAmount: {
-                amount: calculateItemCost(targetQuantity, product.price),
-                currencyCode: "XOF",
+            {
+              id: `temp-${Date.now()}`,
+              quantity: targetQuantity,
+              product: product,
+              cost: {
+                totalAmount: {
+                  amount: calculateItemCost(targetQuantity, product.price),
+                  currencyCode: "XOF",
+                },
               },
-            },
-          } satisfies CartItem,
-          ...currentCart.lines,
-        ];
+            } satisfies CartItem,
+            ...currentCart.lines,
+          ];
 
       return {
         ...currentCart,
@@ -259,12 +256,51 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        setCart(parsedCart);
+        // Recalculate totals with current shipping settings if they're already loaded
+        // This handles the case where shipping settings were fetched before cart load
+        if (
+          parsedCart.lines &&
+          parsedCart.lines.length > 0 &&
+          shippingSettings.defaultShippingCost > 0
+        ) {
+          const updatedTotals = updateCartTotals(
+            parsedCart.lines,
+            shippingSettings.defaultShippingCost,
+          );
+          setCart({
+            ...parsedCart,
+            ...updatedTotals,
+          });
+        } else {
+          setCart(parsedCart);
+        }
       } catch (error) {
         console.error("Error parsing saved cart:", error);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Recalculate cart totals when shipping settings change
+  // This ensures carts loaded from localStorage get updated shipping costs
+  useEffect(() => {
+    if (cart && cart.lines.length > 0) {
+      const updatedTotals = updateCartTotals(
+        cart.lines,
+        shippingSettings.defaultShippingCost,
+      );
+      // Only update if shipping cost actually changed to avoid infinite loops
+      const currentShipping = Number(cart.cost.shippingAmount.amount);
+      const newShipping = Number(updatedTotals.cost.shippingAmount.amount);
+      if (currentShipping !== newShipping) {
+        setCart({
+          ...cart,
+          ...updatedTotals,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shippingSettings.defaultShippingCost]);
 
   // Save cart to localStorage whenever it changes (async, non-blocking)
   useEffect(() => {
@@ -330,7 +366,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCart(updatedCart);
 
         // Track Add to Cart event
-        trackAddToCart(Number(product.price), "XOF", [product.productId || ""]);
+        trackAddToCart(Number(product.price), "XOF", [product._id]);
       });
 
       // Return promise for compatibility

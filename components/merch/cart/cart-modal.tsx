@@ -85,8 +85,10 @@ const CartItems = ({
                 <p className="text-muted-foreground">
                   {cart.cost.shippingAmount &&
                   Number(cart.cost.shippingAmount.amount) > 0
-                    ? `${Number(cart.cost.shippingAmount.amount).toLocaleString("fr-FR")} F CFA`
-                    : t(currentLanguage, "cartModal.calculatedAtCheckout")}
+                    ? `${Number(
+                        cart.cost.shippingAmount.amount,
+                      ).toLocaleString("fr-FR")} F CFA`
+                    : t(currentLanguage, "cartModal.freeShipping")}
                 </p>
               </div>
             )}
@@ -123,6 +125,35 @@ let activePortalInstance: string | null = null;
 const CART_OPEN_DEBOUNCE_MS = 500; // Prevent duplicate opens within 500ms
 const CART_PORTAL_ID = "cart-modal-portal";
 
+type CartModalInstance = {
+  id: string;
+  open: () => void;
+};
+
+const cartModalInstances: CartModalInstance[] = [];
+
+const registerCartModalInstance = (instance: CartModalInstance) => {
+  cartModalInstances.push(instance);
+};
+
+const unregisterCartModalInstance = (id: string, open: () => void) => {
+  const index = cartModalInstances.findIndex(
+    (inst) => inst.id === id && inst.open === open,
+  );
+  if (index !== -1) {
+    cartModalInstances.splice(index, 1);
+  }
+};
+
+export const openCartExternally = () => {
+  const target =
+    cartModalInstances.find((inst) => inst.id === activePortalInstance) ??
+    cartModalInstances[0];
+  if (target) {
+    target.open();
+  }
+};
+
 // Helper to check if a cart drawer is already visible in the DOM
 const isCartDrawerVisible = (): boolean => {
   if (typeof document === "undefined") return false;
@@ -155,6 +186,13 @@ export default function CartModal() {
   );
   const portalContainerRef = useRef<HTMLElement | null>(null);
 
+  const openCart = () => {
+    cartOpenLock = instanceIdRef.current;
+    activePortalInstance = instanceIdRef.current;
+    setShouldRenderPortal(true);
+    setIsOpen(true);
+  };
+
   // Ensure component is mounted before rendering portal
   useEffect(() => {
     setIsMounted(true);
@@ -169,8 +207,15 @@ export default function CartModal() {
       portalContainerRef.current = portalContainer;
     }
     const instanceId = instanceIdRef.current;
+    // Register this CartModal instance so external callers (e.g. Buy Now) can open it
+    const openInstance = () => openCart();
+    registerCartModalInstance({
+      id: instanceId,
+      open: openInstance,
+    });
     return () => {
       setIsMounted(false);
+      unregisterCartModalInstance(instanceId, openInstance);
       if (cartOpenLock === instanceId) {
         cartOpenLock = null;
       }
@@ -262,13 +307,6 @@ export default function CartModal() {
       document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [isOpen]);
-
-  const openCart = () => {
-    cartOpenLock = instanceIdRef.current;
-    activePortalInstance = instanceIdRef.current;
-    setShouldRenderPortal(true);
-    setIsOpen(true);
-  };
 
   const closeCart = () => {
     setIsOpen(false);

@@ -4,6 +4,9 @@ import { PaymentCancelClient } from "./payment-cancel-client";
 interface SearchParamsProps {
   searchParams: Promise<{
     purchase_id?: string;
+    purchase_ids?: string;
+    status?: string;
+    flow?: string;
   }>;
 }
 
@@ -20,7 +23,7 @@ export default async function PaymentCancelPage({
         </div>
       }
     >
-      <PaymentCancelClient purchaseId={params.purchase_id} />
+      <PaymentCancelClient purchaseId={params.purchase_id} flow={params.flow} />
     </Suspense>
   );
 }

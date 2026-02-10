@@ -18,8 +18,7 @@ export default function Footer() {
   const { currentLanguage } = useTranslation();
 
   const footerLinks = [
-    { href: "", labelKey: "footer.links.terms", icon: Newspaper },
-    { href: "", labelKey: "footer.links.privacy", icon: Newspaper },
+    { href: "/terms", labelKey: "footer.links.terms", icon: Newspaper },
   ];
 
   const animatedWordsKeys = [
@@ -124,8 +123,8 @@ export default function Footer() {
             })}
           </div>
 
-          {/* Combined Footer Links - Moved second */}
-          <nav className="md:col-span-1">
+          {/* Combined Footer Links - right-aligned with high z-index so they're clickable above overlays */}
+          <nav className="md:col-span-1 relative z-60">
             <ul className="list-none flex text-xs flex-wrap justify-center md:justify-end gap-x-4 gap-y-1 items-center">
               {footerLinks.map((link, i) => (
                 <li key={`footer-link-${i}`} className="shrink-0">

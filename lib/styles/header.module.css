@@ -10,7 +10,10 @@
   right: 0;
   z-index: 50;
   padding: 0.5rem 0;
+  /* Transparent by default - no blur */
   background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-bottom: 1px solid transparent;
   transition:
     background-color 0.3s ease,
@@ -20,9 +23,10 @@
 }
 
 .header.scrolled {
-  background-color: hsla(var(--background) / 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Transparent blurry glass effect only when scrolled */
+  background-color: rgba(31, 31, 31, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid hsl(var(--border));
 }
 

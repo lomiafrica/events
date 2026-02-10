@@ -11,6 +11,7 @@ import PhoneNumberInput from "@/components/ui/phone-number-input";
 import { cn } from "@/lib/actions/utils";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 
 const CartContainer = ({
   children,
@@ -23,8 +24,9 @@ const CartContainer = ({
 };
 
 export default function CartPurchaseForm() {
-  const { cart } = useCart();
+  const { cart, shippingSettings } = useCart();
   const { currentLanguage } = useTranslation();
+  const { button } = useTheme();
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
@@ -69,9 +71,14 @@ export default function CartPurchaseForm() {
       const cartItems = cart.lines.map((line) => ({
         merchandiseId: line.id,
         quantity: line.quantity,
-        productId: line.product.productId,
+        productId: undefined, // Products no longer have lomi productId - direct charges only
         title: line.product.name,
         price: line.product.price,
+        // Use a single global shipping option; items that don't require shipping get 0.
+        shippingFee:
+          line.product.requiresShipping === false
+            ? 0
+            : shippingSettings.defaultShippingCost,
       }));
 
       const payload = {
@@ -205,14 +212,27 @@ export default function CartPurchaseForm() {
       <CartContainer>
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
-            <div className="flex justify-between items-center py-3">
-              <p className="font-medium text-foreground">
-                {t(currentLanguage, "cartPurchaseForm.shipping")}
-              </p>
-              <p className="text-muted-foreground">
-                {t(currentLanguage, "cartPurchaseForm.shippingCalculated")}
-              </p>
-            </div>
+            {cart &&
+              cart.lines.some(
+                (line) => line.product.requiresShipping !== false,
+              ) && (
+                <div className="flex justify-between items-center py-3">
+                  <p className="font-medium text-foreground">
+                    {t(currentLanguage, "cartPurchaseForm.shipping")}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {cart.cost.shippingAmount &&
+                    Number(cart.cost.shippingAmount.amount) > 0
+                      ? `${Number(
+                          cart.cost.shippingAmount.amount,
+                        ).toLocaleString("fr-FR")} F CFA`
+                      : t(
+                          currentLanguage,
+                          "cartPurchaseForm.freeShipping",
+                        )}
+                  </p>
+                </div>
+              )}
             <div className="flex justify-between items-center py-2">
               <p className="text-lg font-bold text-foreground">
                 {t(currentLanguage, "cartPurchaseForm.total")}
@@ -235,7 +255,7 @@ export default function CartPurchaseForm() {
               !userEmail.trim() ||
               !userPhone.trim()
             }
-            className="w-full bg-teal-800 hover:bg-teal-700 text-teal-200 rounded-sm font-semibold h-9"
+            className={`w-full ${button.secondary} rounded-sm font-semibold h-9`}
           >
             {isLoading ? (
               <>

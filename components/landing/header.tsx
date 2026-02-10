@@ -28,15 +28,19 @@ interface NavItem {
 
 export default function Header() {
   const [isScrolled, setScrolled] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
   const { currentLanguage } = useTranslation();
   const { showBlogInNavigation, showGalleryInNavigation } =
     useNavigationSettings();
 
   useEffect(() => {
+    setIsClient(true);
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
+
     window.addEventListener("scroll", handleScroll);
 
     return () => {
@@ -124,56 +128,77 @@ export default function Header() {
 
         <div className="flex items-center gap-2 md:hidden">
           <CartModal />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                className={`${styles.mobileMenuButton} bg-transparent border-none hover:bg-transparent focus:ring-0`}
+          {isClient && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  className={`${styles.mobileMenuButton} bg-transparent border-none hover:bg-transparent focus:ring-0`}
+                >
+                  <Menu className="h-5 w-5 text-white" />
+                  <span className="sr-only">
+                    {t(currentLanguage, "header.mobileMenu.toggle")}
+                  </span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="top"
+                className={`${styles.customSheetContent} bg-zinc-900 text-white h-screen w-screen p-16 duration-200 flex flex-col items-start justify-start`}
               >
-                <Menu className="h-5 w-5 text-white" />
-                <span className="sr-only">
-                  {t(currentLanguage, "header.mobileMenu.toggle")}
-                </span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="top"
-              className={`${styles.customSheetContent} bg-zinc-900 text-white h-screen w-screen p-16 duration-200 flex flex-col items-start justify-start`}
-            >
-              <SheetTitle className="sr-only">
-                {t(currentLanguage, "header.mobileMenu.title")}
-              </SheetTitle>
+                <SheetTitle className="sr-only">
+                  {t(currentLanguage, "header.mobileMenu.title")}
+                </SheetTitle>
 
-              <div className="absolute top-4 right-4">
-                <SheetClose asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-zinc-800 hover:text-white"
-                  >
-                    <X className="h-6 w-6" />
-                    <span className="sr-only">
-                      {t(currentLanguage, "header.mobileMenu.close")}
-                    </span>
-                  </Button>
-                </SheetClose>
-              </div>
+                <div className="absolute top-4 right-4">
+                  <SheetClose asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-white hover:bg-zinc-800 hover:text-white"
+                    >
+                      <X className="h-6 w-6" />
+                      <span className="sr-only">
+                        {t(currentLanguage, "header.mobileMenu.close")}
+                      </span>
+                    </Button>
+                  </SheetClose>
+                </div>
 
-              <div className="mt-16 flex flex-col gap-8 text-left w-auto">
-                {navItems.map((item: NavItem) => {
-                  if (item.isComingSoon) {
-                    return (
-                      <div
-                        key={item.path}
-                        className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}
-                      >
-                        {t(currentLanguage, item.nameKey)}
-                        <span className={styles.comingSoonBadge}>
-                          {t(currentLanguage, "header.nav.soon")}
-                        </span>
-                      </div>
-                    );
-                  }
-                  if (item.isComingSoonBadgeOnly) {
+                <div className="mt-16 flex flex-col gap-8 text-left w-auto">
+                  {navItems.map((item: NavItem) => {
+                    if (item.isComingSoon) {
+                      return (
+                        <div
+                          key={item.path}
+                          className={`${styles.mobileNavLink} ${styles.disabledMobileNavLink}`}
+                        >
+                          {t(currentLanguage, item.nameKey)}
+                          <span className={styles.comingSoonBadge}>
+                            {t(currentLanguage, "header.nav.soon")}
+                          </span>
+                        </div>
+                      );
+                    }
+                    if (item.isComingSoonBadgeOnly) {
+                      return (
+                        <SheetClose asChild key={item.path}>
+                          <Link
+                            href={item.path}
+                            className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
+                          >
+                            {t(currentLanguage, item.nameKey)}
+                            <span
+                              className={styles.comingSoonBadge}
+                              style={{
+                                marginLeft: "8px",
+                                fontSize: "0.5em",
+                              }}
+                            >
+                              {t(currentLanguage, "header.nav.soon")}
+                            </span>
+                          </Link>
+                        </SheetClose>
+                      );
+                    }
                     return (
                       <SheetClose asChild key={item.path}>
                         <Link
@@ -181,37 +206,18 @@ export default function Header() {
                           className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
                         >
                           {t(currentLanguage, item.nameKey)}
-                          <span
-                            className={styles.comingSoonBadge}
-                            style={{
-                              marginLeft: "8px",
-                              fontSize: "0.5em",
-                            }}
-                          >
-                            {t(currentLanguage, "header.nav.soon")}
-                          </span>
                         </Link>
                       </SheetClose>
                     );
-                  }
-                  return (
-                    <SheetClose asChild key={item.path}>
-                      <Link
-                        href={item.path}
-                        className={`${styles.mobileNavLink} ${isActive(item.path) ? styles.activeMobileNavLink : ""} text-3xl font-semibold text-white hover:text-gray-400 border-none`}
-                      >
-                        {t(currentLanguage, item.nameKey)}
-                      </Link>
-                    </SheetClose>
-                  );
-                })}
-              </div>
+                  })}
+                </div>
 
-              <p className="mt-8 text-sm text-bold text-zinc-400 max-w-md">
-                {t(currentLanguage, "header.mobileMenu.description")}
-              </p>
-            </SheetContent>
-          </Sheet>
+                <p className="mt-8 text-sm text-bold text-zinc-400 max-w-md">
+                  {t(currentLanguage, "header.mobileMenu.description")}
+                </p>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
     </header>

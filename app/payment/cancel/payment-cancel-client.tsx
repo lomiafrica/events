@@ -1,9 +1,7 @@
 "use client";
 
-import { XCircle, ArrowLeft, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { XCircle, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
@@ -11,10 +9,18 @@ import { t } from "@/lib/i18n/translations";
 
 interface PaymentCancelClientProps {
   purchaseId?: string;
+  flow?: string;
 }
 
-export function PaymentCancelClient({ purchaseId }: PaymentCancelClientProps) {
+export function PaymentCancelClient({
+  purchaseId,
+  flow,
+}: PaymentCancelClientProps) {
   const { currentLanguage } = useTranslation();
+
+  // Default to ticket copy if flow is not provided or unknown
+  const translationBaseKey =
+    flow === "merch" ? "paymentCancelMerch" : "paymentCancel";
 
   return (
     <>
@@ -27,15 +33,20 @@ export function PaymentCancelClient({ purchaseId }: PaymentCancelClientProps) {
                 <XCircle className="w-8 h-8 text-orange-600 dark:text-orange-400" />
               </div>
               <CardTitle className="text-2xl font-bold text-orange-800 dark:text-orange-200">
-                {t(currentLanguage, "paymentCancel.title")}
+                {t(currentLanguage, `${translationBaseKey}.title`)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center text-gray-600 dark:text-gray-300">
-                <p>{t(currentLanguage, "paymentCancel.description")}</p>
+                <p>
+                  {t(
+                    currentLanguage,
+                    `${translationBaseKey}.description`,
+                  )}
+                </p>
                 {purchaseId && (
                   <p className="text-sm mt-2 font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded">
-                    {t(currentLanguage, "paymentCancel.orderId", {
+                    {t(currentLanguage, `${translationBaseKey}.orderId`, {
                       orderId: purchaseId,
                     })}
                   </p>
@@ -46,47 +57,36 @@ export function PaymentCancelClient({ purchaseId }: PaymentCancelClientProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <ArrowLeft className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                   <h3 className="font-semibold text-orange-800 dark:text-orange-200">
-                    {t(currentLanguage, "paymentCancel.whatsNext.title")}
+                    {t(currentLanguage, `${translationBaseKey}.whatsNext.title`)}
                   </h3>
                 </div>
                 <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
                   <li>
-                    • {t(currentLanguage, "paymentCancel.whatsNext.tryAgain")}
-                  </li>
-                  <li>
                     •{" "}
                     {t(
                       currentLanguage,
-                      "paymentCancel.whatsNext.differentMethod",
+                      `${translationBaseKey}.whatsNext.tryAgain`,
                     )}
                   </li>
                   <li>
                     •{" "}
                     {t(
                       currentLanguage,
-                      "paymentCancel.whatsNext.contactSupport",
+                      `${translationBaseKey}.whatsNext.differentMethod`,
+                    )}
+                  </li>
+                  <li>
+                    •{" "}
+                    {t(
+                      currentLanguage,
+                      `${translationBaseKey}.whatsNext.contactSupport`,
                     )}
                   </li>
                 </ul>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <Button asChild className="w-full">
-                  <Link href="/">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {t(currentLanguage, "paymentCancel.buttons.backToEvents")}
-                  </Link>
-                </Button>
-
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/gallery">
-                    {t(currentLanguage, "paymentCancel.buttons.browseGallery")}
-                  </Link>
-                </Button>
-              </div>
-
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                {t(currentLanguage, "paymentCancel.support")}
+                {t(currentLanguage, `${translationBaseKey}.support`)}
               </div>
             </CardContent>
           </Card>

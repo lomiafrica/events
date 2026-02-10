@@ -7,6 +7,8 @@ export interface ImageProps {
   url: string; // Sanity image URL
   blurDataUrl?: string;
   tags?: string[];
+  /** Gallery/section title from Sanity (e.g. "Event November", "Backstage") */
+  title?: string;
 }
 
 export interface SharedModalProps {
