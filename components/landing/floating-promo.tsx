@@ -18,9 +18,9 @@ interface FloatingPromoProps {
 }
 
 export default function FloatingPromo({
-  imageUrl = "/placeholder.svg?height=180&width=320",
-  onClose = () => {},
-  onButtonClick = () => {},
+  imageUrl = "/placeholder.webp",
+  onClose = () => { },
+  onButtonClick = () => { },
   href,
   title = "Promotional event flyer",
   buttonText = "Get your ticket",
@@ -78,7 +78,7 @@ export default function FloatingPromo({
         {/* Image - 16:9 ratio */}
         <div className="relative w-full aspect-video">
           <Image
-            src={imageUrl || "/placeholder.svg"}
+            src={imageUrl || "/placeholder.webp"}
             alt={title}
             fill
             className="object-cover"
