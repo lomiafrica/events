@@ -102,7 +102,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
     product.sizes?.find((s) => s.available)?.name || "",
   );
 
-  const { addItem, cart } = useCart();
+  const { addItem } = useCart();
 
   const displayImages = useMemo(() => {
     const allImages = product.images || [];
@@ -167,22 +167,18 @@ function ProductDetail({ product }: ProductDetailContentProps) {
       }
     }
 
-    for (let i = 0; i < quantity; i++) {
-      await addItem(product);
-    }
+    await addItem(product, quantity);
   };
 
   const handleBuyNow = async () => {
-    // If product is not yet in the cart, add exactly 1
-    const alreadyInCart = cart?.lines.some(
-      (line) => line.product._id === product._id,
-    );
-
-    if (!alreadyInCart) {
-      await addItem(product);
+    if (product.sizes && product.sizes.length > 0) {
+      if (!hasAvailableSizes || !hasValidSizeSelection) {
+        return;
+      }
     }
 
-    // Always open the cart modal after Buy Now
+    // Add selected quantity and open cart for checkout
+    await addItem(product, quantity);
     openCartExternally();
   };
 
@@ -251,8 +247,8 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                 >
                   {typeof product.price === "number"
                     ? product.price
-                      .toString()
-                      .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
                     : "0"}{" "}
                   F CFA
                 </motion.p>
@@ -280,15 +276,16 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                         onClick={() => handleColorChange(color.name)}
                         disabled={!color.available}
                         className={cn(
-                          "relative h-8 w-8 rounded-full border-2 transition-all overflow-hidden",
+                          "relative h-8 w-8 rounded-full border-2 transition-all duration-200 overflow-hidden",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          "hover:ring-2 hover:ring-primary/60 hover:ring-offset-2 hover:ring-offset-background",
                           selectedColor === color.name
-                            ? isWhite
-                              ? "border-gray-900"
-                              : "border-gray-900"
+                            ? "border-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-background"
                             : isWhite
-                              ? "border-gray-300"
-                              : "border-gray-200",
-                          !color.available && "opacity-40",
+                              ? "border-border dark:border-gray-500"
+                              : "border-border dark:border-gray-600",
+                          !color.available &&
+                            "opacity-40 cursor-not-allowed hover:ring-0 focus-visible:ring-0",
                           isMix && "bg-white",
                         )}
                         style={
@@ -353,7 +350,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-card text-foreground hover:border-primary",
                         !size.available &&
-                        "cursor-not-allowed border-border text-muted-foreground opacity-50",
+                          "cursor-not-allowed border-border text-muted-foreground opacity-50",
                       )}
                     >
                       {size.name}
@@ -391,8 +388,8 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                       )}
                     >
                       {typeof product.stock === "number" &&
-                        product.stock > 0 &&
-                        !isOutOfStock
+                      product.stock > 0 &&
+                      !isOutOfStock
                         ? `${product.stock} in stock`
                         : "Out of Stock"}
                     </div>
@@ -403,7 +400,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                     {typeof product.description === "string"
                       ? product.description
                       : Array.isArray(product.description) &&
-                        product.description[0]?.children?.[0]?.text
+                          product.description[0]?.children?.[0]?.text
                         ? product.description[0].children[0].text
                         : "No description available"}
                   </p>
@@ -480,18 +477,18 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                     >
                       {isOutOfStock
                         ? t(
-                          currentLanguage,
-                          "merchPage.productDetail.outOfStock",
-                        ) || "Out of Stock"
+                            currentLanguage,
+                            "merchPage.productDetail.outOfStock",
+                          ) || "Out of Stock"
                         : !hasAvailableSizes || !hasValidSizeSelection
                           ? t(
-                            currentLanguage,
-                            "merchPage.productDetail.noSizeAvailable",
-                          ) || "No size available"
+                              currentLanguage,
+                              "merchPage.productDetail.noSizeAvailable",
+                            ) || "No size available"
                           : t(
-                            currentLanguage,
-                            "merchPage.productDetail.addToCart",
-                          )}
+                              currentLanguage,
+                              "merchPage.productDetail.addToCart",
+                            )}
                     </Button>
                     <Button
                       className="w-full h-14 text-lg font-semibold rounded-sm bg-blue-600 hover:bg-blue-700 text-white"

@@ -52,14 +52,14 @@ type CartAction =
     }
   | {
       type: "ADD_ITEM";
-      payload: { product: SanityProduct; previousQuantity: number };
+      payload: { product: SanityProduct; quantityToAdd: number };
     };
 
 type UseCartReturn = {
   isPending: boolean;
   cart: Cart | undefined;
   shippingSettings: ShippingSettings;
-  addItem: (product: SanityProduct) => Promise<void>;
+  addItem: (product: SanityProduct, quantity?: number) => Promise<void>;
   updateItem: (
     lineId: string,
     merchandiseId: string,
@@ -86,13 +86,9 @@ function updateCartTotals(
   }, 0);
   const currencyCode = "XOF";
 
-  // Global shipping: apply one default shipping cost per order
-  // if there is at least one shippable item in the cart.
-  const hasShippableItems = lines.some(
-    (item) => item.product.requiresShipping !== false,
-  );
-  const shippingAmount =
-    subtotalAmount > 0 && hasShippableItems ? defaultShippingCost : 0;
+  // Global shipping: apply one default shipping cost per order when cart has items.
+  // (requiresShipping was removed from product schema; all merch is shippable.)
+  const shippingAmount = subtotalAmount > 0 ? defaultShippingCost : 0;
 
   const totalAmount = subtotalAmount + shippingAmount;
 
@@ -174,11 +170,12 @@ function cartReducer(
       };
     }
     case "ADD_ITEM": {
-      const { product, previousQuantity } = action.payload;
+      const { product, quantityToAdd } = action.payload;
       const existingItem = currentCart.lines.find(
         (item) => item.product._id === product._id,
       );
-      const targetQuantity = previousQuantity + 1;
+      const previousQuantity = existingItem?.quantity ?? 0;
+      const targetQuantity = previousQuantity + quantityToAdd;
 
       const updatedLines = existingItem
         ? currentCart.lines.map((item) => {
@@ -250,19 +247,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     cartReducer(state, action, shippingSettings.defaultShippingCost),
   );
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount (run once)
   useEffect(() => {
     const savedCart = localStorage.getItem("merch-cart");
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        // Recalculate totals with current shipping settings if they're already loaded
-        // This handles the case where shipping settings were fetched before cart load
-        if (
-          parsedCart.lines &&
-          parsedCart.lines.length > 0 &&
-          shippingSettings.defaultShippingCost > 0
-        ) {
+        if (parsedCart.lines && parsedCart.lines.length > 0) {
+          // Always recalc totals so we use current shipping when it's available
           const updatedTotals = updateCartTotals(
             parsedCart.lines,
             shippingSettings.defaultShippingCost,
@@ -281,15 +273,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Recalculate cart totals when shipping settings change
-  // This ensures carts loaded from localStorage get updated shipping costs
+  // Recalculate cart totals when shipping settings change (e.g. after fetch)
+  // This ensures cart always shows correct shipping once getShippingSettings() returns
   useEffect(() => {
     if (cart && cart.lines.length > 0) {
       const updatedTotals = updateCartTotals(
         cart.lines,
         shippingSettings.defaultShippingCost,
       );
-      // Only update if shipping cost actually changed to avoid infinite loops
       const currentShipping = Number(cart.cost.shippingAmount.amount);
       const newShipping = Number(updatedTotals.cost.shippingAmount.amount);
       if (currentShipping !== newShipping) {
@@ -342,16 +333,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const add = useCallback(
-    (product: SanityProduct) => {
-      startTransition(() => {
-        const previousQuantity =
-          optimisticCart?.lines.find((l) => l.product._id === product._id)
-            ?.quantity || 0;
+    (product: SanityProduct, quantity: number = 1) => {
+      const quantityToAdd = Math.max(1, Math.floor(quantity));
 
+      startTransition(() => {
         // Update optimistic cart immediately (synchronous)
         updateOptimisticCart({
           type: "ADD_ITEM",
-          payload: { product, previousQuantity },
+          payload: { product, quantityToAdd },
         });
 
         // Update actual cart immediately after optimistic update
@@ -359,25 +348,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           cart,
           {
             type: "ADD_ITEM",
-            payload: { product, previousQuantity },
+            payload: { product, quantityToAdd },
           },
           shippingSettings.defaultShippingCost,
         );
         setCart(updatedCart);
 
-        // Track Add to Cart event
-        trackAddToCart(Number(product.price), "XOF", [product._id]);
+        // Track Add to Cart event (total value and units)
+        trackAddToCart(
+          Number(product.price) * quantityToAdd,
+          "XOF",
+          Array(quantityToAdd).fill(product._id),
+        );
       });
 
       // Return promise for compatibility
       return Promise.resolve();
     },
-    [
-      updateOptimisticCart,
-      optimisticCart,
-      cart,
-      shippingSettings.defaultShippingCost,
-    ],
+    [updateOptimisticCart, cart, shippingSettings.defaultShippingCost],
   );
 
   const value = useMemo<UseCartReturn>(

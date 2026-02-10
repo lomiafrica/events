@@ -38,9 +38,7 @@ const CartItems = ({
 
   if (!cart) return <></>;
 
-  const hasShippableItems = cart.lines.some(
-    (line) => line.product?.requiresShipping !== false,
-  );
+  const hasItems = cart.lines.length > 0;
 
   return (
     <div className="flex flex-col justify-between h-full overflow-hidden">
@@ -77,12 +75,23 @@ const CartItems = ({
       <CartContainer>
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
-            {hasShippableItems && (
-              <div className="flex justify-between items-center py-3">
-                <p className="font-medium text-foreground">
+            <div className="flex justify-between items-center py-1">
+              <p className="text-muted-foreground">
+                {t(currentLanguage, "cartModal.subtotal")}
+              </p>
+              <p className="text-foreground">
+                {Number(cart.cost.subtotalAmount.amount).toLocaleString(
+                  "fr-FR",
+                )}{" "}
+                F CFA
+              </p>
+            </div>
+            {hasItems && (
+              <div className="flex justify-between items-center py-1">
+                <p className="text-muted-foreground">
                   {t(currentLanguage, "cartModal.shipping")}
                 </p>
-                <p className="text-muted-foreground">
+                <p className="text-foreground">
                   {cart.cost.shippingAmount &&
                   Number(cart.cost.shippingAmount.amount) > 0
                     ? `${Number(cart.cost.shippingAmount.amount).toLocaleString(
@@ -92,7 +101,7 @@ const CartItems = ({
                 </p>
               </div>
             )}
-            <div className="flex justify-between items-center py-2">
+            <div className="flex justify-between items-center py-2 pt-3 border-t border-border/40">
               <p className="text-lg font-bold text-foreground">
                 {t(currentLanguage, "cartModal.total")}
               </p>

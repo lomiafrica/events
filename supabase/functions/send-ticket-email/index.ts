@@ -24,7 +24,8 @@ interface IndividualTicket {
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@tickets.djaoulient.com";
+const fromEmail =
+  Deno.env.get("FROM_EMAIL") || "noreply@tickets.djaoulient.com";
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
 const defaultLogoUrl = "https://www.djaoulient.com/icon.png";
 
@@ -188,9 +189,9 @@ Deno.serve(async (req: Request) => {
     const hasVenue = !tbaOrEmpty(rawVenue);
     const eventDataForTicket = {
       eventName: purchaseData.event_title || "Amazing Event",
-      eventDate: hasDate ? rawDate : null as string | null,
-      eventTime: hasTime ? rawTime : null as string | null,
-      eventVenue: hasVenue ? rawVenue : null as string | null,
+      eventDate: hasDate ? rawDate : (null as string | null),
+      eventTime: hasTime ? rawTime : (null as string | null),
+      eventVenue: hasVenue ? rawVenue : (null as string | null),
     };
 
     // Calculate actual ticket quantity for bundles
@@ -440,7 +441,10 @@ Deno.serve(async (req: Request) => {
           font: helveticaBold,
           color: blackColor,
         });
-        const eventNameW = helvetica.widthOfTextAtSize(ticketProps.eventName, 7);
+        const eventNameW = helvetica.widthOfTextAtSize(
+          ticketProps.eventName,
+          7,
+        );
         page.drawText(ticketProps.eventName, {
           x: rightAlignX - eventNameW,
           y: y,
@@ -494,10 +498,7 @@ Deno.serve(async (req: Request) => {
             font: helveticaBold,
             color: blackColor,
           });
-          const venueW = helvetica.widthOfTextAtSize(
-            ticketProps.eventVenue,
-            7,
-          );
+          const venueW = helvetica.widthOfTextAtSize(ticketProps.eventVenue, 7);
           page.drawText(ticketProps.eventVenue, {
             x: rightAlignX - venueW,
             y: y,
@@ -756,10 +757,7 @@ Deno.serve(async (req: Request) => {
         ticketProps.lastName,
         ticketProps.quantity,
       );
-      const legacyHolderW = helvetica.widthOfTextAtSize(
-        legacyDisplayName,
-        7,
-      );
+      const legacyHolderW = helvetica.widthOfTextAtSize(legacyDisplayName, 7);
       page.drawText(legacyDisplayName, {
         x: legacyRightAlignX - legacyHolderW,
         y: y,

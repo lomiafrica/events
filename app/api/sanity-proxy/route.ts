@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get("query");
+    const body = await request.json();
+    const query = typeof body?.query === "string" ? body.query : null;
 
     if (!query) {
       return NextResponse.json(
-        { error: "Query parameter is required" },
+        { error: "Body must include { query: string }" },
         { status: 400 },
       );
     }
 
-    // Forward the request to Sanity API
+    // Forward the request to Sanity API (query in URL for Sanity's GET API)
     const sanityUrl = `https://11qckjsr.api.sanity.io/v2023-05-03/data/query/production?query=${encodeURIComponent(query)}&returnQuery=false`;
 
     const response = await fetch(sanityUrl, {

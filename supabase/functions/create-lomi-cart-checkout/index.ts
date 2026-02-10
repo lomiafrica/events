@@ -34,6 +34,8 @@ interface CartItem {
 
 interface RequestPayload {
   cartItems: CartItem[];
+  /** Order-level shipping amount (F CFA). One shipping cost per order, from Sanity homepage defaultShippingCost. */
+  orderShipping?: number;
   currencyCode?: string;
   userName: string;
   userEmail: string;
@@ -217,6 +219,10 @@ serve(async (req: Request) => {
       purchaseIds.push(purchaseId);
       console.log("Created purchase record:", purchaseId);
     }
+
+    // Add order-level shipping once (from Sanity homepage defaultShippingCost)
+    const orderShipping = Number(payload.orderShipping) || 0;
+    totalAmount += orderShipping;
 
     console.log(
       `Created ${purchaseIds.length} purchase records, total amount: ${totalAmount}`,

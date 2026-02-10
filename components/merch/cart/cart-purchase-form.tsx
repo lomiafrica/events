@@ -24,7 +24,7 @@ const CartContainer = ({
 };
 
 export default function CartPurchaseForm() {
-  const { cart, shippingSettings } = useCart();
+  const { cart } = useCart();
   const { currentLanguage } = useTranslation();
   const { button } = useTheme();
   const [userName, setUserName] = useState("");
@@ -74,15 +74,15 @@ export default function CartPurchaseForm() {
         productId: undefined, // Products no longer have lomi productId - direct charges only
         title: line.product.name,
         price: line.product.price,
-        // Use a single global shipping option; items that don't require shipping get 0.
-        shippingFee:
-          line.product.requiresShipping === false
-            ? 0
-            : shippingSettings.defaultShippingCost,
+        // Shipping is sent as orderShipping (one per order); backend uses that for total.
+        shippingFee: 0,
       }));
+
+      const orderShipping = Number(cart.cost.shippingAmount?.amount) || 0;
 
       const payload = {
         cartItems,
+        orderShipping,
         userName: userName.trim(),
         userEmail: userEmail.trim(),
         userPhone: userPhone.trim(),
@@ -212,24 +212,21 @@ export default function CartPurchaseForm() {
       <CartContainer>
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
-            {cart &&
-              cart.lines.some(
-                (line) => line.product.requiresShipping !== false,
-              ) && (
-                <div className="flex justify-between items-center py-3">
-                  <p className="font-medium text-foreground">
-                    {t(currentLanguage, "cartPurchaseForm.shipping")}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {cart.cost.shippingAmount &&
-                    Number(cart.cost.shippingAmount.amount) > 0
-                      ? `${Number(
-                          cart.cost.shippingAmount.amount,
-                        ).toLocaleString("fr-FR")} F CFA`
-                      : t(currentLanguage, "cartPurchaseForm.freeShipping")}
-                  </p>
-                </div>
-              )}
+            {cart && cart.lines.length > 0 && (
+              <div className="flex justify-between items-center py-3">
+                <p className="font-medium text-foreground">
+                  {t(currentLanguage, "cartPurchaseForm.shipping")}
+                </p>
+                <p className="text-muted-foreground">
+                  {cart.cost.shippingAmount &&
+                  Number(cart.cost.shippingAmount.amount) > 0
+                    ? `${Number(cart.cost.shippingAmount.amount).toLocaleString(
+                        "fr-FR",
+                      )} F CFA`
+                    : t(currentLanguage, "cartPurchaseForm.freeShipping")}
+                </p>
+              </div>
+            )}
             <div className="flex justify-between items-center py-2">
               <p className="text-lg font-bold text-foreground">
                 {t(currentLanguage, "cartPurchaseForm.total")}

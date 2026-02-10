@@ -208,12 +208,26 @@ export async function getAllProducts() {
           "slug": slug.current
         },
         tags,
-        "colors": colors[]{
-          name,
-          "image": image.asset->url,
-          available
-        },
-        "sizes": sizes[]{name, available},
+        "colors": coalesce(
+          colors[]{
+            name,
+            "image": image.asset->url,
+            available
+          },
+          [
+            { "name": "Noir", "image": null, "available": true },
+            { "name": "Blanc", "image": null, "available": true }
+          ]
+        ),
+        "sizes": coalesce(
+          sizes[]{name, available},
+          [
+            { "name": "S", "available": true },
+            { "name": "M", "available": true },
+            { "name": "L", "available": true },
+            { "name": "XL", "available": true }
+          ]
+        ),
         images[]{
           asset->{url},
           alt,
@@ -221,8 +235,12 @@ export async function getAllProducts() {
         }
       }`;
 
-      const url = `${getBaseUrl()}/api/sanity-proxy?query=${encodeURIComponent(query)}`;
-      const response = await fetch(url);
+      const url = `${getBaseUrl()}/api/sanity-proxy`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
@@ -247,12 +265,26 @@ export async function getAllProducts() {
           "slug": slug.current
         },
         tags,
-        "colors": colors[]{
-          name,
-          "image": image.asset->url,
-          available
-        },
-        "sizes": sizes[]{name, available},
+        "colors": coalesce(
+          colors[]{
+            name,
+            "image": image.asset->url,
+            available
+          },
+          [
+            { "name": "Noir", "image": null, "available": true },
+            { "name": "Blanc", "image": null, "available": true }
+          ]
+        ),
+        "sizes": coalesce(
+          sizes[]{name, available},
+          [
+            { "name": "S", "available": true },
+            { "name": "M", "available": true },
+            { "name": "L", "available": true },
+            { "name": "XL", "available": true }
+          ]
+        ),
         images[]{
           asset->{url},
           alt,
@@ -286,18 +318,31 @@ export async function getProductBySlug(slug: string) {
       },
       "price": basePrice,
       "stock": baseStock,
-      "colors": colors[]{
-        name,
-        "image": image.asset->url,
-        available
-      },
-      "sizes": sizes[]{name, available},
+      "colors": coalesce(
+        colors[]{
+          name,
+          "image": image.asset->url,
+          available
+        },
+        [
+          { "name": "Noir", "image": null, "available": true },
+          { "name": "Blanc", "image": null, "available": true }
+        ]
+      ),
+      "sizes": coalesce(
+        sizes[]{name, available},
+        [
+          { "name": "S", "available": true },
+          { "name": "M", "available": true },
+          { "name": "L", "available": true },
+          { "name": "XL", "available": true }
+        ]
+      ),
       "categories": categories[]->{
         title,
         "slug": slug.current
       },
-      tags,
-      requiresShipping
+      tags
     }
   `,
     { slug },
@@ -312,14 +357,19 @@ export interface ShippingSettings {
 
 export const getShippingSettings = async (): Promise<ShippingSettings> => {
   try {
-    const query = `*[_type == "homepage"][0] {
+    // Use most recently updated homepage (same pattern as getNavigationSettings)
+    const query = `*[_type == "homepage"] | order(_updatedAt desc) [0] {
       defaultShippingCost
     }`;
 
     // In development, use the proxy API to avoid CORS issues
     if (process.env.NODE_ENV === "development") {
-      const url = `${getBaseUrl()}/api/sanity-proxy?query=${encodeURIComponent(query)}`;
-      const response = await fetch(url);
+      const url = `${getBaseUrl()}/api/sanity-proxy`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
       if (!response.ok) {
         throw new Error(`Proxy API error: ${response.status}`);
       }
