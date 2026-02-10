@@ -5,9 +5,15 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { TranslationProvider } from "@/lib/contexts/TranslationContext";
+import { NavigationSettingsProvider } from "@/lib/contexts/NavigationSettingsContext";
 import { CartProvider } from "@/components/merch/cart/cart-context";
 import { WishlistProvider } from "@/components/merch/wishlist/wishlist-context";
 import { FacebookPixel } from "@/components/ui/FacebookPixel";
+import {
+  getNavigationSettings,
+  getHomepageThemeSettings,
+} from "@/lib/sanity/queries";
+import { ButtonThemeProvider } from "@/lib/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,11 +65,15 @@ export const metadata: Metadata = {
   // manifest: "/site.webmanifest",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [navSettings, themeSettings] = await Promise.all([
+    getNavigationSettings(),
+    getHomepageThemeSettings(),
+  ]);
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
@@ -74,13 +84,22 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TranslationProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <main className="grow">{children}</main>
-              </WishlistProvider>
-            </CartProvider>
-          </TranslationProvider>
+          <ButtonThemeProvider
+            primaryButtonColor={themeSettings.primaryButtonColor}
+          >
+            <NavigationSettingsProvider
+              showBlogInNavigation={navSettings.showBlogInNavigation}
+              showGalleryInNavigation={navSettings.showGalleryInNavigation}
+            >
+              <TranslationProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <main className="grow">{children}</main>
+                  </WishlistProvider>
+                </CartProvider>
+              </TranslationProvider>
+            </NavigationSettingsProvider>
+          </ButtonThemeProvider>
         </ThemeProvider>
         <Analytics />
       </body>

@@ -19,6 +19,7 @@ export interface SanityProduct {
   mainImage?: string;
   price: number;
   stock?: number;
+  requiresShipping?: boolean;
   description?: string | PortableTextBlock[];
   categories?: Array<{
     title: string;

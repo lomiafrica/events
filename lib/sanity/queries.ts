@@ -360,10 +360,67 @@ export const getShippingSettings = async (): Promise<ShippingSettings> => {
   }
 };
 
+// ================================= Navigation Settings ================================
+export interface NavigationSettings {
+  showBlogInNavigation?: boolean;
+  showGalleryInNavigation?: boolean;
+}
+
+export const getNavigationSettings = async (): Promise<NavigationSettings> => {
+  try {
+    const query = `*[_type == "homepage"][0] {
+      showBlogInNavigation,
+      showGalleryInNavigation,
+    }`;
+    const result = await client.fetch<NavigationSettings>(
+      query,
+      {},
+      getCacheConfig(["homepage", "navigation"]),
+    );
+    return {
+      showBlogInNavigation: result?.showBlogInNavigation ?? true,
+      showGalleryInNavigation: result?.showGalleryInNavigation ?? true,
+    };
+  } catch (error) {
+    console.error("Error fetching navigation settings:", error);
+    return {
+      showBlogInNavigation: true,
+      showGalleryInNavigation: true,
+    };
+  }
+};
+
+// ================================= Theme / Button Color ================================
+export interface HomepageThemeSettings {
+  primaryButtonColor: string;
+}
+
+export const getHomepageThemeSettings =
+  async (): Promise<HomepageThemeSettings> => {
+    try {
+      const query = `*[_type == "homepage"][0] {
+        primaryButtonColor,
+      }`;
+      const result = await client.fetch<{ primaryButtonColor?: string }>(
+        query,
+        {},
+        getCacheConfig(["homepage", "settings"]),
+      );
+      return {
+        primaryButtonColor: result?.primaryButtonColor ?? "teal",
+      };
+    } catch (error) {
+      console.error("Error fetching theme settings:", error);
+      return { primaryButtonColor: "teal" };
+    }
+  };
+
 // ================================= Homepage Content ================================
 
 // Interface for homepage data
 export interface HomepageData {
+  showBlogInNavigation?: boolean;
+  showGalleryInNavigation?: boolean;
   heroContent?: {
     _key: string;
     title?: string;
@@ -407,6 +464,8 @@ export interface HomepageData {
 
 export const getHomepageContent = async (): Promise<HomepageData | null> => {
   const query = `*[_type == "homepage"][0] {
+    showBlogInNavigation,
+    showGalleryInNavigation,
     heroContent[]{
       _key,
       title,

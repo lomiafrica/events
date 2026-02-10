@@ -15,6 +15,7 @@ import {
 } from "../ui/sheet";
 import styles from "@/lib/styles/header.module.css";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { useNavigationSettings } from "@/lib/contexts/NavigationSettingsContext";
 import { t } from "@/lib/i18n/translations";
 import CartModal from "@/components/merch/cart/cart-modal";
 
@@ -29,6 +30,8 @@ export default function Header() {
   const [isScrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { currentLanguage } = useTranslation();
+  const { showBlogInNavigation, showGalleryInNavigation } =
+    useNavigationSettings();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,8 +51,12 @@ export default function Header() {
   const navItems: NavItem[] = [
     { nameKey: "header.nav.home", path: "/" },
     { nameKey: "header.nav.events", path: "/events" },
-    { nameKey: "header.nav.gallery", path: "/gallery" },
-    { nameKey: "header.nav.blog", path: "/blog" },
+    ...(showGalleryInNavigation
+      ? [{ nameKey: "header.nav.gallery" as const, path: "/gallery" }]
+      : []),
+    ...(showBlogInNavigation
+      ? [{ nameKey: "header.nav.blog" as const, path: "/blog" }]
+      : []),
     { nameKey: "header.nav.shop", path: "/merch" },
   ];
 

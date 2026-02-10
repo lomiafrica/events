@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,9 @@ import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { SupabaseClient } from "@supabase/supabase-js";
 import PhoneNumberInput from "@/components/ui/phone-number-input";
 import DjaouliCodeDialog from "@/components/landing/djaouli-code";
+
+const PURCHASE_MODAL_PORTAL_ID = "purchase-modal-portal";
+const ANIMATION_DURATION_MS = 300;
 
 // Helper function for formatting price (matching event page)
 const formatPrice = (price: number): string => {
@@ -87,10 +90,20 @@ export default function PurchaseFormModal({
   const [error, setError] = useState<string | null>(null);
   const [showDjaouliCode, setShowDjaouliCode] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const portalContainerRef = useRef<HTMLElement | null>(null);
 
-  // Ensure component is mounted before rendering portal
+  // Ensure component is mounted and create dedicated portal container for consistent stacking/animation on desktop
   useEffect(() => {
     setIsMounted(true);
+    if (typeof document !== "undefined") {
+      let portalContainer = document.getElementById(PURCHASE_MODAL_PORTAL_ID);
+      if (!portalContainer) {
+        portalContainer = document.createElement("div");
+        portalContainer.id = PURCHASE_MODAL_PORTAL_ID;
+        document.body.appendChild(portalContainer);
+      }
+      portalContainerRef.current = portalContainer;
+    }
     return () => setIsMounted(false);
   }, []);
 
@@ -347,20 +360,24 @@ export default function PurchaseFormModal({
     ? quantity * (item.ticketsIncluded || 1)
     : quantity;
 
-  // Only render portal content if mounted
-  if (!isMounted) return null;
+  // Only render portal content if mounted and we have a portal container
+  if (!isMounted || !portalContainerRef.current) return null;
 
   return createPortal(
     <>
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop - stable key for reliable exit animation on desktop */}
             <motion.div
+              key="purchase-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{
+                duration: ANIMATION_DURATION_MS / 1000,
+                ease: "easeInOut",
+              }}
               className="fixed inset-0 z-[60] bg-foreground/30 will-change-auto cursor-pointer"
               onClick={(e) => {
                 e.preventDefault();
@@ -377,17 +394,21 @@ export default function PurchaseFormModal({
               }}
             />
 
-            {/* Panel */}
+            {/* Panel - stable key for smooth slide-out exit on desktop */}
             <motion.div
+              key="purchase-panel"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{
+                duration: ANIMATION_DURATION_MS / 1000,
+                ease: "easeInOut",
+              }}
               className="fixed top-0 bottom-0 right-0 flex w-full md:w-[500px] z-[70] will-change-transform pointer-events-auto"
               style={{ position: "fixed", top: 0, right: 0, bottom: 0 }}
               onClick={(e) => e.stopPropagation()} // Prevent event bubbling to backdrop
             >
-              <div className="flex flex-col w-full bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
+              <div className="flex flex-col w-full h-full min-h-0 bg-[#1a1a1a] backdrop-blur-xl rounded-sm shadow-2xl">
                 {/* Header */}
                 <div className="flex justify-between items-center px-4 py-4 md:py-6 flex-shrink-0">
                   <div>
@@ -595,6 +616,6 @@ export default function PurchaseFormModal({
         onClose={() => setShowDjaouliCode(false)}
       />
     </>,
-    document.body,
+    portalContainerRef.current,
   );
 }

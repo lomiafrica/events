@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { trackEvent } from "@/components/ui/FacebookPixel";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 
 interface FloatingPromoProps {
   imageUrl?: string;
@@ -25,6 +26,7 @@ export default function FloatingPromo({
   buttonText = "Get your ticket",
 }: FloatingPromoProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { button } = useTheme();
 
   useEffect(() => {
     // Small delay to allow for animation
@@ -89,7 +91,7 @@ export default function FloatingPromo({
           {href ? (
             <Link
               href={href}
-              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center"
+              className={`w-full py-2.5 px-4 ${button.primary} text-sm font-medium transition-colors rounded-b-sm text-center flex items-center justify-center`}
               onClick={() => {
                 // Track promo button click
                 trackEvent("Lead", {
@@ -112,7 +114,7 @@ export default function FloatingPromo({
                 // Call the original onClick handler
                 onButtonClick();
               }}
-              className="w-full py-2.5 px-4 bg-blue-600/80 hover:bg-blue-500/90 text-white text-sm font-medium transition-colors rounded-b-sm flex items-center justify-center"
+              className={`w-full py-2.5 px-4 ${button.primary} text-sm font-medium transition-colors rounded-b-sm flex items-center justify-center`}
             >
               <PartyPopper className="h-3.5 w-3.5 mr-1.5" />
               {buttonText}

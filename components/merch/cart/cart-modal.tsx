@@ -13,6 +13,7 @@ import { cn } from "@/lib/actions/utils";
 import { createPortal } from "react-dom";
 import CartPurchaseForm from "./cart-purchase-form";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { t } from "@/lib/i18n/translations";
 
 const CartContainer = ({
@@ -28,15 +29,18 @@ const CartContainer = ({
 const CartItems = ({
   closeCart,
   onProceedToCheckout,
-  currentLanguage,
 }: {
   closeCart: () => void;
   onProceedToCheckout: () => void;
-  currentLanguage: string;
 }) => {
   const { cart } = useCart();
+  const { currentLanguage } = useTranslation();
 
   if (!cart) return <></>;
+
+  const hasShippableItems = cart.lines.some(
+    (line) => line.product?.requiresShipping !== false,
+  );
 
   return (
     <div className="flex flex-col justify-between h-full overflow-hidden">
@@ -45,13 +49,13 @@ const CartItems = ({
           {t(currentLanguage, "cartModal.products")}
         </span>
         <span className="bg-muted/50 px-2 py-1 rounded-sm text-xs">
-          {cart.lines.length === 1
-            ? t(currentLanguage, "cartModal.itemCount", {
-                count: cart.lines.length,
-              })
-            : t(currentLanguage, "cartModal.itemCountPlural", {
-                count: cart.lines.length,
-              })}
+          {t(
+            currentLanguage,
+            cart.totalQuantity !== 1
+              ? "cartModal.itemCountPlural"
+              : "cartModal.itemCount",
+            { count: cart.totalQuantity },
+          )}
         </span>
       </CartContainer>
       <div className="relative flex-1 min-h-0 py-4 overflow-x-hidden">
@@ -73,14 +77,19 @@ const CartItems = ({
       <CartContainer>
         <div className="py-3 text-sm shrink-0">
           <CartContainer className="space-y-2">
-            <div className="flex justify-between items-center py-3">
-              <p className="font-medium text-foreground">
-                {t(currentLanguage, "cartModal.shipping")}
-              </p>
-              <p className="text-muted-foreground">
-                {t(currentLanguage, "cartModal.calculatedAtCheckout")}
-              </p>
-            </div>
+            {hasShippableItems && (
+              <div className="flex justify-between items-center py-3">
+                <p className="font-medium text-foreground">
+                  {t(currentLanguage, "cartModal.shipping")}
+                </p>
+                <p className="text-muted-foreground">
+                  {cart.cost.shippingAmount &&
+                  Number(cart.cost.shippingAmount.amount) > 0
+                    ? `${Number(cart.cost.shippingAmount.amount).toLocaleString("fr-FR")} F CFA`
+                    : t(currentLanguage, "cartModal.calculatedAtCheckout")}
+                </p>
+              </div>
+            )}
             <div className="flex justify-between items-center py-2">
               <p className="text-lg font-bold text-foreground">
                 {t(currentLanguage, "cartModal.total")}
@@ -92,10 +101,7 @@ const CartItems = ({
             </div>
           </CartContainer>
         </div>
-        <CheckoutButton
-          onProceedToCheckout={onProceedToCheckout}
-          currentLanguage={currentLanguage}
-        />
+        <CheckoutButton onProceedToCheckout={onProceedToCheckout} />
       </CartContainer>
     </div>
   );
@@ -110,24 +116,78 @@ const serializeCart = (cart: { lines: { id: string; quantity: number }[] }) => {
   );
 };
 
+// Shared state to prevent duplicate cart opens across multiple CartModal instances
+let lastCartOpenTime = 0;
+let cartOpenLock: string | null = null;
+let activePortalInstance: string | null = null;
+const CART_OPEN_DEBOUNCE_MS = 500; // Prevent duplicate opens within 500ms
+const CART_PORTAL_ID = "cart-modal-portal";
+
+// Helper to check if a cart drawer is already visible in the DOM
+const isCartDrawerVisible = (): boolean => {
+  if (typeof document === "undefined") return false;
+  const portal = document.getElementById(CART_PORTAL_ID);
+  if (portal) {
+    const style = window.getComputedStyle(portal);
+    const rect = portal.getBoundingClientRect();
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      style.opacity !== "0" &&
+      rect.width > 0 &&
+      rect.height > 0
+    );
+  }
+  return false;
+};
+
 export default function CartModal() {
   const { cart } = useCart();
   const { currentLanguage } = useTranslation();
+  const { button } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
+  const [shouldRenderPortal, setShouldRenderPortal] = useState(false);
   const serializedCart = useRef(cart ? serializeCart(cart) : undefined);
+  const instanceIdRef = useRef<string>(
+    `cart-${Math.random().toString(36).substring(7)}`,
+  );
+  const portalContainerRef = useRef<HTMLElement | null>(null);
 
   // Ensure component is mounted before rendering portal
   useEffect(() => {
     setIsMounted(true);
-    return () => setIsMounted(false);
+    // Create portal container if it doesn't exist
+    if (typeof document !== "undefined") {
+      let portalContainer = document.getElementById(CART_PORTAL_ID);
+      if (!portalContainer) {
+        portalContainer = document.createElement("div");
+        portalContainer.id = CART_PORTAL_ID;
+        document.body.appendChild(portalContainer);
+      }
+      portalContainerRef.current = portalContainer;
+    }
+    const instanceId = instanceIdRef.current;
+    return () => {
+      setIsMounted(false);
+      if (cartOpenLock === instanceId) {
+        cartOpenLock = null;
+      }
+      if (activePortalInstance === instanceId) {
+        activePortalInstance = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
     if (!cart) return;
 
     const newSerializedCart = serializeCart(cart);
+    const previousCartLinesCount = serializedCart.current
+      ? JSON.parse(serializedCart.current).length
+      : 0;
+    const newCartLinesCount = cart.lines.length;
 
     // Initialize on first load
     if (serializedCart.current === undefined) {
@@ -135,19 +195,57 @@ export default function CartModal() {
       return;
     }
 
-    // Only auto-open cart if items were added (not just quantity changes) and cart has items
+    // Only auto-open cart if items were ADDED (not removed or quantity changed) and cart has items
+    const itemsWereAdded = newCartLinesCount > previousCartLinesCount;
+
     if (
       serializedCart.current !== newSerializedCart &&
-      cart.totalQuantity > 0
+      cart.totalQuantity > 0 &&
+      itemsWereAdded
     ) {
       serializedCart.current = newSerializedCart;
-      // Open cart instantly when items are added
-      setIsOpen(true);
+
+      const now = Date.now();
+      const timeSinceLastOpen = now - lastCartOpenTime;
+      const drawerAlreadyVisible = isCartDrawerVisible();
+      const canOpen =
+        timeSinceLastOpen > CART_OPEN_DEBOUNCE_MS &&
+        (cartOpenLock === null || cartOpenLock === instanceIdRef.current) &&
+        !isOpen &&
+        !drawerAlreadyVisible;
+
+      if (canOpen) {
+        cartOpenLock = instanceIdRef.current;
+        activePortalInstance = instanceIdRef.current;
+        lastCartOpenTime = now;
+        setShouldRenderPortal(true);
+        setIsOpen(true);
+        setTimeout(() => {
+          if (cartOpenLock === instanceIdRef.current) {
+            cartOpenLock = null;
+          }
+        }, CART_OPEN_DEBOUNCE_MS);
+      }
     } else {
-      // Update the serialized cart reference even if we don't open
       serializedCart.current = newSerializedCart;
     }
-  }, [cart]);
+  }, [cart, isOpen]);
+
+  // Sync lock with isOpen state - release lock when closed
+  useEffect(() => {
+    if (!isOpen) {
+      if (cartOpenLock === instanceIdRef.current) {
+        cartOpenLock = null;
+      }
+    } else {
+      if (
+        activePortalInstance === null ||
+        activePortalInstance === instanceIdRef.current
+      ) {
+        activePortalInstance = instanceIdRef.current;
+      }
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -165,10 +263,26 @@ export default function CartModal() {
     };
   }, [isOpen]);
 
-  const openCart = () => setIsOpen(true);
+  const openCart = () => {
+    cartOpenLock = instanceIdRef.current;
+    activePortalInstance = instanceIdRef.current;
+    setShouldRenderPortal(true);
+    setIsOpen(true);
+  };
+
   const closeCart = () => {
     setIsOpen(false);
     setShowPurchaseForm(false);
+    if (cartOpenLock === instanceIdRef.current) {
+      cartOpenLock = null;
+    }
+    // Delay releasing portal ownership to allow exit animation to complete (300ms)
+    setTimeout(() => {
+      if (activePortalInstance === instanceIdRef.current) {
+        activePortalInstance = null;
+        setShouldRenderPortal(false);
+      }
+    }, 300);
   };
 
   const renderCartContent = () => {
@@ -204,7 +318,6 @@ export default function CartModal() {
       <CartItems
         closeCart={closeCart}
         onProceedToCheckout={() => setShowPurchaseForm(true)}
-        currentLanguage={currentLanguage}
       />
     );
   };
@@ -219,7 +332,7 @@ export default function CartModal() {
       <Button
         aria-label="Open cart"
         onClick={openCart}
-        className="uppercase relative bg-teal-800 hover:bg-teal-700 text-teal-200 border-teal-700"
+        className={`uppercase relative ${button.secondaryBorder}`}
         size={"sm"}
         onClickCapture={(e) => {
           // Prevent event bubbling that might interfere with modal
@@ -229,7 +342,9 @@ export default function CartModal() {
       >
         <ShoppingCart className="h-4 w-4" />
         {cart.totalQuantity > 0 && (
-          <span className="absolute -top-1 -right-1 bg-teal-600 text-teal-100 text-xs rounded-sm h-5 w-5 flex items-center justify-center font-medium border border-teal-500">
+          <span
+            className={`absolute -top-1 -right-1 ${button.cartBadge} text-xs rounded-sm h-5 w-5 flex items-center justify-center font-medium`}
+          >
             {cart.totalQuantity}
           </span>
         )}
@@ -237,12 +352,16 @@ export default function CartModal() {
 
       {/* Render modal at document body level using portal */}
       {isMounted &&
+        shouldRenderPortal &&
+        activePortalInstance === instanceIdRef.current &&
+        portalContainerRef.current &&
         createPortal(
           <AnimatePresence>
             {isOpen && (
               <>
                 {/* Backdrop */}
                 <motion.div
+                  key="cart-backdrop"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -261,6 +380,7 @@ export default function CartModal() {
 
                 {/* Panel */}
                 <motion.div
+                  key="cart-panel"
                   initial={{ x: "100%" }}
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
@@ -293,7 +413,7 @@ export default function CartModal() {
               </>
             )}
           </AnimatePresence>,
-          document.body,
+          portalContainerRef.current,
         )}
     </>
   );
@@ -301,13 +421,13 @@ export default function CartModal() {
 
 function CheckoutButton({
   onProceedToCheckout,
-  currentLanguage,
 }: {
   onProceedToCheckout: () => void;
-  currentLanguage: string;
 }) {
   const { pending } = useFormStatus();
   const { cart, isPending } = useCart();
+  const { currentLanguage } = useTranslation();
+  const { button } = useTheme();
 
   const isLoading = pending;
   const isDisabled = !cart || cart.lines.length === 0 || isPending;
@@ -318,7 +438,7 @@ function CheckoutButton({
         type="submit"
         disabled={isDisabled}
         size="lg"
-        className="flex relative gap-3 justify-between items-center w-full bg-teal-800 hover:bg-teal-700 text-teal-200 rounded-sm font-semibold py-4"
+        className={`flex relative gap-3 justify-between items-center w-full ${button.secondary} rounded-sm font-semibold py-4`}
         onClick={onProceedToCheckout}
       >
         <AnimatePresence initial={false} mode="wait">

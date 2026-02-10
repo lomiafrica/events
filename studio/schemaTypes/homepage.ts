@@ -31,6 +31,43 @@ export default defineType({
         "Select an event to feature in the floating promo on the homepage. The event's flyer will be used as the image, and the promo will link to the event page.",
     }),
     defineField({
+      name: 'showBlogInNavigation',
+      title: 'Show Blog in Navigation',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Show or hide the blog page link in the navigation menu',
+    }),
+    defineField({
+      name: 'showGalleryInNavigation',
+      title: 'Show Gallery in Navigation',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Show or hide the gallery page link in the navigation menu',
+    }),
+    defineField({
+      name: 'primaryButtonColor',
+      title: 'Primary button color',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Red', value: 'red' },
+          { title: 'Amber', value: 'amber' },
+          { title: 'Cyan', value: 'cyan' },
+          { title: 'Teal', value: 'teal' },
+          { title: 'Sky', value: 'sky' },
+          { title: 'Pink', value: 'pink' },
+          { title: 'Purple', value: 'purple' },
+          { title: 'Yellow', value: 'yellow' },
+          { title: 'Emerald', value: 'emerald' },
+          { title: 'Blue', value: 'blue' },
+        ],
+        layout: 'dropdown',
+      },
+      initialValue: 'teal',
+      description:
+        'Color for themed buttons (cart button in header, floating promo CTA). Change in Sanity to update site-wide.',
+    }),
+    defineField({
       name: 'featuredEvents',
       title: 'Featured Events for Hero Carousel',
       type: 'array',
