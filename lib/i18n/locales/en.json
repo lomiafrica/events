@@ -190,6 +190,9 @@
     "productDetail": {
       "backToMerch": "Merch",
       "noImage": "No Image Available",
+      "color": "Color",
+      "size": "Size",
+      "noSizeAvailable": "No size available",
       "quantity": "Quantity",
       "total": "Total",
       "outOfStock": "Out of Stock",

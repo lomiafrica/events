@@ -251,15 +251,15 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                 >
                   {typeof product.price === "number"
                     ? product.price
-                        .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
                     : "0"}{" "}
                   F CFA
                 </motion.p>
               </div>
             </div>
 
-            {product.colors && product.colors.length > 1 && (
+            {product.colors && product.colors.length >= 1 && (
               <motion.div
                 className="mb-6"
                 initial={{ opacity: 0 }}
@@ -353,7 +353,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-card text-foreground hover:border-primary",
                         !size.available &&
-                          "cursor-not-allowed border-border text-muted-foreground opacity-50",
+                        "cursor-not-allowed border-border text-muted-foreground opacity-50",
                       )}
                     >
                       {size.name}
@@ -391,8 +391,8 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                       )}
                     >
                       {typeof product.stock === "number" &&
-                      product.stock > 0 &&
-                      !isOutOfStock
+                        product.stock > 0 &&
+                        !isOutOfStock
                         ? `${product.stock} in stock`
                         : "Out of Stock"}
                     </div>
@@ -403,7 +403,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                     {typeof product.description === "string"
                       ? product.description
                       : Array.isArray(product.description) &&
-                          product.description[0]?.children?.[0]?.text
+                        product.description[0]?.children?.[0]?.text
                         ? product.description[0].children[0].text
                         : "No description available"}
                   </p>
@@ -480,18 +480,18 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                     >
                       {isOutOfStock
                         ? t(
-                            currentLanguage,
-                            "merchPage.productDetail.outOfStock",
-                          ) || "Out of Stock"
+                          currentLanguage,
+                          "merchPage.productDetail.outOfStock",
+                        ) || "Out of Stock"
                         : !hasAvailableSizes || !hasValidSizeSelection
                           ? t(
-                              currentLanguage,
-                              "merchPage.productDetail.noSizeAvailable",
-                            ) || "No size available"
+                            currentLanguage,
+                            "merchPage.productDetail.noSizeAvailable",
+                          ) || "No size available"
                           : t(
-                              currentLanguage,
-                              "merchPage.productDetail.addToCart",
-                            )}
+                            currentLanguage,
+                            "merchPage.productDetail.addToCart",
+                          )}
                     </Button>
                     <Button
                       className="w-full h-14 text-lg font-semibold rounded-sm bg-blue-600 hover:bg-blue-700 text-white"

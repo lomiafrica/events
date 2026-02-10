@@ -20,7 +20,7 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const resendApiKey = Deno.env.get("RESEND_API_KEY");
-const fromEmail = Deno.env.get("FROM_EMAIL") || "orders@send.lomi.africa";
+const fromEmail = Deno.env.get("FROM_EMAIL") || "orders@tickets.djaoulient.com";
 const APP_BASE_URL = (
   Deno.env.get("APP_BASE_URL") || "https://www.djaouli.com"
 ).replace(/\/$/, "");
@@ -127,71 +127,61 @@ serve(async (req: Request) => {
     }
 
     // --- 4. Send Email with Resend ---
-    const emailHtmlBody = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Confirmation de votre commande Djaouli</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-          .header { padding: 20px; text-align: center; }
-          .header img { width: 100px; }
-          .content { padding: 30px; }
-          .item-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          .item-table th, .item-table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-          .footer { text-align: center; font-size: 12px; color: #666; padding: 20px; }
-          .total-row td { font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <img src="${logoSrc}" alt="Djaouli Logo" />
-          </div>
-          <div class="content">
-            <h1>Merci pour votre commande, ${firstName}!</h1>
-            <p>Nous avons bien reçu votre commande et nous la préparons pour l'expédition. Voici un récapitulatif :</p>
-            <table class="item-table">
-              <thead>
+    // Table-based layout + inline styles only so email clients (Gmail, Outlook, etc.) don't strip styles and collapse the content
+    const itemsRows = items
+      .map(
+        (item: any) =>
+          `<tr><td style="padding:10px;font-size:14px;border-bottom:1px solid #eee;">${item.product_title}</td><td style="padding:10px;font-size:14px;border-bottom:1px solid #eee;">${item.quantity}</td><td style="padding:10px;font-size:14px;border-bottom:1px solid #eee;">${Number(item.total_amount).toLocaleString("fr-FR")} F CFA</td></tr>`,
+      )
+      .join("");
+
+    const emailHtmlBody = `<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmation de votre commande Djaouli</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;color:#333;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f5f5f5;">
+    <tr>
+      <td align="center" style="padding:24px 16px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#ffffff;">
+          <tr>
+            <td style="padding:24px;text-align:center;">
+              <img src="${logoSrc}" alt="Djaouli Logo" width="100" height="100" style="display:block;margin:0 auto;border:0;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 24px 24px;">
+              <h1 style="margin:0 0 16px;font-size:20px;font-weight:bold;color:#111;">Merci pour votre commande, ${firstName}&nbsp;!</h1>
+              <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">Nous avons bien reçu votre commande et nous la préparons pour l'expédition. Voici un récapitulatif&nbsp;:</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:20px;">
                 <tr>
-                  <th>Article</th>
-                  <th>Quantité</th>
-                  <th>Prix</th>
+                  <th style="padding:10px;text-align:left;font-size:14px;border-bottom:1px solid #eee;">Article</th>
+                  <th style="padding:10px;text-align:left;font-size:14px;border-bottom:1px solid #eee;">Quantité</th>
+                  <th style="padding:10px;text-align:left;font-size:14px;border-bottom:1px solid #eee;">Prix</th>
                 </tr>
-              </thead>
-              <tbody>
-                ${items
-                  .map(
-                    (item: any) => `
-                  <tr>
-                    <td>${item.product_title}</td>
-                    <td>${item.quantity}</td>
-                    <td>${Number(item.total_amount).toLocaleString("fr-FR")} F CFA</td>
-                  </tr>
-                `,
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-            <table class="item-table">
-              <tbody>
-                <tr><td>Sous-total</td><td style="text-align:right;">${(Number(total_amount) - Number(shipping_fee)).toLocaleString("fr-FR")} F CFA</td></tr>
-                <tr><td>Livraison</td><td style="text-align:right;">${Number(shipping_fee).toLocaleString("fr-FR")} F CFA</td></tr>
-                <tr class="total-row"><td>Total</td><td style="text-align:right;">${Number(total_amount).toLocaleString("fr-FR")} F CFA</td></tr>
-              </tbody>
-            </table>
-            <p>Nous vous enverrons une autre notification dès que votre commande sera expédiée.</p>
-            <p>Pour toute question, répondez simplement à cet e-mail.</p>
-          </div>
-          <div class="footer">
-            © ${new Date().getFullYear()} Djaouli Entertainment
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+                ${itemsRows}
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:20px;">
+                <tr><td style="padding:10px;font-size:14px;">Sous-total</td><td style="padding:10px;font-size:14px;text-align:right;">${(Number(total_amount) - Number(shipping_fee)).toLocaleString("fr-FR")} F CFA</td></tr>
+                <tr><td style="padding:10px;font-size:14px;">Livraison</td><td style="padding:10px;font-size:14px;text-align:right;">${Number(shipping_fee).toLocaleString("fr-FR")} F CFA</td></tr>
+                <tr><td style="padding:10px;font-size:14px;font-weight:bold;">Total</td><td style="padding:10px;font-size:14px;font-weight:bold;text-align:right;">${Number(total_amount).toLocaleString("fr-FR")} F CFA</td></tr>
+              </table>
+              <p style="margin:0 0 12px;font-size:15px;line-height:1.5;">Nous vous enverrons une autre notification dès que votre commande sera expédiée.</p>
+              <p style="margin:0;font-size:15px;line-height:1.5;">Pour toute question, répondez simplement à cet e-mail.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 24px;border-top:1px solid #eee;font-size:12px;color:#666;text-align:center;">© ${new Date().getFullYear()} Djaouli Entertainment</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: `Djaouli Entertainment <${fromEmail}>`,

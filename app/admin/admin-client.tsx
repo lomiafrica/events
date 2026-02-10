@@ -651,26 +651,26 @@ export default function AdminClient() {
   // Calculate current event stats from PAID purchases only (always show real business metrics)
   const currentEventStats = selectedEvent
     ? (() => {
-        const paidPurchases = purchases.filter(
-          (p) => p.event_id === selectedEvent && p.status === "paid",
-        );
-        const totalPurchases = paidPurchases.length;
-        const totalTickets = paidPurchases.reduce(
-          (sum, p) => sum + p.quantity,
-          0,
-        );
-        const scannedTickets = paidPurchases.reduce(
-          (sum, p) => sum + (p.is_used ? 1 : 0),
-          0,
-        );
+      const paidPurchases = purchases.filter(
+        (p) => p.event_id === selectedEvent && p.status === "paid",
+      );
+      const totalPurchases = paidPurchases.length;
+      const totalTickets = paidPurchases.reduce(
+        (sum, p) => sum + p.quantity,
+        0,
+      );
+      const scannedTickets = paidPurchases.reduce(
+        (sum, p) => sum + (p.is_used ? 1 : 0),
+        0,
+      );
 
-        return {
-          total_purchases: totalPurchases,
-          total_tickets: totalTickets,
-          scanned_tickets: scannedTickets,
-          event_id: selectedEvent,
-        };
-      })()
+      return {
+        total_purchases: totalPurchases,
+        total_tickets: totalTickets,
+        scanned_tickets: scannedTickets,
+        event_id: selectedEvent,
+      };
+    })()
     : null;
 
   if (!isAuthenticated) {
@@ -838,11 +838,10 @@ export default function AdminClient() {
               variant="ghost"
               size="sm"
               onClick={() => setActiveTab("purchases")}
-              className={`rounded-sm text-xs sm:text-sm ${
-                activeTab === "purchases"
+              className={`rounded-sm text-xs sm:text-sm ${activeTab === "purchases"
                   ? "bg-slate-700 text-white hover:bg-slate-600"
                   : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-              }`}
+                }`}
             >
               Purchases
             </Button>
@@ -850,11 +849,10 @@ export default function AdminClient() {
               variant="ghost"
               size="sm"
               onClick={() => setActiveTab("scans")}
-              className={`rounded-sm text-xs sm:text-sm ${
-                activeTab === "scans"
+              className={`rounded-sm text-xs sm:text-sm ${activeTab === "scans"
                   ? "bg-slate-700 text-white hover:bg-slate-600"
                   : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-              }`}
+                }`}
             >
               Logs
             </Button>
@@ -891,11 +889,10 @@ export default function AdminClient() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setStatusFilter("paid")}
-                        className={`rounded-sm text-xs sm:text-sm ${
-                          statusFilter === "paid"
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "paid"
                             ? "bg-slate-700 text-white hover:bg-slate-600"
                             : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Paid Only
@@ -904,11 +901,10 @@ export default function AdminClient() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setStatusFilter("all")}
-                        className={`rounded-sm text-xs sm:text-sm ${
-                          statusFilter === "all"
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "all"
                             ? "bg-slate-700 text-white hover:bg-slate-600"
                             : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-                        }`}
+                          }`}
                       >
                         All Status
                       </Button>
@@ -916,11 +912,10 @@ export default function AdminClient() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setStatusFilter("pending")}
-                        className={`rounded-sm text-xs sm:text-sm ${
-                          statusFilter === "pending"
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "pending"
                             ? "bg-slate-700 text-white hover:bg-slate-600"
                             : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Pending
@@ -929,11 +924,10 @@ export default function AdminClient() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setStatusFilter("failed")}
-                        className={`rounded-sm text-xs sm:text-sm ${
-                          statusFilter === "failed"
+                        className={`rounded-sm text-xs sm:text-sm ${statusFilter === "failed"
                             ? "bg-slate-700 text-white hover:bg-slate-600"
                             : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Failed
@@ -1231,8 +1225,8 @@ export default function AdminClient() {
             <DialogHeader>
               <DialogTitle className="text-gray-100 text-base sm:text-lg">
                 {selectedPurchase &&
-                (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
-                  selectedPurchase.email_dispatch_attempts === 0)
+                  (selectedPurchase.email_dispatch_status === "NOT_INITIATED" ||
+                    selectedPurchase.email_dispatch_attempts === 0)
                   ? "Send Ticket Email"
                   : "Resend Ticket Email"}
               </DialogTitle>
@@ -1330,7 +1324,7 @@ export default function AdminClient() {
                       <>
                         {selectedPurchase.email_dispatch_status ===
                           "NOT_INITIATED" ||
-                        selectedPurchase.email_dispatch_attempts === 0 ? (
+                          selectedPurchase.email_dispatch_attempts === 0 ? (
                           <>
                             <Send className="h-4 w-4 mr-2" />
                             Send Email

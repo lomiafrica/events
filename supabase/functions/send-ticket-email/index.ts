@@ -1,7 +1,7 @@
 import { corsHeaders } from "../_shared/cors.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 import { Resend } from "npm:resend@2.0.0";
-import { PDFDocument, StandardFonts, rgb, PageSizes } from "npm:pdf-lib@1.17.1";
+import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 
 // Helper function to convert Uint8Array to Base64 string
 function uint8ArrayToBase64(bytes: Uint8Array): string {
@@ -24,9 +24,9 @@ interface IndividualTicket {
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@send.lomi.africa";
+const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@tickets.djaoulient.com";
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "http://localhost:3000";
-const defaultLogoUrl = `${supabaseUrl}/storage/v1/object/public/assets/logo.png`;
+const defaultLogoUrl = "https://www.djaoulient.com/icon.png";
 
 // --- Main Serve Function ---
 Deno.serve(async (req: Request) => {
@@ -171,12 +171,26 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Event data for ticket
+    // Event data for ticket — only set date/time/venue when we have real values (omit row if TBA/missing)
+    const rawDate = (purchaseData.event_date_text || "").trim();
+    const rawTime = (purchaseData.event_time_text || "").trim();
+    const rawVenue = (purchaseData.event_venue_name || "").trim();
+    const tbaOrEmpty = (v: string) =>
+      !v ||
+      v === "TBA" ||
+      v === "Time TBA" ||
+      v === "Venue TBA" ||
+      v === "À confirmer" ||
+      v === "Lieu à confirmer" ||
+      v === "To Be Announced";
+    const hasDate = !tbaOrEmpty(rawDate);
+    const hasTime = !tbaOrEmpty(rawTime);
+    const hasVenue = !tbaOrEmpty(rawVenue);
     const eventDataForTicket = {
       eventName: purchaseData.event_title || "Amazing Event",
-      eventDate: purchaseData.event_date_text || "To Be Announced",
-      eventTime: purchaseData.event_time_text || "Soon",
-      eventVenue: purchaseData.event_venue_name || "Secret Location",
+      eventDate: hasDate ? rawDate : null as string | null,
+      eventTime: hasTime ? rawTime : null as string | null,
+      eventVenue: hasVenue ? rawVenue : null as string | null,
     };
 
     // Calculate actual ticket quantity for bundles
@@ -343,6 +357,9 @@ Deno.serve(async (req: Request) => {
       eventDate: eventDataForTicket.eventDate,
       eventTime: eventDataForTicket.eventTime,
       eventVenue: eventDataForTicket.eventVenue,
+      hasDate: hasDate,
+      hasTime: hasTime,
+      hasVenue: hasVenue,
       quantity: actualTicketQuantity, // Use actual ticket quantity for display
       ticketIdentifier: ticketIdentifiers[0], // Primary identifier for compatibility
       isBundle: isBundle,
@@ -355,60 +372,190 @@ Deno.serve(async (req: Request) => {
     const pdfsToAttach: Array<{ filename: string; content: string }> = [];
 
     if (useIndividualTickets) {
-      // Generate individual PDFs for each ticket
+      // Generate individual PDFs for each ticket (receipt-style layout like kamayakoi)
+      const receiptWidth = 250;
+      const receiptHeight = 400;
+      const rightAlignX = receiptWidth - 10;
+
       for (let i = 0; i < qrCodeData.length; i++) {
         const qr = qrCodeData[i];
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage(PageSizes.A4);
-        const { width, height } = page.getSize();
+        const page = pdfDoc.addPage([receiptWidth, receiptHeight]);
         const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const helveticaBold = await pdfDoc.embedFont(
           StandardFonts.HelveticaBold,
         );
 
-        // Simple color scheme
         const blackColor = rgb(0, 0, 0);
         const whiteColor = rgb(1, 1, 1);
-        const accentColor = rgb(0.2, 0.6, 1); // Nice blue
-        const greyColor = rgb(0.6, 0.6, 0.6);
+        const greyColor = rgb(0.5, 0.5, 0.5);
 
-        // Draw clean dark background
         page.drawRectangle({
           x: 0,
           y: 0,
-          width: width,
-          height: height,
-          color: blackColor,
+          width: receiptWidth,
+          height: receiptHeight,
+          color: whiteColor,
+        });
+        page.drawRectangle({
+          x: 2,
+          y: 2,
+          width: receiptWidth - 4,
+          height: receiptHeight - 4,
+          borderColor: rgb(0.9, 0.9, 0.9),
+          borderWidth: 1,
         });
 
-        // Start from top with QR code
-        let y = height - 100;
+        let y = receiptHeight - 20;
 
-        // QR Code for this specific ticket
+        page.drawText("DJAOULI ENTERTAINMENT", {
+          x: 10,
+          y: y,
+          size: 10,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        y -= 15;
+        page.drawText("VOTRE E-TICKET", {
+          x: 10,
+          y: y,
+          size: 8,
+          font: helvetica,
+          color: greyColor,
+        });
+        y -= 25;
+
+        page.drawLine({
+          start: { x: 10, y: y },
+          end: { x: receiptWidth - 10, y: y },
+          thickness: 0.5,
+          color: greyColor,
+        });
+        y -= 15;
+
+        page.drawText("ÉVÉNEMENT", {
+          x: 10,
+          y: y,
+          size: 7,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        const eventNameW = helvetica.widthOfTextAtSize(ticketProps.eventName, 7);
+        page.drawText(ticketProps.eventName, {
+          x: rightAlignX - eventNameW,
+          y: y,
+          size: 7,
+          font: helvetica,
+          color: blackColor,
+        });
+        y -= 12;
+
+        if (ticketProps.eventDate) {
+          page.drawText("DATE", {
+            x: 10,
+            y: y,
+            size: 7,
+            font: helveticaBold,
+            color: blackColor,
+          });
+          const dateW = helvetica.widthOfTextAtSize(ticketProps.eventDate, 7);
+          page.drawText(ticketProps.eventDate, {
+            x: rightAlignX - dateW,
+            y: y,
+            size: 7,
+            font: helvetica,
+            color: blackColor,
+          });
+          y -= 12;
+        }
+        if (ticketProps.eventTime) {
+          page.drawText("HEURE", {
+            x: 10,
+            y: y,
+            size: 7,
+            font: helveticaBold,
+            color: blackColor,
+          });
+          const timeW = helvetica.widthOfTextAtSize(ticketProps.eventTime, 7);
+          page.drawText(ticketProps.eventTime, {
+            x: rightAlignX - timeW,
+            y: y,
+            size: 7,
+            font: helvetica,
+            color: blackColor,
+          });
+          y -= 12;
+        }
+        if (ticketProps.eventVenue) {
+          page.drawText("LIEU", {
+            x: 10,
+            y: y,
+            size: 7,
+            font: helveticaBold,
+            color: blackColor,
+          });
+          const venueW = helvetica.widthOfTextAtSize(
+            ticketProps.eventVenue,
+            7,
+          );
+          page.drawText(ticketProps.eventVenue, {
+            x: rightAlignX - venueW,
+            y: y,
+            size: 7,
+            font: helvetica,
+            color: blackColor,
+          });
+          y -= 12;
+        }
+
+        page.drawText("TITULAIRE", {
+          x: 10,
+          y: y,
+          size: 7,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        const holderName = `${ticketProps.firstName} ${ticketProps.lastName}`;
+        const holderW = helvetica.widthOfTextAtSize(holderName, 7);
+        page.drawText(holderName, {
+          x: rightAlignX - holderW,
+          y: y,
+          size: 7,
+          font: helvetica,
+          color: blackColor,
+        });
+        y -= 20;
+
+        page.drawLine({
+          start: { x: 10, y: y },
+          end: { x: receiptWidth - 10, y: y },
+          thickness: 0.5,
+          color: greyColor,
+        });
+        y -= 15;
+
         try {
           const qrImage = await pdfDoc.embedPng(qr.qrCodeBytes);
-          const qrSize = 200;
-          const qrX = (width - qrSize) / 2;
+          const qrSize = 100;
+          const qrX = (receiptWidth - qrSize) / 2;
           const qrY = y - qrSize;
+          const qrPadding = 8;
 
-          // Clean white background for QR code
-          const bgPadding = 20;
           page.drawRectangle({
-            x: qrX - bgPadding,
-            y: qrY - bgPadding,
-            width: qrSize + bgPadding * 2,
-            height: qrSize + bgPadding * 2,
-            color: whiteColor,
+            x: qrX - qrPadding,
+            y: qrY - qrPadding,
+            width: qrSize + qrPadding * 2,
+            height: qrSize + qrPadding * 2,
+            borderColor: rgb(0, 0, 0),
+            borderWidth: 1,
           });
-
           page.drawImage(qrImage, {
             x: qrX,
             y: qrY,
             width: qrSize,
             height: qrSize,
           });
-
-          y = qrY - 40;
+          y = qrY - 10;
         } catch (imgError) {
           const embedErrorMsg =
             imgError instanceof Error
@@ -418,93 +565,33 @@ Deno.serve(async (req: Request) => {
             `Error embedding QR for ticket ${i + 1}:`,
             embedErrorMsg,
           );
-
-          const errorText = "[QR Code Unavailable]";
-          const errorWidth = errorText.length * 8;
+          const errorText = "[QR CODE INDISPONIBLE]";
           page.drawText(errorText, {
-            x: (width - errorWidth) / 2,
-            y: y - 30,
-            size: 14,
+            x: (receiptWidth - 90) / 2,
+            y: y - 15,
+            size: 6,
             font: helvetica,
             color: rgb(0.8, 0.2, 0.2),
           });
-          y -= 80;
+          y -= 25;
         }
 
-        // ADMIT ONE badge for individual tickets
-        const admissionText = "ADMIT ONE";
-        const admissionTextSize = 18;
-        const textWidth = admissionText.length * (admissionTextSize * 0.6);
-        const badgeWidth = textWidth + 60;
-        const badgeHeight = 45;
-        const badgeX = (width - badgeWidth) / 2;
-        const badgeY = y - badgeHeight;
-
-        // Simple rectangular badge
-        page.drawRectangle({
-          x: badgeX,
-          y: badgeY,
-          width: badgeWidth,
-          height: badgeHeight,
-          color: accentColor,
-        });
-
-        // Text centered in the badge
-        const textX = badgeX + (badgeWidth - textWidth) / 2;
-        const textY = badgeY + (badgeHeight - admissionTextSize) / 2 + 5;
-
-        page.drawText(admissionText, {
-          x: textX,
-          y: textY,
-          size: admissionTextSize,
-          font: helveticaBold,
-          color: whiteColor,
-        });
-
-        y = badgeY - 40;
-
-        // Display name for individual ticket (no "+Friends" since it's individual)
-        const displayName = `${ticketProps.firstName} ${ticketProps.lastName}`;
-        const displayNameWidth = displayName.length * 9;
-        page.drawText(displayName, {
-          x: (width - displayNameWidth) / 2,
-          y: y,
-          size: 18,
-          font: helveticaBold,
-          color: whiteColor,
-        });
-
-        y -= 35;
-
-        // Event title below the name
-        const eventTitleWidth = ticketProps.eventName.length * 8;
-        page.drawText(ticketProps.eventName, {
-          x: (width - eventTitleWidth) / 2,
-          y: y,
-          size: 16,
-          font: helvetica,
-          color: accentColor,
-        });
-
-        // Date/time and venue at the bottom with interpunct
-        const bottomY = 80;
-        const eventDetails = `${ticketProps.eventDate} at ${ticketProps.eventTime} • ${ticketProps.eventVenue}`;
-        const eventDetailsWidth = eventDetails.length * 7;
-        page.drawText(eventDetails, {
-          x: (width - eventDetailsWidth) / 2,
+        const bottomY = 25;
+        const footerMsg1 = "Présentez ce QR code à l'entrée";
+        const footerMsg1W = helvetica.widthOfTextAtSize(footerMsg1, 5);
+        page.drawText(footerMsg1, {
+          x: rightAlignX - footerMsg1W,
           y: bottomY,
-          size: 14,
+          size: 5,
           font: helvetica,
-          color: whiteColor,
+          color: greyColor,
         });
-
-        // Add ticket number indicator
-        const ticketNumberText = `Ticket ${i + 1} of ${actualTicketQuantity}`;
-        const ticketNumberWidth = ticketNumberText.length * 6;
-        page.drawText(ticketNumberText, {
-          x: (width - ticketNumberWidth) / 2,
-          y: 50,
-          size: 12,
+        const ticketNumText = `Ticket ${i + 1} / ${actualTicketQuantity}`;
+        const ticketNumW = helvetica.widthOfTextAtSize(ticketNumText, 5);
+        page.drawText(ticketNumText, {
+          x: rightAlignX - ticketNumW,
+          y: bottomY - 8,
+          size: 5,
           font: helvetica,
           color: greyColor,
         });
@@ -516,58 +603,204 @@ Deno.serve(async (req: Request) => {
         });
       }
     } else {
-      // Legacy single PDF generation
+      // Legacy single PDF generation (receipt-style layout like kamayakoi)
+      const receiptWidth = 250;
+      const receiptHeight = 450;
+      const legacyRightAlignX = receiptWidth - 10;
+
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage(PageSizes.A4);
-      const { width, height } = page.getSize();
+      const page = pdfDoc.addPage([receiptWidth, receiptHeight]);
       const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-      // Simple color scheme
       const blackColor = rgb(0, 0, 0);
       const whiteColor = rgb(1, 1, 1);
-      const accentColor = rgb(0.2, 0.6, 1); // Nice blue
-      const greyColor = rgb(0.6, 0.6, 0.6);
+      const greyColor = rgb(0.5, 0.5, 0.5);
 
-      // Draw clean dark background
       page.drawRectangle({
         x: 0,
         y: 0,
-        width: width,
-        height: height,
-        color: blackColor,
+        width: receiptWidth,
+        height: receiptHeight,
+        color: whiteColor,
+      });
+      page.drawRectangle({
+        x: 2,
+        y: 2,
+        width: receiptWidth - 4,
+        height: receiptHeight - 4,
+        borderColor: rgb(0.9, 0.9, 0.9),
+        borderWidth: 1,
       });
 
-      // Start from top with QR code
-      let y = height - 100;
+      let y = receiptHeight - 20;
 
-      // QR Code at the very top
+      page.drawText("DJAOULI ENTERTAINMENT", {
+        x: 10,
+        y: y,
+        size: 10,
+        font: helveticaBold,
+        color: blackColor,
+      });
+      y -= 15;
+      page.drawText("VOTRE E-TICKET", {
+        x: 10,
+        y: y,
+        size: 8,
+        font: helvetica,
+        color: greyColor,
+      });
+      y -= 25;
+
+      page.drawLine({
+        start: { x: 10, y: y },
+        end: { x: receiptWidth - 10, y: y },
+        thickness: 0.5,
+        color: greyColor,
+      });
+      y -= 15;
+
+      page.drawText("ÉVÉNEMENT", {
+        x: 10,
+        y: y,
+        size: 7,
+        font: helveticaBold,
+        color: blackColor,
+      });
+      const legacyEventNameW = helvetica.widthOfTextAtSize(
+        ticketProps.eventName,
+        7,
+      );
+      page.drawText(ticketProps.eventName, {
+        x: legacyRightAlignX - legacyEventNameW,
+        y: y,
+        size: 7,
+        font: helvetica,
+        color: blackColor,
+      });
+      y -= 12;
+
+      if (ticketProps.eventDate) {
+        page.drawText("DATE", {
+          x: 10,
+          y: y,
+          size: 7,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        const legacyDateW = helvetica.widthOfTextAtSize(
+          ticketProps.eventDate,
+          7,
+        );
+        page.drawText(ticketProps.eventDate, {
+          x: legacyRightAlignX - legacyDateW,
+          y: y,
+          size: 7,
+          font: helvetica,
+          color: blackColor,
+        });
+        y -= 12;
+      }
+      if (ticketProps.eventTime) {
+        page.drawText("HEURE", {
+          x: 10,
+          y: y,
+          size: 7,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        const legacyTimeW = helvetica.widthOfTextAtSize(
+          ticketProps.eventTime,
+          7,
+        );
+        page.drawText(ticketProps.eventTime, {
+          x: legacyRightAlignX - legacyTimeW,
+          y: y,
+          size: 7,
+          font: helvetica,
+          color: blackColor,
+        });
+        y -= 12;
+      }
+      if (ticketProps.eventVenue) {
+        page.drawText("LIEU", {
+          x: 10,
+          y: y,
+          size: 7,
+          font: helveticaBold,
+          color: blackColor,
+        });
+        const legacyVenueW = helvetica.widthOfTextAtSize(
+          ticketProps.eventVenue,
+          7,
+        );
+        page.drawText(ticketProps.eventVenue, {
+          x: legacyRightAlignX - legacyVenueW,
+          y: y,
+          size: 7,
+          font: helvetica,
+          color: blackColor,
+        });
+        y -= 12;
+      }
+
+      page.drawText("TITULAIRE", {
+        x: 10,
+        y: y,
+        size: 7,
+        font: helveticaBold,
+        color: blackColor,
+      });
+      const legacyDisplayName = getNameText(
+        ticketProps.firstName,
+        ticketProps.lastName,
+        ticketProps.quantity,
+      );
+      const legacyHolderW = helvetica.widthOfTextAtSize(
+        legacyDisplayName,
+        7,
+      );
+      page.drawText(legacyDisplayName, {
+        x: legacyRightAlignX - legacyHolderW,
+        y: y,
+        size: 7,
+        font: helvetica,
+        color: blackColor,
+      });
+      y -= 20;
+
+      page.drawLine({
+        start: { x: 10, y: y },
+        end: { x: receiptWidth - 10, y: y },
+        thickness: 0.5,
+        color: greyColor,
+      });
+      y -= 15;
+
       if (qrCodeData.length > 0) {
-        const qr = qrCodeData[0]; // Use first (and only) QR code for legacy
+        const qr = qrCodeData[0];
         try {
           const qrImage = await pdfDoc.embedPng(qr.qrCodeBytes);
-          const qrSize = 200;
-          const qrX = (width - qrSize) / 2;
+          const qrSize = 100;
+          const qrX = (receiptWidth - qrSize) / 2;
           const qrY = y - qrSize;
+          const qrPadding = 8;
 
-          // Clean white background for QR code
-          const bgPadding = 20;
           page.drawRectangle({
-            x: qrX - bgPadding,
-            y: qrY - bgPadding,
-            width: qrSize + bgPadding * 2,
-            height: qrSize + bgPadding * 2,
-            color: whiteColor,
+            x: qrX - qrPadding,
+            y: qrY - qrPadding,
+            width: qrSize + qrPadding * 2,
+            height: qrSize + qrPadding * 2,
+            borderColor: rgb(0, 0, 0),
+            borderWidth: 1,
           });
-
           page.drawImage(qrImage, {
             x: qrX,
             y: qrY,
             width: qrSize,
             height: qrSize,
           });
-
-          y = qrY - 40;
+          y = qrY - 10;
         } catch (imgError) {
           const embedErrorMsg =
             imgError instanceof Error
@@ -576,100 +809,40 @@ Deno.serve(async (req: Request) => {
           console.error(
             `Error embedding QR for ${purchaseIdFromRequest}: ${embedErrorMsg}`,
           );
-
-          const errorText = "[QR Code Unavailable]";
-          const errorWidth = errorText.length * 8;
+          const errorText = "[QR CODE INDISPONIBLE]";
           page.drawText(errorText, {
-            x: (width - errorWidth) / 2,
-            y: y - 30,
-            size: 14,
+            x: (receiptWidth - 90) / 2,
+            y: y - 15,
+            size: 6,
             font: helvetica,
             color: rgb(0.8, 0.2, 0.2),
           });
-          y -= 80;
+          y -= 25;
         }
       } else {
-        const missingText = "[QR Code Data Missing]";
-        const missingWidth = missingText.length * 8;
+        const missingText = "[QR UNAVAILABLE]";
         page.drawText(missingText, {
-          x: (width - missingWidth) / 2,
-          y: y - 30,
-          size: 14,
+          x: (receiptWidth - 90) / 2,
+          y: y - 15,
+          size: 6,
           font: helvetica,
           color: greyColor,
         });
-        y -= 80;
+        y -= 25;
       }
 
-      // ADMIT badge - simple rectangle
-      const admissionText = getAdmissionText(ticketProps.quantity);
-      const admissionTextSize = 18;
-      const textWidth = admissionText.length * (admissionTextSize * 0.6); // Approximate text width
-      const badgeWidth = textWidth + 60; // More padding for better look
-      const badgeHeight = 45;
-      const badgeX = (width - badgeWidth) / 2;
-      const badgeY = y - badgeHeight;
-
-      // Simple rectangular badge
-      page.drawRectangle({
-        x: badgeX,
-        y: badgeY,
-        width: badgeWidth,
-        height: badgeHeight,
-        color: accentColor,
-      });
-
-      // Text centered in the badge
-      const textX = badgeX + (badgeWidth - textWidth) / 2;
-      const textY = badgeY + (badgeHeight - admissionTextSize) / 2 + 5; // +5 for better vertical centering
-
-      page.drawText(admissionText, {
-        x: textX,
-        y: textY,
-        size: admissionTextSize,
-        font: helveticaBold,
-        color: whiteColor,
-      });
-
-      y = badgeY - 40;
-
-      // Display name based on quantity logic - centered below badge
-      const displayName = getNameText(
-        ticketProps.firstName,
-        ticketProps.lastName,
-        ticketProps.quantity,
+      const legacyBottomY = 25;
+      const legacyFooterMsg1 = "Présentez ce QR code à l'entrée";
+      const legacyFooterMsg1W = helvetica.widthOfTextAtSize(
+        legacyFooterMsg1,
+        5,
       );
-      const displayNameWidth = displayName.length * 9;
-      page.drawText(displayName, {
-        x: (width - displayNameWidth) / 2,
-        y: y,
-        size: 18,
-        font: helveticaBold,
-        color: whiteColor,
-      });
-
-      y -= 35;
-
-      // Event title below the name
-      const eventTitleWidth = ticketProps.eventName.length * 8;
-      page.drawText(ticketProps.eventName, {
-        x: (width - eventTitleWidth) / 2,
-        y: y,
-        size: 16,
+      page.drawText(legacyFooterMsg1, {
+        x: legacyRightAlignX - legacyFooterMsg1W,
+        y: legacyBottomY,
+        size: 5,
         font: helvetica,
-        color: accentColor,
-      });
-
-      // Date/time and venue at the bottom with interpunct
-      const bottomY = 80;
-      const eventDetails = `${ticketProps.eventDate} at ${ticketProps.eventTime} • ${ticketProps.eventVenue}`;
-      const eventDetailsWidth = eventDetails.length * 7;
-      page.drawText(eventDetails, {
-        x: (width - eventDetailsWidth) / 2,
-        y: bottomY,
-        size: 14,
-        font: helvetica,
-        color: whiteColor,
+        color: greyColor,
       });
 
       const pdfBytes = await pdfDoc.save();
@@ -680,132 +853,64 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- 5. Send Email with Resend (with PDF attachment) ---
-    // Fetch and embed the logo image as Base64 from Supabase storage to prevent email clients from blocking it.
-    // If embedding fails, fall back to using the URL directly. Logo loading never affects email sending.
-    let logoSrc = defaultLogoUrl; // Default to URL - email sending always works
+    // Use logo URL directly for reliable display in email clients
+    const logoSrc = defaultLogoUrl;
 
-    try {
-      console.log(
-        "Attempting to embed logo from Supabase storage bucket into email...",
-      );
-      const logoResponse = await fetch(defaultLogoUrl);
+    const dateTimeRow =
+      ticketProps.eventDate || ticketProps.eventTime
+        ? `<tr><td style="padding:4px 0;font-size:14px;"><strong>Date</strong></td><td style="padding:4px 0;font-size:14px;">${[ticketProps.eventDate, ticketProps.eventTime].filter(Boolean).join(" · ")}</td></tr>`
+        : "";
+    const lieuRow = ticketProps.eventVenue
+      ? `<tr><td style="padding:4px 0;font-size:14px;"><strong>Lieu</strong></td><td style="padding:4px 0;font-size:14px;">${ticketProps.eventVenue}</td></tr>`
+      : "";
 
-      if (logoResponse.ok) {
-        try {
-          const logoBytes = new Uint8Array(await logoResponse.arrayBuffer());
-          const logoBase64 = uint8ArrayToBase64(logoBytes);
-          logoSrc = `data:image/png;base64,${logoBase64}`;
-          console.log(
-            "Successfully fetched and encoded logo from Supabase storage for email embedding.",
-          );
-        } catch (encodingError) {
-          // If base64 encoding fails, fall back to URL
-          console.warn(
-            "Failed to encode logo as base64, falling back to URL:",
-            encodingError,
-          );
-          logoSrc = defaultLogoUrl;
-        }
-      } else {
-        // If fetch fails, fall back to URL
-        console.warn(
-          `Failed to fetch logo from Supabase storage (status: ${logoResponse.status}), using URL fallback.`,
-        );
-        logoSrc = defaultLogoUrl;
-      }
-    } catch (logoError) {
-      // Any error in logo processing - just log and continue with URL
-      console.warn(
-        "Error processing logo, using URL fallback (email sending unaffected):",
-        logoError instanceof Error ? logoError.message : logoError,
-      );
-      logoSrc = defaultLogoUrl;
-    }
-
-    const emailHtmlBody = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Votre e-ticket pour ${ticketProps.eventName}</title>
-        <style type="text/css">
-          .logo-img { width: 100px; height: auto; border-radius: 6px; object-fit: contain; }
-          .email-header { padding: 20px; text-align: center; background-color: #ffffff; }
-        </style>
-      </head>
-      <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #333;">
-        
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          
-          <div class="email-header">
-            <img src="${logoSrc}" alt="Djaouli Entertainment" class="logo-img" />
-          </div>
-          
-          <div style="padding: 30px;">
-            <h1 style="color: #333; font-size: 24px; margin-bottom: 20px;">Votre ticket pour ${ticketProps.eventName}</h1>
-          
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-            Hello ${ticketProps.firstName},
-          </p>
-          
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-            Merci pour votre achat ! Votre e-ticket pour <strong>${ticketProps.eventName}</strong> a été généré avec succès.
-            ${ticketProps.isBundle ? `<br><br>Vous avez acheté ${ticketProps.bundleQuantity} bundle(s) qui inclut ${ticketProps.quantity} ticket(s) au total.` : ""}
-            ${ticketProps.useIndividualTickets ? `<br><br><strong>🎟️ Vous avez reçu ${ticketProps.quantity} QR codes individuels</strong> - un pour chaque personne.` : ""}
-          </p>
-          
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 30px;">
-            <h2 style="color: #333; font-size: 18px; margin-bottom: 15px; margin-top: 0;">Summary</h2>
-            
-            <p style="margin: 8px 0; font-size: 14px;">
-              <strong>Événement :</strong> ${ticketProps.eventName}
-            </p>
-            
-            <p style="margin: 8px 0; font-size: 14px;">
-              <strong>Ticket ID :</strong> ${ticketProps.ticketIdentifier}
-            </p>
-            
-            <p style="margin: 8px 0; font-size: 14px;">
-              <strong>Date :</strong> ${ticketProps.eventDate} à ${ticketProps.eventTime}
-            </p>
-            
-            <p style="margin: 8px 0; font-size: 14px;">
-              <strong>Lieu :</strong> ${ticketProps.eventVenue}
-            </p>
-          </div>
-          
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-            ${
-              ticketProps.useIndividualTickets
-                ? `Vos ${ticketProps.quantity} QR codes se trouvent en pièce jointe. Chaque personne doit utiliser son propre QR code le jour J.`
-                : `Votre QR code se trouve en pièce jointe. Conservez-le précieusement et présentez-le nous le jour J.`
-            }
-          </p>
-
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-            Si vous avez des questions, contactez notre équipe en répondant à cet email.
-          </p>
-          
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-            Nous avons hâte de vous retrouver !
-          </p>
-          
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-          
-          <p style="font-size: 12px; color: #666; text-align: center; margin: 0;">
-            © ${new Date().getFullYear()} Djaouli Entertainment • Fait avec ❤️ en Côte d'Ivoire
-          </p>
-          
-          <p style="font-size: 12px; color: #666; text-align: center; margin: 5px 0 0 0;">
-            Ceci est un email automatique.
-          </p>
-          
-          </div>
-        </div>
-        
-      </body>
-      </html>`;
+    // Inline styles only, no border-radius/overflow (stripped by many clients and can cause collapse). Explicit width on table for reliable layout.
+    const emailHtmlBody = `<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votre ticket - ${ticketProps.eventName}</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f0f0f0;color:#333;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f0f0f0;">
+    <tr>
+      <td align="center" style="padding:24px 16px;">
+        <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="width:560px;max-width:100%;background-color:#ffffff;">
+          <tr>
+            <td style="padding:24px 24px 16px;text-align:center;">
+              <img src="${logoSrc}" alt="Djaouli Entertainment" width="80" height="80" style="display:block;margin:0 auto;border:0;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 24px 24px;">
+              <h1 style="margin:0 0 16px;font-size:20px;font-weight:bold;color:#111;">Votre ticket pour ${ticketProps.eventName}</h1>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">Bonjour ${ticketProps.firstName},</p>
+              <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">Merci pour votre achat. Votre e-ticket est en pièce jointe.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f8f8f8;">
+                <tr>
+                  <td style="padding:16px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr><td style="padding:4px 0;font-size:14px;"><strong>Événement</strong></td><td style="padding:4px 0;font-size:14px;">${ticketProps.eventName}</td></tr>
+                      ${dateTimeRow}
+                      ${lieuRow}
+                      <tr><td style="padding:4px 0;font-size:14px;"><strong>Réf.</strong></td><td style="padding:4px 0;font-size:14px;">${ticketProps.ticketIdentifier}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:20px 0 0;font-size:14px;line-height:1.5;color:#555;">Présentez le QR code (en pièce jointe) à l'entrée.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 24px;border-top:1px solid #eee;font-size:12px;color:#888;text-align:center;">© ${new Date().getFullYear()} Djaouli Entertainment</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: `Djaouli Entertainment <${fromEmail}>`,
