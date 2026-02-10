@@ -85,9 +85,9 @@ const CartItems = ({
                 <p className="text-muted-foreground">
                   {cart.cost.shippingAmount &&
                   Number(cart.cost.shippingAmount.amount) > 0
-                    ? `${Number(
-                        cart.cost.shippingAmount.amount,
-                      ).toLocaleString("fr-FR")} F CFA`
+                    ? `${Number(cart.cost.shippingAmount.amount).toLocaleString(
+                        "fr-FR",
+                      )} F CFA`
                     : t(currentLanguage, "cartModal.freeShipping")}
                 </p>
               </div>

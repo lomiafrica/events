@@ -226,10 +226,7 @@ export default function CartPurchaseForm() {
                       ? `${Number(
                           cart.cost.shippingAmount.amount,
                         ).toLocaleString("fr-FR")} F CFA`
-                      : t(
-                          currentLanguage,
-                          "cartPurchaseForm.freeShipping",
-                        )}
+                      : t(currentLanguage, "cartPurchaseForm.freeShipping")}
                   </p>
                 </div>
               )}

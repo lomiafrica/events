@@ -38,12 +38,7 @@ export function PaymentCancelClient({
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center text-gray-600 dark:text-gray-300">
-                <p>
-                  {t(
-                    currentLanguage,
-                    `${translationBaseKey}.description`,
-                  )}
-                </p>
+                <p>{t(currentLanguage, `${translationBaseKey}.description`)}</p>
                 {purchaseId && (
                   <p className="text-sm mt-2 font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded">
                     {t(currentLanguage, `${translationBaseKey}.orderId`, {
@@ -57,7 +52,10 @@ export function PaymentCancelClient({
                 <div className="flex items-center gap-2 mb-2">
                   <ArrowLeft className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                   <h3 className="font-semibold text-orange-800 dark:text-orange-200">
-                    {t(currentLanguage, `${translationBaseKey}.whatsNext.title`)}
+                    {t(
+                      currentLanguage,
+                      `${translationBaseKey}.whatsNext.title`,
+                    )}
                   </h3>
                 </div>
                 <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">

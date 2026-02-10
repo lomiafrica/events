@@ -23,7 +23,8 @@ export default function GalleryClientComponent() {
     const map = new Map<string, ImageProps[]>();
 
     for (const img of images) {
-      const title = img.title?.trim() || t(currentLanguage, "galleryPage.untitledSection");
+      const title =
+        img.title?.trim() || t(currentLanguage, "galleryPage.untitledSection");
       if (!map.has(title)) {
         titleOrder.push(title);
         map.set(title, []);
@@ -168,49 +169,57 @@ export default function GalleryClientComponent() {
           )}
 
           {/* Sections grouped by gallery title (from Sanity gallery document) */}
-          {imagesByTitle.map(({ title: sectionTitle, images: sectionImages }) => (
-            <section key={sectionTitle} className="mb-24 first:mt-0 mt-4">
-              <h2 className="text-2xl sm:text-3xl font-medium text-zinc-800 dark:text-white mb-6 tracking-tight">
-                {sectionTitle}
-              </h2>
-              <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-                {sectionImages.map(({ id, url, width, height, tags }, index) => {
-                  const numericWidth = parseInt(width, 10);
-                  const numericHeight = parseInt(height, 10);
-                  return (
-                    <div
-                      key={`${sectionTitle}-${id}`}
-                      onClick={() => setZoomedImageId(id)}
-                      className={`
+          {imagesByTitle.map(
+            ({ title: sectionTitle, images: sectionImages }) => (
+              <section key={sectionTitle} className="mb-24 first:mt-0 mt-4">
+                <h2 className="text-2xl sm:text-3xl font-medium text-zinc-800 dark:text-white mb-6 tracking-tight">
+                  {sectionTitle}
+                </h2>
+                <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
+                  {sectionImages.map(
+                    ({ id, url, width, height, tags }, index) => {
+                      const numericWidth = parseInt(width, 10);
+                      const numericHeight = parseInt(height, 10);
+                      return (
+                        <div
+                          key={`${sectionTitle}-${id}`}
+                          onClick={() => setZoomedImageId(id)}
+                          className={`
                                         relative 
                                         mb-5 block w-full cursor-zoom-in
                                         after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-sm after:shadow-highlight
                                     `}
-                    >
-                      <Image
-                        alt={sectionTitle ? `Gallery photo - ${sectionTitle}` : "Gallery photo"}
-                        className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
-                        style={{ transform: "translate3d(0, 0, 0)" }}
-                        src={url}
-                        width={!isNaN(numericWidth) ? numericWidth : 720}
-                        height={!isNaN(numericHeight) ? numericHeight : 480}
-                        sizes="(max-width: 640px) 100vw,
+                        >
+                          <Image
+                            alt={
+                              sectionTitle
+                                ? `Gallery photo - ${sectionTitle}`
+                                : "Gallery photo"
+                            }
+                            className="transform rounded-sm brightness-90 transition will-change-auto group-hover:brightness-110"
+                            style={{ transform: "translate3d(0, 0, 0)" }}
+                            src={url}
+                            width={!isNaN(numericWidth) ? numericWidth : 720}
+                            height={!isNaN(numericHeight) ? numericHeight : 480}
+                            sizes="(max-width: 640px) 100vw,
                                           (max-width: 1280px) 50vw,
                                           (max-width: 1536px) 33vw,
                                           25vw"
-                        priority={index < 3}
-                      />
-                      {tags && tags.length > 0 && (
-                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
-                          {tags[0]}
+                            priority={index < 3}
+                          />
+                          {tags && tags.length > 0 && (
+                            <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm shadow-lg z-10">
+                              {tags[0]}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+                      );
+                    },
+                  )}
+                </div>
+              </section>
+            ),
+          )}
         </div>
       </div>
 
@@ -271,7 +280,11 @@ export default function GalleryClientComponent() {
                   onClick={handleImageClick} // Click this whole area to further zoom/unzoom
                 >
                   <Image
-                    alt={zoomedImage.title ? `Gallery - ${zoomedImage.title}` : `Zoomed gallery photo ${zoomedImage.id}`}
+                    alt={
+                      zoomedImage.title
+                        ? `Gallery - ${zoomedImage.title}`
+                        : `Zoomed gallery photo ${zoomedImage.id}`
+                    }
                     className="object-contain w-full h-full rounded-sm" // Transform class removed
                     style={{ transform: "translate3d(0, 0, 0)" }} // Keep for potential GPU layer promotion
                     src={imageSrc}
@@ -280,7 +293,8 @@ export default function GalleryClientComponent() {
                     sizes={imageSizes}
                   />
                   {/* Gallery title and tag relative to this scaling wrapper */}
-                  {(zoomedImage.title || (zoomedImage.tags && zoomedImage.tags.length > 0)) && (
+                  {(zoomedImage.title ||
+                    (zoomedImage.tags && zoomedImage.tags.length > 0)) && (
                     <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center gap-2 z-10">
                       {zoomedImage.title && (
                         <span className="bg-black/70 text-white text-sm px-2 py-1 rounded-sm">
