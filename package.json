@@ -25,8 +25,8 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.38.0",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.2",
     "ldrs": "^1.1.9",
     "lucide-react": "^0.485.0",
     "next": "^16.2.1",
@@ -60,5 +60,32 @@
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "dompurify": "^3.4.11",
+      "undici": "^7.28.0",
+      "next": "^16.2.6",
+      "minimatch": "^9.0.7",
+      "vite": "^7.3.5",
+      "lodash": "^4.18.0",
+      "lodash-es": "^4.18.0",
+      "picomatch": "^4.0.4",
+      "ws": "^8.21.0",
+      "brace-expansion": "^5.0.6",
+      "uuid": "^13.0.1",
+      "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+      "follow-redirects": "^1.16.0",
+      "form-data": "^4.0.6",
+      "markdown-it": "^14.2.0",
+      "@isaacs/brace-expansion": "^5.0.1",
+      "flatted": "^3.4.2",
+      "glob": "^10.5.0",
+      "postcss": "^8.5.10",
+      "prismjs": "^1.30.0",
+      "rollup": "^4.59.0",
+      "tar": "^7.5.16",
+      "yaml": "^2.8.3"
+    }
   }
 }
