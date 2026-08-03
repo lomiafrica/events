@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { VerifyClient } from "./verify-client";
+import { VerifyClient } from "@/components/verify/verify-client";
 import { cookies } from "next/headers";
 
 const PIN_CACHE_KEY = "staff_verification_pin";

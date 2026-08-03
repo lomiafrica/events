@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/contexts/TranslationContext";
-import ParallaxGallery from "@/components/event/parallax";
+import ParallaxGallery from "@/components/events/parallax";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { t } from "@/lib/i18n/translations";

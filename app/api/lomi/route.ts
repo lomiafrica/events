@@ -1,9 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { Buffer } from "node:buffer";
+import { NextRequest } from "next/server";
 
 // --- Helper: Check if webhook has already been processed ---
-async function isWebhookAlreadyProcessed(supabase, webhookEventId, purchaseId) {
+async function isWebhookAlreadyProcessed(
+  supabase: SupabaseClient,
+  webhookEventId: string,
+  purchaseId: string | undefined,
+) {
   try {
     const { data, error } = await supabase.rpc(
       "check_webhook_already_processed",
@@ -26,7 +31,11 @@ async function isWebhookAlreadyProcessed(supabase, webhookEventId, purchaseId) {
 }
 
 // --- Helper: Mark webhook as processed ---
-async function markWebhookAsProcessed(supabase, webhookEventId, purchaseId) {
+async function markWebhookAsProcessed(
+  supabase: SupabaseClient,
+  webhookEventId: string,
+  purchaseId: string,
+) {
   try {
     const { error } = await supabase.rpc("update_purchase_webhook_metadata", {
       p_purchase_id: purchaseId,
@@ -43,7 +52,11 @@ async function markWebhookAsProcessed(supabase, webhookEventId, purchaseId) {
 }
 
 // --- Helper: Verify Lomi Webhook Signature ---
-async function verifyLomiWebhook(rawBody, signatureHeader, webhookSecret) {
+async function verifyLomiWebhook(
+  rawBody: Buffer,
+  signatureHeader: string | null,
+  webhookSecret: string,
+) {
   if (!signatureHeader) {
     throw new Error("Missing Lomi signature header (X-Lomi-Signature).");
   }
@@ -67,7 +80,7 @@ async function verifyLomiWebhook(rawBody, signatureHeader, webhookSecret) {
 }
 
 // --- POST Handler for App Router ---
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   console.log(
     "🚀 Events Webhook: Received request at",
     new Date().toISOString(),
@@ -111,7 +124,7 @@ export async function POST(request) {
   });
 
   // Read the raw body
-  let rawBody;
+  let rawBody: string;
   try {
     rawBody = await request.text();
   } catch (bodyError) {
@@ -130,7 +143,7 @@ export async function POST(request) {
 
   try {
     eventPayload = await verifyLomiWebhook(
-      rawBody,
+      Buffer.from(rawBody),
       signature,
       lomiWebhookSecret,
     );
@@ -139,12 +152,13 @@ export async function POST(request) {
       eventPayload?.event || "Event type missing",
     );
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error(
       "Events Webhook: Lomi signature verification failed:",
-      err.message,
+      message,
     );
     return new Response(
-      JSON.stringify({ error: `Webhook verification failed: ${err.message}` }),
+      JSON.stringify({ error: `Webhook verification failed: ${message}` }),
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -402,15 +416,19 @@ export async function POST(request) {
             );
           }
         } catch (functionError) {
+          const error =
+            functionError instanceof Error
+              ? functionError
+              : new Error(String(functionError));
           console.error(
             `❌ Events Webhook: Exception calling send-ticket-email for ${purchaseId}:`,
-            functionError,
+            error,
           );
           // Log additional context about the error
           console.error(`❌ Function Error Details:`, {
-            name: functionError.name,
-            message: functionError.message,
-            stack: functionError.stack,
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
           });
 
           // Try to update purchase status to indicate email dispatch failed
@@ -418,7 +436,7 @@ export async function POST(request) {
             await supabase.rpc("update_email_dispatch_status", {
               p_purchase_id: purchaseId,
               p_email_dispatch_status: "DISPATCH_FAILED",
-              p_email_dispatch_error: `Function invocation error: ${functionError.message}`,
+              p_email_dispatch_error: `Function invocation error: ${error.message}`,
             });
           } catch (updateError) {
             console.error(

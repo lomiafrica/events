@@ -4,7 +4,7 @@
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { Metadata } from "next";
-import GalleryClientComponent from "./gallery-client"; // Import the new client component
+import GalleryClientComponent from "@/components/gallery/gallery-client";
 
 // Metadata export remains here (this is now a Server Component)
 export const metadata: Metadata = {

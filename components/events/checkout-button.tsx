@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import PurchaseFormModal from "@/components/event/PurchaseFormModal";
+import PurchaseFormModal from "@/components/events/purchase-form-modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Ticket, Package } from "lucide-react";

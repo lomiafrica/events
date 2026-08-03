@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getEventBySlug } from "@/lib/sanity/queries";
-import EventPageContent from "./event-page-content";
+import EventPageContent from "@/components/events/event-page-content";
 
 // Define specific type for TicketType
 interface TicketTypeData {

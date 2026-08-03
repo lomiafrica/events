@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import AdminClient from "./admin-client";
+import AdminClient from "@/components/admin/admin-client";
 import LoadingComponent from "@/components/ui/Bouncer";
 
 export default function AdminPage() {

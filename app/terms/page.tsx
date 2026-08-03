@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import TermsClientPage from "./terms-client";
+import TermsClientPage from "@/components/terms/terms-client";
 
 export const metadata: Metadata = {
   title: "Terms",

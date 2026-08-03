@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getEventsForScroller } from "@/lib/sanity/queries";
 import { t } from "@/lib/i18n/translations";
-import EventsPageContent from "./events-page-content";
+import EventsPageContent from "@/components/events/events-page-content";
 
 interface EventImageData {
   _id: string;

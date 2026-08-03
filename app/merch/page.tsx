@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getAllProducts } from "@/lib/sanity/queries";
 import LoadingComponent from "@/components/ui/Bouncer";
-import MerchContentClient from "./merch-content-client";
+import MerchContentClient from "@/components/merch/merch-content-client";
 
 export const metadata: Metadata = {
   title: "Merch | Djaouli",

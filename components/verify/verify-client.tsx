@@ -26,7 +26,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
-import { setStaffPinCookie } from "./actions";
+import { setStaffPinCookie } from "@/app/verify/actions";
 
 interface TicketData {
   purchase_id: string;

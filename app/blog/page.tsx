@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getAllNewsPosts } from "@/lib/queries/news";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
-import NewsContent from "./news-client";
+import NewsContent from "@/components/blog/news-client";
 
 export async function generateMetadata(): Promise<Metadata> {
   // For now, return static metadata - in a real app you'd get the current language

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { PaymentCancelClient } from "./payment-cancel-client";
+import { PaymentCancelClient } from "@/components/payment/payment-cancel-client";
 
 interface SearchParamsProps {
   searchParams: Promise<{
