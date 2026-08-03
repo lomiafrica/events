@@ -63,10 +63,7 @@ const O_SLASH_LIKE = "[\\u00D8\\u00F8\\u019F\\u2205\\u2300]";
 /** Remove merge-field noise after O-slash-like glyphs. */
 function stripOslashMergeGarbage(s: string): string {
   // Letter/digit jammed against O-slash with no space
-  s = s.replace(
-    new RegExp(`([\\p{L}\\p{N}])${O_SLASH_LIKE}`, "gu"),
-    "$1 ",
-  );
+  s = s.replace(new RegExp(`([\\p{L}\\p{N}])${O_SLASH_LIKE}`, "gu"), "$1 ");
   // Ø-like + angle/chevron + trailing non-space junk
   s = s.replace(
     new RegExp(
@@ -76,10 +73,7 @@ function stripOslashMergeGarbage(s: string): string {
     " ",
   );
   // O-slash-like + Symbol + junk
-  s = s.replace(
-    new RegExp(`\\s*${O_SLASH_LIKE}\\p{S}\\S{0,32}`, "gu"),
-    " ",
-  );
+  s = s.replace(new RegExp(`\\s*${O_SLASH_LIKE}\\p{S}\\S{0,32}`, "gu"), " ");
   // O-slash-like + Latin-1 mojibake tail (thorn, eszett, circled chars, guillemets)
   s = s.replace(
     new RegExp(
@@ -88,10 +82,7 @@ function stripOslashMergeGarbage(s: string): string {
     ),
     " ",
   );
-  s = s.replace(
-    /\s*[\u00AB\u00BB\u2039\u203A\u276E\u276F]{1,3}\s*/g,
-    " ",
-  );
+  s = s.replace(/\s*[\u00AB\u00BB\u2039\u203A\u276E\u276F]{1,3}\s*/g, " ");
   s = s.replace(/\s*\u00DF\u00AB+\s*/g, " ");
   s = s.replace(/\s*\u00DE\u00C2+\s*/g, " ");
   // Orphan angle clusters (e.g. leftover <ß«)

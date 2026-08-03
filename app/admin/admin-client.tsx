@@ -356,7 +356,6 @@ export default function AdminClient() {
       // loadPurchases: deferred to the [selectedEvent, isAuthenticated] effect so we
       // do not race get_admin_purchases (100 cap) against get_admin_purchases_by_event.
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-select the most recent event when events are loaded
@@ -966,7 +965,8 @@ export default function AdminClient() {
       table_rows_filteredPurchases: filteredPurchases.length,
       statusFilter,
       paid_rows_in_buffer: byStatus("paid"),
-      card_total_purchases_paid_only: currentEventStats?.total_purchases ?? null,
+      card_total_purchases_paid_only:
+        currentEventStats?.total_purchases ?? null,
       selectedEvent,
       admissionFilter,
       offeringFilter,

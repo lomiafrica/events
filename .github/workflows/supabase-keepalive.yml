@@ -1,0 +1,33 @@
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    name: Ping Supabase REST
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: REST keepalive
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          status="$(curl -sS -o /tmp/out.json -w '%{http_code}' --max-time 30 \
+            "${SUPABASE_URL}/rest/v1/purchases?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")"
+          echo "HTTP ${status}"
+          head -c 300 /tmp/out.json; echo
+          test "$status" = "200"
