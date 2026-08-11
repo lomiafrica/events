@@ -41,12 +41,12 @@
       "@babel/plugin-transform-modules-systemjs": "^7.29.4",
       "@isaacs/brace-expansion": "^5.0.1",
       "brace-expansion": "^5.0.9",
-      "dompurify": "^3.4.12",
+      "dompurify": "^3.4.13",
       "flatted": "^3.4.2",
       "follow-redirects": "^1.16.0",
       "form-data": "^4.0.6",
       "glob": "^10.5.0",
-      "js-yaml": "^4.2.0",
+      "js-yaml": "^4.3.1",
       "json-2-csv": "^5.5.11",
       "linkify-it": "^5.0.1",
       "lodash": "^4.18.0",
@@ -71,7 +71,10 @@
       "brace-expansion@^2": "^2.1.4",
       "fast-uri": "^3.1.5",
       "ajv@^6": "^6.14.0",
-      "ajv@^8": "^8.17.1"
+      "ajv@^8": "^8.17.1",
+      "nanoid@^3": "^3.3.17",
+      "nanoid@^5": "^5.1.16",
+      "nanoid@^4": "5.1.16"
     }
   }
 }
