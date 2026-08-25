@@ -91,6 +91,9 @@ interface Purchase {
   abandonment_resolved_by_paid_order?: boolean;
   /** payment_failed row is eligible for recovery email (not resolved, plausible address). */
   recovery_email_eligible?: boolean;
+  price_per_ticket?: number;
+  /** Paid event ticket whose total_amount is not quantity * unit price. */
+  amount_quantity_mismatch?: boolean;
 }
 
 /** Mirrors admin_normalize_email_for_recovery_match for client fallback when RPC columns are absent. */
@@ -172,6 +175,19 @@ function getAdmissionScanState(p: Purchase): AdmissionScanState {
 /** Event ticket / pack rows only (excludes merch and other non-event sales). */
 function isEventTicketPurchase(p: Purchase): boolean {
   return p.event_id != null && String(p.event_id).trim() !== "";
+}
+
+/** True when paid amount does not match recorded ticket quantity (RPC, with client fallback). */
+function isAmountQuantityMismatch(p: Purchase): boolean {
+  if (typeof p.amount_quantity_mismatch === "boolean") {
+    return p.amount_quantity_mismatch;
+  }
+  if (p.status !== "paid" || !isEventTicketPurchase(p)) return false;
+  const unit = Number(p.price_per_ticket);
+  const qty = Number(p.quantity);
+  const total = Number(p.total_amount);
+  if (!unit || unit <= 0 || !qty || qty <= 0) return false;
+  return qty * unit !== total;
 }
 
 /** Stable id for filter dropdown: distinguishes bundle vs ticket with same title. */
@@ -1549,6 +1565,12 @@ export default function AdminClient() {
                                   {purchase.total_amount}{" "}
                                   {purchase.currency_code}
                                 </div>
+                                {isAmountQuantityMismatch(purchase) && (
+                                  <Badge className="mt-1 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700 rounded-sm text-[10px]">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    Qty vs paid
+                                  </Badge>
+                                )}
                               </TableCell>
 
                               {/* Admission Status */}
@@ -1854,6 +1876,12 @@ export default function AdminClient() {
                       Amount: {selectedPurchase.total_amount}{" "}
                       {selectedPurchase.currency_code}
                     </div>
+                    {isAmountQuantityMismatch(selectedPurchase) && (
+                      <div className="text-amber-400">
+                        Paid amount does not match ticket quantity. Check Lomi
+                        vs recorded qty before sending.
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">

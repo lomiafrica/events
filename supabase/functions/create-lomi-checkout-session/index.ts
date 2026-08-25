@@ -240,6 +240,8 @@ serve(async (req: Request) => {
       ...(payload.userPhone && { customer_phone: payload.userPhone }),
       allow_coupon_code:
         payload.allowCouponCode !== undefined ? payload.allowCouponCode : true,
+      // Qty can change on Lomi; record_event_lomi_payment reconciles
+      // purchases.quantity from the amount actually paid.
       allow_quantity:
         payload.allowQuantity !== undefined ? payload.allowQuantity : true,
       metadata: {
