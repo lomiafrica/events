@@ -92,16 +92,17 @@
       "vite": "^7.3.5",
       "ws": "^8.21.0",
       "yaml": "^2.8.3",
-      "sharp": "^0.35.3",
-      "adm-zip": "^0.6.0",
+      "sharp": "^0.35.4",
+      "adm-zip": "^0.6.1",
       "brace-expansion@^1": "^1.1.18",
       "brace-expansion@^2": "^2.1.4",
       "brace-expansion@^5": "^5.0.9",
       "valibot": "^1.4.2",
-      "fast-uri": "^3.1.5",
-      "nanoid@^3": "^3.3.17",
+      "fast-uri": "^3.1.7",
+      "nanoid@^3": "^3.3.18",
       "nanoid@^5": "^5.1.16",
-      "nanoid@^4": "5.1.16"
+      "nanoid@^4": "5.1.16",
+      "smol-toml": "^1.8.0"
     }
   }
 }
