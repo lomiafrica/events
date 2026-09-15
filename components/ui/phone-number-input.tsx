@@ -19,7 +19,7 @@ interface PhoneNumberInputProps {
 }
 
 const fieldChrome =
-  "border-input flex w-full min-w-0 rounded-sm border bg-transparent shadow-xs transition-[color,box-shadow] outline-none dark:bg-input/30";
+  "border-input flex w-full min-w-0 items-center rounded-sm border bg-transparent shadow-xs transition-[color,box-shadow] outline-none dark:bg-input/30";
 
 export default function PhoneNumberInput({
   value,
@@ -75,7 +75,7 @@ export default function PhoneNumberInput({
       <div
         className={cn(
           fieldChrome,
-          fieldSize === "responsive" ? "min-h-11 md:h-9" : "h-11",
+          fieldSize === "responsive" ? "h-11 md:h-9" : "h-11",
           isFocused && "border-ring ring-ring/50 ring-[3px] ring-inset",
           className,
         )}
@@ -83,7 +83,7 @@ export default function PhoneNumberInput({
         onBlur={() => setIsFocused(false)}
       >
         <RPNInput.default
-          className="flex h-full w-full min-w-0 items-center"
+          className="flex !h-full w-full min-w-0 items-center"
           international
           defaultCountry={defaultCountry}
           flagComponent={FlagComponent}
@@ -109,7 +109,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          "h-full min-w-0 flex-1 bg-transparent px-3 py-1 text-base outline-none placeholder:text-muted-foreground md:text-sm",
+          "h-full min-w-0 flex-1 self-stretch bg-transparent px-3 text-base leading-none outline-none placeholder:text-muted-foreground md:text-sm",
           fieldSize === "responsive" && "text-base md:text-sm",
           className,
         )}
@@ -145,16 +145,19 @@ const CountrySelect = ({
   return (
     <div
       className={cn(
-        "relative flex h-full shrink-0 items-center pl-3 pr-1",
+        "relative flex h-full shrink-0 items-center self-stretch pl-3 pr-1",
         disabled && "pointer-events-none opacity-50",
       )}
     >
-      <div className="flex items-center gap-1" aria-hidden="true">
+      <div
+        className="flex h-full items-center gap-1 leading-none"
+        aria-hidden="true"
+      >
         <FlagComponent country={value} countryName={value} aria-hidden="true" />
         <ChevronDown
           size={14}
           strokeWidth={2}
-          className="text-muted-foreground"
+          className="relative top-px size-3.5 shrink-0 text-muted-foreground"
           aria-hidden="true"
         />
       </div>
@@ -185,11 +188,11 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   const Flag = flags[country];
 
   return (
-    <span className="flex h-4 w-5 items-center justify-center overflow-hidden rounded-sm">
+    <span className="relative top-px flex h-3.5 w-[21px] shrink-0 items-center overflow-hidden rounded-[1px] leading-none [&_svg]:block [&_svg]:h-full [&_svg]:w-full">
       {Flag ? (
         <Flag title={countryName} />
       ) : (
-        <Phone size={16} aria-hidden="true" role="presentation" />
+        <Phone size={14} aria-hidden="true" role="presentation" />
       )}
     </span>
   );

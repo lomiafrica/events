@@ -513,46 +513,42 @@ export default function PurchaseFormModal({
                     onSubmit={handleSubmit}
                     className="space-y-5 md:space-y-6 py-1 md:py-2"
                   >
-                    <div className="bg-muted/30 p-3 rounded-sm">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="font-medium text-sm">{item.name}</h4>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatPrice(item.price)}
-                            {t(
-                              currentLanguage,
-                              "eventSlugPage.tickets.currencySuffix",
-                            )}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          {item.isBundle && (
-                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-sm">
+                    <div className="bg-muted/20 px-3 py-2.5 rounded-sm">
+                      <h4 className="font-medium text-sm leading-snug">
+                        {item.name}
+                      </h4>
+                      <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                        <span>
+                          {formatPrice(item.price)}
+                          {t(
+                            currentLanguage,
+                            "eventSlugPage.tickets.currencySuffix",
+                          )}
+                        </span>
+                        {item.isBundle && (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span>
                               {t(currentLanguage, "purchaseModal.bundleBadge", {
                                 count: item.ticketsIncluded || 1,
                               })}
                             </span>
-                          )}
-                          {!item.isBundle &&
-                            item.stock !== null &&
-                            item.stock !== undefined &&
-                            item.stock > 0 && (
-                              <span className="text-xs px-2 py-0.5 rounded-sm bg-muted/50 text-muted-foreground">
-                                {t(currentLanguage, "purchaseModal.only")}{" "}
-                                {item.stock}{" "}
-                                {item.stock === 1
-                                  ? t(
-                                      currentLanguage,
-                                      "purchaseModal.available",
-                                    )
-                                  : t(
-                                      currentLanguage,
-                                      "purchaseModal.availablePlural",
-                                    )}
+                          </>
+                        )}
+                        {!item.isBundle &&
+                          item.stock !== null &&
+                          item.stock !== undefined &&
+                          item.stock > 0 && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <span className="text-[11px] tabular-nums">
+                                {t(currentLanguage, "purchaseModal.stockLeft", {
+                                  count: item.stock,
+                                })}
                               </span>
-                            )}
-                        </div>
-                      </div>
+                            </>
+                          )}
+                      </p>
                     </div>
 
                     <div className="space-y-2">

@@ -281,6 +281,7 @@
     "only": "Only",
     "available": "available",
     "availablePlural": "available",
+    "stockLeft": "{count} left",
     "includesTickets": "Includes {count} ticket(s)",
     "bundleBadge": "{count} tickets",
     "ticketsGenerated": "Tickets to be generated",
