@@ -4,15 +4,18 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Ticket, Plus, Minus } from "lucide-react";
+import { Loader2, Ticket, Plus, Minus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { t } from "@/lib/i18n/translations";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { SupabaseClient } from "@supabase/supabase-js";
 import PhoneNumberInput from "@/components/ui/phone-number-input";
-import DjaouliCodeDialog from "@/components/landing/djaouli-code";
 import { useIsMobile } from "@/lib/utils/use-is-mobile";
+import {
+  loadCheckoutForm,
+  saveCheckoutForm,
+} from "@/lib/utils/checkout-form-storage";
 
 const PURCHASE_MODAL_PORTAL_ID = "purchase-modal-portal";
 
@@ -29,6 +32,8 @@ interface PurchaseItem {
   maxPerOrder?: number;
   stock?: number | null;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
   ticketsIncluded?: number;
 }
 
@@ -46,11 +51,14 @@ interface CreateCheckoutSessionPayload {
   successUrlPath?: string;
   cancelUrlPath?: string;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
   allowCouponCode?: boolean;
   allowQuantity?: boolean;
   eventDateText?: string;
   eventTimeText?: string;
   eventVenueName?: string;
+  eventSlug?: string;
   isBundle?: boolean;
   ticketsPerBundle?: number;
 }
@@ -62,6 +70,7 @@ interface PurchaseFormModalProps {
   eventDetails: {
     id: string;
     title: string;
+    slug?: string;
     dateText?: string;
     timeText?: string;
     venueName?: string;
@@ -85,7 +94,6 @@ export default function PurchaseFormModal({
   const [userPhone, setUserPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDjaouliCode, setShowDjaouliCode] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [mobileVisibleHeight, setMobileVisibleHeight] = useState<number | null>(
@@ -176,20 +184,24 @@ export default function PurchaseFormModal({
       setQuantity(1);
       setQuantityDisplay("1");
       setError(null);
-
-      const hasSeenDjaouliCode =
-        localStorage.getItem("djaouli-code-shown") === "true";
-      if (!hasSeenDjaouliCode) {
-        setShowDjaouliCode(true);
-      }
     }
   }, [item]);
 
   useEffect(() => {
-    if (!isOpen) {
-      setShowDjaouliCode(false);
-    }
+    if (!isOpen) return;
+    const saved = loadCheckoutForm();
+    if (saved.name) setUserName(saved.name);
+    if (saved.email) setUserEmail(saved.email);
+    if (saved.phone) setUserPhone(saved.phone);
   }, [isOpen]);
+
+  const persistCheckoutFields = useCallback(() => {
+    saveCheckoutForm({
+      name: userName,
+      email: userEmail,
+      phone: userPhone,
+    });
+  }, [userName, userEmail, userPhone]);
 
   if (!item) return null;
 
@@ -302,6 +314,11 @@ export default function PurchaseFormModal({
     }
 
     setIsLoading(true);
+    saveCheckoutForm({
+      name: userName.trim(),
+      email: userEmail.trim(),
+      phone: userPhone.trim(),
+    });
 
     const shouldAllowQuantity =
       (item.maxPerOrder && item.maxPerOrder > 1) ||
@@ -323,11 +340,14 @@ export default function PurchaseFormModal({
       successUrlPath: "/payment/success",
       cancelUrlPath: "/payment/cancel",
       productId: item.productId,
+      lomiProductId: item.lomiProductId,
+      lomiPriceId: item.lomiPriceId,
       allowCouponCode: true,
       allowQuantity: shouldAllowQuantity,
       eventDateText: eventDetails.dateText,
       eventTimeText: eventDetails.timeText,
       eventVenueName: eventDetails.venueName,
+      eventSlug: eventDetails.slug,
       isBundle: item.isBundle,
       ticketsPerBundle: item.ticketsIncluded || 1,
     };
@@ -460,7 +480,12 @@ export default function PurchaseFormModal({
                     : undefined
                 }
               >
-                <div className="flex items-start py-3 md:py-6 flex-shrink-0">
+                {isMobile && (
+                  <div className="flex justify-center pt-1 pb-2 md:hidden">
+                    <span className="h-1 w-10 rounded-full bg-muted-foreground/40" />
+                  </div>
+                )}
+                <div className="flex items-start justify-between gap-3 py-3 md:py-6 flex-shrink-0">
                   <div>
                     <h2
                       id="purchase-modal-title"
@@ -472,6 +497,14 @@ export default function PurchaseFormModal({
                       {t(currentLanguage, "purchaseModal.description")}
                     </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="shrink-0 rounded-sm p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 min-h-11 min-w-11 inline-flex items-center justify-center"
+                    aria-label={t(currentLanguage, "purchaseModal.close")}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto min-h-0 overscroll-y-contain [-webkit-overflow-scrolling:touch]">
@@ -531,11 +564,12 @@ export default function PurchaseFormModal({
                         name="name"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
+                        onBlur={persistCheckoutFields}
                         onFocus={scrollActiveFieldIntoView}
                         autoComplete="name"
                         enterKeyHint="next"
                         autoCapitalize="words"
-                        className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2"
+                        className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2 focus-visible:ring-inset"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.name",
@@ -554,11 +588,12 @@ export default function PurchaseFormModal({
                         type="email"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
+                        onBlur={persistCheckoutFields}
                         onFocus={scrollActiveFieldIntoView}
                         autoComplete="email"
                         enterKeyHint="next"
                         inputMode="email"
-                        className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2"
+                        className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2 focus-visible:ring-inset"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.email",
@@ -576,8 +611,17 @@ export default function PurchaseFormModal({
                       </Label>
                       <PhoneNumberInput
                         value={userPhone}
-                        onChange={(value) => setUserPhone(value || "")}
-                        className="rounded-sm h-9 text-sm mt-2"
+                        onChange={(value) => {
+                          const next = value || "";
+                          setUserPhone(next);
+                          saveCheckoutForm({
+                            name: userName,
+                            email: userEmail,
+                            phone: next,
+                          });
+                        }}
+                        fieldSize="responsive"
+                        className="mt-2"
                         placeholder={t(
                           currentLanguage,
                           "purchaseModal.placeholders.phone",
@@ -600,6 +644,12 @@ export default function PurchaseFormModal({
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
+                        <span
+                          className="flex-1 text-center text-base font-medium mt-2 md:hidden tabular-nums"
+                          aria-live="polite"
+                        >
+                          {quantity}
+                        </span>
                         <Input
                           id="quantity"
                           name="quantity"
@@ -610,7 +660,7 @@ export default function PurchaseFormModal({
                           onBlur={handleQuantityBlur}
                           onFocus={scrollActiveFieldIntoView}
                           enterKeyHint="done"
-                          className="rounded-sm min-h-11 text-base text-center flex-1 md:h-9 md:min-h-0 md:text-sm mt-2"
+                          className="hidden md:block rounded-sm min-h-11 text-base text-center flex-1 md:h-9 md:min-h-0 md:text-sm mt-2"
                           required
                         />
                         <Button
@@ -687,11 +737,6 @@ export default function PurchaseFormModal({
           </>
         )}
       </AnimatePresence>
-
-      <DjaouliCodeDialog
-        isOpen={showDjaouliCode}
-        onClose={() => setShowDjaouliCode(false)}
-      />
     </>,
     portalNode,
   );

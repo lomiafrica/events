@@ -23,6 +23,8 @@ export interface CheckoutItemData {
   salesStart?: string | null;
   salesEnd?: string | null;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
   ticketsIncluded?: number; // Number of tickets included per bundle
 }
 
@@ -34,6 +36,8 @@ interface PurchaseItemForModal {
   maxPerOrder?: number;
   stock?: number | null;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
   ticketsIncluded?: number;
 }
 
@@ -42,12 +46,14 @@ interface CheckoutButtonProps {
   eventDetails: {
     id: string;
     title: string;
+    slug?: string;
     dateText?: string;
     timeText?: string;
     venueName?: string;
   };
   globallyTicketsOnSale: boolean;
   currentLanguage: string;
+  compact?: boolean;
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -119,6 +125,7 @@ export default function CheckoutButton({
   eventDetails,
   globallyTicketsOnSale,
   currentLanguage,
+  compact = false,
 }: CheckoutButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -153,6 +160,8 @@ export default function CheckoutButton({
     maxPerOrder: item.maxPerOrder,
     stock: item.stock,
     productId: item.productId,
+    lomiProductId: item.lomiProductId,
+    lomiPriceId: item.lomiPriceId,
     ticketsIncluded: item.ticketsIncluded,
   };
 
@@ -161,7 +170,7 @@ export default function CheckoutButton({
       return (
         <Button
           asChild
-          className="bg-green-600 hover:bg-green-700 text-white border-green-600 rounded-sm font-medium h-10 px-6 uppercase w-full justify-center"
+          className="bg-green-600 hover:bg-green-700 text-white border-green-600 rounded-sm font-medium h-10 px-6 uppercase justify-center w-full"
         >
           <Link
             href={item.paymentLink}
@@ -171,7 +180,7 @@ export default function CheckoutButton({
               // Track purchase initiation
               trackEvent("InitiateCheckout", {
                 content_name: item.name,
-                content_ids: [item.productId || item.id],
+                content_ids: [item.lomiProductId || item.productId || item.id],
                 content_type: item.isBundle ? "bundle" : "ticket",
                 value: item.price,
                 currency: "XOF",
@@ -194,8 +203,8 @@ export default function CheckoutButton({
         ? t(currentLanguage, "eventSlugPage.tickets.buyNow")
         : t(currentLanguage, "eventSlugPage.tickets.getETicket");
       const buttonClassName = isBundle
-        ? "bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium h-10 px-6 uppercase w-full justify-center"
-        : "bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium h-10 px-6 uppercase w-full justify-center";
+        ? `bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium h-10 px-6 uppercase justify-center ${compact ? "w-auto shrink-0 min-h-11" : "w-full"}`
+        : `bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium h-10 px-6 uppercase justify-center ${compact ? "w-auto shrink-0 min-h-11" : "w-full"}`;
       return (
         <>
           <Button
@@ -203,7 +212,7 @@ export default function CheckoutButton({
               // Track purchase initiation
               trackEvent("InitiateCheckout", {
                 content_name: item.name,
-                content_ids: [item.productId || item.id],
+                content_ids: [item.lomiProductId || item.productId || item.id],
                 content_type: item.isBundle ? "bundle" : "ticket",
                 value: item.price,
                 currency: "XOF",
@@ -228,6 +237,7 @@ export default function CheckoutButton({
             eventDetails={{
               id: eventDetails.id,
               title: eventDetails.title,
+              slug: eventDetails.slug,
               dateText: eventDetails.dateText,
               timeText: eventDetails.timeText,
               venueName: eventDetails.venueName,

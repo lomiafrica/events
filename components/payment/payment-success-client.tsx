@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Ticket } from "lucide-react";
+import { CheckCircle, Ticket, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -9,22 +9,43 @@ import Footer from "@/components/landing/footer";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
 import { trackPurchase } from "@/components/ui/FacebookPixel";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { clearCheckoutForm } from "@/lib/utils/checkout-form-storage";
+import DjaouliCodeDialog from "@/components/landing/djaouli-code";
 
 interface PaymentSuccessClientProps {
   purchaseId?: string;
+  flow?: string;
+  eventSlug?: string;
 }
 
 export function PaymentSuccessClient({
   purchaseId,
+  flow,
+  eventSlug,
 }: PaymentSuccessClientProps) {
   const { currentLanguage } = useTranslation();
+  const isMerch = flow === "merch";
+  const [showDjaouliCode, setShowDjaouliCode] = useState(false);
 
-  // Track purchase completion
   useEffect(() => {
-    // Track successful purchase - you can enhance this with actual purchase value
-    trackPurchase(0, "XOF"); // Replace 0 with actual purchase amount when available
+    clearCheckoutForm();
+    trackPurchase(0, "XOF");
   }, []);
+
+  const whatsappHref = purchaseId
+    ? `https://wa.me/?text=${encodeURIComponent(
+        t(currentLanguage, "paymentSuccess.whatsAppText", {
+          orderId: purchaseId,
+        }),
+      )}`
+    : null;
+
+  const returnHref = isMerch
+    ? "/merch"
+    : eventSlug
+      ? `/events/${eventSlug}`
+      : "/";
 
   return (
     <>
@@ -42,7 +63,17 @@ export function PaymentSuccessClient({
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center text-gray-600 dark:text-gray-300">
-                <p>{t(currentLanguage, "paymentSuccess.description")}</p>
+                <p>
+                  {t(
+                    currentLanguage,
+                    isMerch
+                      ? "paymentSuccess.descriptionMerch"
+                      : "paymentSuccess.descriptionTicket",
+                  )}
+                </p>
+                <p className="text-sm mt-2 text-muted-foreground">
+                  {t(currentLanguage, "paymentSuccess.emailDelay")}
+                </p>
                 {purchaseId && (
                   <p className="text-sm mt-2 font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded-sm">
                     {t(currentLanguage, "paymentSuccess.orderId", {
@@ -54,31 +85,105 @@ export function PaymentSuccessClient({
 
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-sm p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Ticket className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  {isMerch ? (
+                    <Package className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Ticket className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  )}
                   <h3 className="font-semibold text-green-800 dark:text-green-200">
                     {t(currentLanguage, "paymentSuccess.whatsNext.title")}
                   </h3>
                 </div>
                 <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                  <li>
-                    •{" "}
-                    {t(currentLanguage, "paymentSuccess.whatsNext.checkEmail")}
-                  </li>
-                  <li>
-                    •{" "}
-                    {t(
-                      currentLanguage,
-                      "paymentSuccess.whatsNext.presentTicket",
-                    )}
-                  </li>
-                  <li>
-                    •{" "}
-                    {t(currentLanguage, "paymentSuccess.whatsNext.arriveEarly")}
-                  </li>
+                  {isMerch ? (
+                    <>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.merchCheckEmail",
+                        )}
+                      </li>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.merchWait",
+                        )}
+                      </li>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.merchKeepId",
+                        )}
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.checkEmail",
+                        )}
+                      </li>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.presentTicket",
+                        )}
+                      </li>
+                      <li>
+                        •{" "}
+                        {t(
+                          currentLanguage,
+                          "paymentSuccess.whatsNext.arriveEarly",
+                        )}
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
 
               <div className="flex flex-col gap-3">
+                <Button asChild className="w-full">
+                  <Link href={returnHref}>
+                    {isMerch
+                      ? t(currentLanguage, "paymentSuccess.buttons.backToMerch")
+                      : eventSlug
+                        ? t(
+                            currentLanguage,
+                            "paymentSuccess.buttons.backToEvent",
+                          )
+                        : t(
+                            currentLanguage,
+                            "paymentSuccess.buttons.backToEvents",
+                          )}
+                  </Link>
+                </Button>
+                {whatsappHref && (
+                  <Button variant="outline" asChild className="w-full">
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t(currentLanguage, "paymentSuccess.shareWhatsApp")}
+                    </a>
+                  </Button>
+                )}
+                {!isMerch && (
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full"
+                    onClick={() => setShowDjaouliCode(true)}
+                  >
+                    {t(currentLanguage, "djaouliCode.readLink")}
+                  </Button>
+                )}
                 <Button variant="outline" asChild className="w-full">
                   <Link href="/gallery">
                     {t(currentLanguage, "paymentSuccess.buttons.browseGallery")}
@@ -94,6 +199,12 @@ export function PaymentSuccessClient({
         </div>
       </div>
       <Footer />
+      {!isMerch && (
+        <DjaouliCodeDialog
+          isOpen={showDjaouliCode}
+          onClose={() => setShowDjaouliCode(false)}
+        />
+      )}
     </>
   );
 }

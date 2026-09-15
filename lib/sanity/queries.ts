@@ -8,6 +8,41 @@ function getBaseUrl(): string {
 }
 
 // Events
+export type LatestEventHero = {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  date?: string;
+  flyer?: { url: string };
+  ticketsAvailable?: boolean;
+};
+
+const latestEventHeroProjection = `
+  _id,
+  title,
+  slug,
+  date,
+  "flyer": { "url": flyer.asset->url },
+  ticketsAvailable
+`;
+
+/** Next upcoming event with a flyer, else the most recent past event. */
+export async function getLatestEventForHero(): Promise<LatestEventHero | null> {
+  const upcoming = await client.fetch<LatestEventHero | null>(
+    `*[_type == "event" && defined(flyer.asset) && dateTime(date) >= dateTime(now())] | order(date asc) [0] {${latestEventHeroProjection}}`,
+    {},
+    { next: { revalidate: 3600, tags: ["events", "homepage"] } },
+  );
+  if (upcoming?.flyer?.url) return upcoming;
+
+  const recent = await client.fetch<LatestEventHero | null>(
+    `*[_type == "event" && defined(flyer.asset)] | order(date desc) [0] {${latestEventHeroProjection}}`,
+    {},
+    { next: { revalidate: 3600, tags: ["events", "homepage"] } },
+  );
+  return recent?.flyer?.url ? recent : null;
+}
+
 export async function getLatestEvents(limit = 3) {
   return client.fetch(
     `
@@ -83,7 +118,9 @@ export async function getEventBySlug(slug: string, locale: string) {
         salesStart,
         salesEnd,
         active,
-        productId
+        productId,
+        lomiProductId,
+        lomiPriceId
       },
       lineup[]->{
         _id,
@@ -112,6 +149,8 @@ export async function getEventBySlug(slug: string, locale: string) {
         salesEnd,
         maxPerOrder,
         productId,
+        lomiProductId,
+        lomiPriceId,
         ticketsIncluded
       }
     }

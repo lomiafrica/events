@@ -1,7 +1,9 @@
 "use client";
 
 import { XCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
@@ -10,17 +12,22 @@ import { t } from "@/lib/i18n/translations";
 interface PaymentCancelClientProps {
   purchaseId?: string;
   flow?: string;
+  eventSlug?: string;
 }
 
 export function PaymentCancelClient({
   purchaseId,
   flow,
+  eventSlug,
 }: PaymentCancelClientProps) {
   const { currentLanguage } = useTranslation();
-
-  // Default to ticket copy if flow is not provided or unknown
-  const translationBaseKey =
-    flow === "merch" ? "paymentCancelMerch" : "paymentCancel";
+  const isMerch = flow === "merch";
+  const translationBaseKey = isMerch ? "paymentCancelMerch" : "paymentCancel";
+  const returnHref = isMerch
+    ? "/merch"
+    : eventSlug
+      ? `/events/${eventSlug}`
+      : "/";
 
   return (
     <>
@@ -81,6 +88,32 @@ export function PaymentCancelClient({
                     )}
                   </li>
                 </ul>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button asChild className="w-full">
+                  <Link href={returnHref}>
+                    {t(currentLanguage, `${translationBaseKey}.buttons.tryAgain`)}
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild className="w-full">
+                  <Link href={returnHref}>
+                    {isMerch
+                      ? t(
+                          currentLanguage,
+                          `${translationBaseKey}.buttons.backToMerch`,
+                        )
+                      : eventSlug
+                        ? t(
+                            currentLanguage,
+                            "paymentCancel.buttons.backToEvent",
+                          )
+                        : t(
+                            currentLanguage,
+                            `${translationBaseKey}.buttons.backToEvents`,
+                          )}
+                  </Link>
+                </Button>
               </div>
 
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">

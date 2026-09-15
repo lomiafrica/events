@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,8 @@ interface ContentItem {
   description?: string;
   thumbnail?: string;
   slug?: string | { current: string };
+  href?: string;
+  fit?: "cover" | "contain";
   author?: {
     name: string;
     image?: string;
@@ -75,6 +78,18 @@ interface HeroSectionProps {
     };
     ticketsAvailable?: boolean;
   }[];
+  latestEvent?: {
+    _id: string;
+    title: string;
+    slug: {
+      current: string;
+    };
+    date?: string;
+    flyer?: {
+      url: string;
+    };
+    ticketsAvailable?: boolean;
+  } | null;
   highlightedContent?: {
     _id: string;
     type: "article" | "media" | "event" | "video" | "image";
@@ -97,6 +112,7 @@ export function HeroSection({
   contentItems = [],
   sanityHeroItems,
   featuredEvents,
+  latestEvent,
   highlightedContent,
 }: HeroSectionProps) {
   const { currentLanguage } = useTranslation();
@@ -206,15 +222,42 @@ export function HeroSection({
       })
     : [];
 
-  // Combine all content sources with priority: highlighted > events first + sanity > props > defaults
-  const content =
+  const latestEventSlug =
+    latestEvent?.slug?.current ||
+    (typeof latestEvent?.slug === "string" ? latestEvent.slug : "");
+  const latestHeroItem: ContentItem | null =
+    latestEvent?.flyer?.url && latestEventSlug
+      ? {
+          id: latestEvent._id,
+          type: "image",
+          src: latestEvent.flyer.url,
+          href: `/events/${latestEventSlug}`,
+          fit: "contain",
+          slug: latestEvent.slug,
+        }
+      : null;
+
+  // Latest event flyer leads; then highlighted / CMS hero / featured / defaults.
+  const rest =
     highlightedItems.length > 0
       ? highlightedItems
       : sanityContent.length > 0 || featuredEventItems.length > 0
-        ? [...featuredEventItems, ...sanityContent] // Events come first
+        ? [
+            ...featuredEventItems.filter(
+              (item) => item.id !== latestHeroItem?.id,
+            ),
+            ...sanityContent.filter((item) => item.src !== latestHeroItem?.src),
+          ]
         : contentItems.length > 0
           ? contentItems
           : defaultContent;
+
+  const content = latestHeroItem
+    ? [
+        latestHeroItem,
+        ...rest.filter((item) => item.id !== latestHeroItem.id),
+      ]
+    : rest;
 
   const currentItem = content[currentIndex];
 
@@ -402,17 +445,37 @@ export function HeroSection({
     }
 
     // Handle image content (default fallback)
-    return (
-      <div className="absolute inset-0 w-full h-full">
+    const image = (
+      <div className="absolute inset-0 w-full h-full bg-black">
         <Image
           src={currentItem.src}
           alt={currentItem.title || "Hero content"}
           fill
-          className="object-cover"
+          className={
+            currentItem.fit === "contain" ? "object-contain" : "object-cover"
+          }
+          style={{
+            objectFit: currentItem.fit === "contain" ? "contain" : "cover",
+          }}
           priority
+          sizes="100vw"
         />
       </div>
     );
+
+    if (currentItem.href) {
+      return (
+        <Link
+          href={currentItem.href}
+          className="absolute inset-0 w-full h-full"
+          aria-label={currentItem.title || "View event"}
+        >
+          {image}
+        </Link>
+      );
+    }
+
+    return image;
   };
 
   return (
@@ -424,18 +487,19 @@ export function HeroSection({
       <div className="absolute inset-0">
         {renderContent()}
 
-        {/* Overlay for better text readability */}
-        {currentItem.type === "video" ? null : currentItem.type === "event" ? ( // No overlay for videos
-          // Darker overlay for events
-          <div className="absolute inset-0 bg-black/75" />
-        ) : (
-          // Very minimal overlay for other content
-          <div className="absolute inset-0 bg-black/20" />
-        )}
+        {/* Overlay for better text readability — skip on flyer-first hero */}
+        {currentItem.type === "video" || currentItem.fit === "contain"
+          ? null
+          : currentItem.type === "event" ? (
+              <div className="absolute inset-0 bg-black/75" />
+            ) : (
+              <div className="absolute inset-0 bg-black/20" />
+            )}
       </div>
 
-      {/* Content Overlay - Hidden for videos when playing */}
-      {!(currentItem.type === "video" && isPlaying) && (
+      {/* Content Overlay - Hidden for videos when playing and for flyer-only slides */}
+      {!(currentItem.type === "video" && isPlaying) &&
+        (currentItem.title || currentItem.description) && (
         <div className="relative z-10 flex items-start justify-start min-h-screen pt-44 md:pt-20 pl-5 md:pl-20">
           <div className="text-left px-4 md:px-8 max-w-2xl mr-4 md:mr-0">
             {currentItem.title && (

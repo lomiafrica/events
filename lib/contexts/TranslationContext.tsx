@@ -14,7 +14,7 @@ interface TranslationContextType {
 }
 
 const TranslationContext = createContext<TranslationContextType>({
-  currentLanguage: "en",
+  currentLanguage: "fr",
   setLanguage: () => {},
 });
 
@@ -24,7 +24,7 @@ export function TranslationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>("en");
+  const [currentLanguage, setCurrentLanguage] = useState<Language>("fr");
 
   useEffect(() => {
     // Try to get language from localStorage
@@ -35,14 +35,13 @@ export function TranslationProvider({
       languages.some((lang) => lang.code === savedLanguage)
     ) {
       setCurrentLanguage(savedLanguage as Language);
-    } else {
-      // Try to detect browser language
-      if (typeof navigator !== "undefined") {
-        const browserLang = navigator.language.split("-")[0];
+    } else if (typeof navigator !== "undefined") {
+      const browserLang = navigator.language.split("-")[0];
 
-        if (languages.some((lang) => lang.code === browserLang)) {
-          setCurrentLanguage(browserLang as Language);
-        }
+      if (languages.some((lang) => lang.code === browserLang)) {
+        setCurrentLanguage(browserLang as Language);
+      } else {
+        setCurrentLanguage("fr");
       }
     }
   }, []);

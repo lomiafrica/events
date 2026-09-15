@@ -10,7 +10,7 @@ interface ProductListContentProps {
 
 export function ProductListContent({ products }: ProductListContentProps) {
   return products.length > 0 ? (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
       {products.map((product) => (
         <ProductCard key={product._id} product={product} />
       ))}

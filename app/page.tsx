@@ -5,6 +5,7 @@ import Footer from "@/components/landing/footer";
 import {
   getHomepageContent,
   getHomepagePromoEvent,
+  getLatestEventForHero,
 } from "@/lib/sanity/queries";
 import FloatingPromo from "@/components/landing/floating-promo";
 import { EventsCarousel } from "@/components/home/events-carousel";
@@ -20,6 +21,7 @@ export default async function Home() {
   // Fetch homepage content server-side
   const homepageData = await getHomepageContent();
   const promoEventData = await getHomepagePromoEvent();
+  const latestEvent = await getLatestEventForHero();
   return (
     <div className="min-h-screen bg-background text-foreground relative">
       <Header />
@@ -27,18 +29,21 @@ export default async function Home() {
       <HeroSection
         sanityHeroItems={homepageData?.heroContent}
         featuredEvents={homepageData?.featuredEvents}
+        latestEvent={latestEvent}
       />
       <EventsCarousel />
       <MerchCarousel />
       <Footer />
 
       {/* Floating Promo - Renders if promoEventData is found and has a flyer and slug */}
-      {promoEventData && promoEventData.flyerUrl && promoEventData.slug && (
+      {promoEventData &&
+        promoEventData.flyerUrl &&
+        promoEventData.slug &&
+        promoEventData.slug !== latestEvent?.slug?.current && (
         <FloatingPromo
           imageUrl={promoEventData.flyerUrl}
           href={`/events/${promoEventData.slug}`}
-          title={promoEventData.title || "View Event"} // Use event title for alt text or a default
-          // onClose can be implemented here if needed, e.g., to set a cookie to not show again
+          title={promoEventData.title || "View Event"}
         />
       )}
     </div>

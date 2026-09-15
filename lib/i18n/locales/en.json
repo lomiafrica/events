@@ -35,6 +35,7 @@
   },
   "djaouliCode": {
     "prefix": "CODE",
+    "readLink": "Read the Djaouli Code",
     "item1": {
       "title": "NOBODY IS WATCHING YOU",
       "description": "Let go, breathe, sweat. Here, you have nothing to prove — just enjoy."
@@ -276,6 +277,7 @@
   "purchaseModal": {
     "title": "Purchase tickets",
     "description": "Enter your details to purchase tickets.",
+    "close": "Close",
     "only": "Only",
     "available": "available",
     "availablePlural": "available",
@@ -366,16 +368,26 @@
   "paymentSuccess": {
     "title": "Payment Successful!",
     "description": "Your ticket purchase has been completed successfully.",
+    "descriptionTicket": "Your ticket purchase has been completed successfully.",
+    "descriptionMerch": "Your merch order has been completed successfully.",
     "orderId": "Order ID: {orderId}",
+    "emailDelay": "The email can take a few minutes to arrive.",
+    "shareWhatsApp": "Share on WhatsApp",
+    "whatsAppText": "Order {orderId}",
     "whatsNext": {
       "title": "What's Next?",
       "checkEmail": "Check your email for your e-ticket",
       "presentTicket": "Present your e-ticket QR code at the event",
-      "arriveEarly": "Arrive early to avoid queues"
+      "arriveEarly": "Arrive early to avoid queues",
+      "merchCheckEmail": "Check your email for the order confirmation",
+      "merchWait": "We will follow up by email about delivery",
+      "merchKeepId": "Keep this order ID as proof of payment"
     },
     "buttons": {
       "backToEvents": "Back to Events",
-      "browseGallery": "Browse Gallery"
+      "browseGallery": "Browse Gallery",
+      "backToEvent": "Back to the event",
+      "backToMerch": "Back to merch"
     },
     "support": "Need help? Contact our support team"
   },
@@ -391,7 +403,10 @@
     },
     "buttons": {
       "backToEvents": "Back to Events",
-      "browseGallery": "Browse Gallery"
+      "browseGallery": "Browse Gallery",
+      "tryAgain": "Try again",
+      "backToEvent": "Back to the event",
+      "backToMerch": "Back to merch"
     },
     "support": "Need help? Contact our support team"
   },
@@ -407,7 +422,9 @@
     },
     "buttons": {
       "backToEvents": "Back to Shop",
-      "browseGallery": "Browse Gallery"
+      "browseGallery": "Browse Gallery",
+      "tryAgain": "Try again",
+      "backToMerch": "Back to merch"
     },
     "support": "Need help? Contact our support team"
   },

@@ -6,36 +6,42 @@ import * as RPNInput from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
 import { cn } from "@/lib/actions/utils";
 
+const FieldSizeContext = React.createContext<"default" | "responsive">(
+  "default",
+);
+
 interface PhoneNumberInputProps {
   value: string;
   onChange: (value: string | undefined) => void;
   placeholder?: string;
   className?: string;
+  fieldSize?: "default" | "responsive";
 }
+
+const fieldChrome =
+  "border-input flex w-full min-w-0 rounded-sm border bg-transparent shadow-xs transition-[color,box-shadow] outline-none dark:bg-input/30";
 
 export default function PhoneNumberInput({
   value,
   onChange,
   placeholder = "Phone number",
   className,
+  fieldSize = "default",
 }: PhoneNumberInputProps) {
   const [defaultCountry, setDefaultCountry] = useState<RPNInput.Country>();
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
-    // First check if we have a cached country code in localStorage
     const cachedCountryCode = localStorage.getItem("user_country_code");
     if (cachedCountryCode) {
       setDefaultCountry(cachedCountryCode as RPNInput.Country);
       return;
     }
 
-    // Add a timeout for the fetch to avoid long waits
     const timeoutPromise = new Promise<null>((_, reject) =>
       setTimeout(() => reject(new Error("Request timed out")), 2000),
     );
 
-    // Try to get user's country using ipapi.co
     Promise.race([
       fetch("https://ipapi.co/json/", {
         mode: "cors",
@@ -52,7 +58,6 @@ export default function PhoneNumberInput({
     ])
       .then((data) => {
         if (data && data.country_code) {
-          // Cache the result in localStorage for future use
           localStorage.setItem("user_country_code", data.country_code);
           setDefaultCountry(data.country_code as RPNInput.Country);
         } else {
@@ -60,24 +65,25 @@ export default function PhoneNumberInput({
         }
       })
       .catch(() => {
-        // If ipapi.co fails, try a fallback to CI (Côte d'Ivoire)
         setDefaultCountry("CI");
         localStorage.setItem("user_country_code", "CI");
       });
   }, []);
 
   return (
-    <div className={cn("w-full relative", className)}>
+    <FieldSizeContext.Provider value={fieldSize}>
       <div
         className={cn(
-          "flex w-full rounded-sm border border-input bg-transparent shadow-xs transition-[color,box-shadow]",
-          isFocused && "border-ring ring-ring/50 ring-[3px]",
+          fieldChrome,
+          fieldSize === "responsive" ? "min-h-11 md:h-9" : "h-11",
+          isFocused && "border-ring ring-ring/50 ring-[3px] ring-inset",
+          className,
         )}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       >
         <RPNInput.default
-          className="flex PhoneInput w-full"
+          className="flex h-full w-full min-w-0 items-center"
           international
           defaultCountry={defaultCountry}
           flagComponent={FlagComponent}
@@ -90,7 +96,7 @@ export default function PhoneNumberInput({
           countryCallingCodeEditable={true}
         />
       </div>
-    </div>
+    </FieldSizeContext.Provider>
   );
 }
 
@@ -98,18 +104,18 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 const PhoneInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => {
+    const fieldSize = React.useContext(FieldSizeContext);
     return (
       <input
         ref={ref}
         className={cn(
-          "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
-          "flex h-11 w-full min-w-0 bg-transparent px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
-          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-          "border-0 shadow-none rounded-l-sm rounded-r-sm",
+          "h-full min-w-0 flex-1 bg-transparent px-3 py-1 text-base outline-none placeholder:text-muted-foreground md:text-sm",
+          fieldSize === "responsive" && "text-base md:text-sm",
           className,
         )}
         {...props}
-        autoComplete="off"
+        autoComplete="tel"
+        inputMode="tel"
         data-lpignore="true"
         data-form-type="other"
       />
@@ -139,29 +145,28 @@ const CountrySelect = ({
   return (
     <div
       className={cn(
-        "PhoneInputCountry relative inline-flex items-center self-stretch bg-transparent text-foreground outline-none",
-        "flex h-11 min-w-0 px-3 py-1 border-0 shadow-none rounded-l-sm rounded-r-sm",
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
-        disabled && "pointer-events-none cursor-not-allowed opacity-50",
+        "relative flex h-full shrink-0 items-center pl-3 pr-1",
+        disabled && "pointer-events-none opacity-50",
       )}
     >
-      <div className="inline-flex items-center gap-1.5" aria-hidden="true">
+      <div className="flex items-center gap-1" aria-hidden="true">
         <FlagComponent country={value} countryName={value} aria-hidden="true" />
-        <span className="text-muted-foreground/80">
-          <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
-        </span>
+        <ChevronDown
+          size={14}
+          strokeWidth={2}
+          className="text-muted-foreground"
+          aria-hidden="true"
+        />
       </div>
       <select
         disabled={disabled}
         value={value || ""}
         onChange={handleSelect}
-        className="absolute inset-0 text-sm opacity-0 outline-none cursor-pointer"
+        className="absolute inset-0 cursor-pointer opacity-0 outline-none"
         aria-label="Select country"
         data-lpignore="true"
       >
-        <option value="" className="text-gray-400">
-          Select country
-        </option>
+        <option value="">Select country</option>
         {options
           .filter((x) => x.value)
           .map((option) => (
@@ -180,7 +185,7 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   const Flag = flags[country];
 
   return (
-    <span className="w-5 h-4 overflow-hidden rounded-sm flex items-center justify-center">
+    <span className="flex h-4 w-5 items-center justify-center overflow-hidden rounded-sm">
       {Flag ? (
         <Flag title={countryName} />
       ) : (

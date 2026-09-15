@@ -231,6 +231,20 @@ serve(async (req: Request) => {
     // --- Prepare lomi. Payload (direct charge / amount-based only) ---
     const successRedirectPath = payload.successUrlPath || "/payment/success";
     const cancelRedirectPath = payload.cancelUrlPath || "/payment/cancel";
+    const successUrl = new URL(successRedirectPath, `${APP_BASE_URL}/`);
+    const cancelUrl = new URL(cancelRedirectPath, `${APP_BASE_URL}/`);
+    successUrl.searchParams.set(
+      "purchase_ids",
+      purchaseIds.join(","),
+    );
+    successUrl.searchParams.set("status", "success");
+    successUrl.searchParams.set("flow", "merch");
+    cancelUrl.searchParams.set(
+      "purchase_ids",
+      purchaseIds.join(","),
+    );
+    cancelUrl.searchParams.set("status", "cancelled");
+    cancelUrl.searchParams.set("flow", "merch");
 
     // Title: simple label for payment UI
     const title = "Pay for Merch";
@@ -241,8 +255,8 @@ serve(async (req: Request) => {
       .substring(0, 200);
 
     const lomiPayload = {
-      success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=success`,
-      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_ids=${encodeURIComponent(purchaseIds.join(","))}&status=cancelled&flow=merch`,
+      success_url: successUrl.toString(),
+      cancel_url: cancelUrl.toString(),
       amount: totalAmount,
       currency_code: currencyCode,
       customer_email: payload.userEmail,

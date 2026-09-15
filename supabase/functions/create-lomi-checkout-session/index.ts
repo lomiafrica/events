@@ -40,11 +40,14 @@ interface RequestPayload {
   allowedProviders?: string[];
   priceId?: string;
   productId?: string;
+  lomiPriceId?: string;
+  lomiProductId?: string;
   allowCouponCode?: boolean; // Allow coupon codes
   allowQuantity?: boolean; // Allow quantity changes
   eventDateText?: string;
   eventTimeText?: string;
   eventVenueName?: string;
+  eventSlug?: string;
   couponCode?: string; // Single coupon code to apply
   couponCodes?: string[]; // Multiple coupon codes to apply
   // Bundle-specific fields
@@ -86,7 +89,11 @@ serve(async (req: Request) => {
   try {
     const payload: RequestPayload = await req.json();
     console.log("Received payload:", JSON.stringify(payload, null, 2));
-    console.log("Product ID in request:", payload.productId);
+    console.log("lomi. catalog IDs in request:", {
+      lomiPriceId: payload.lomiPriceId,
+      lomiProductId: payload.lomiProductId,
+      priceId: payload.priceId,
+    });
 
     // --- Validate Input ---
     const requiredFields: (keyof RequestPayload)[] = [
@@ -223,16 +230,30 @@ serve(async (req: Request) => {
     // --- Prepare lomi. Payload ---
     const successRedirectPath = payload.successUrlPath || "/payment/success";
     const cancelRedirectPath = payload.cancelUrlPath || "/payment/cancel";
+    const successUrl = new URL(successRedirectPath, `${APP_BASE_URL}/`);
+    const cancelUrl = new URL(cancelRedirectPath, `${APP_BASE_URL}/`);
+    successUrl.searchParams.set("purchase_id", purchaseId);
+    successUrl.searchParams.set("status", "success");
+    successUrl.searchParams.set("flow", "ticket");
+    cancelUrl.searchParams.set("purchase_id", purchaseId);
+    cancelUrl.searchParams.set("status", "cancelled");
+    cancelUrl.searchParams.set("flow", "ticket");
+    if (payload.eventSlug) {
+      successUrl.searchParams.set("event_slug", payload.eventSlug);
+      cancelUrl.searchParams.set("event_slug", payload.eventSlug);
+    }
 
-    // Determine if we're using price-based (product/price) or event-based checkout
-    const priceId = payload.priceId || payload.productId || null;
-    const isPriceBased = !!priceId;
+    // Catalog checkout only when a lomi. price ID is present. Do not treat
+    // productId as price_id (legacy field was often a product UUID).
+    const catalogPriceId = payload.lomiPriceId || payload.priceId || null;
+    const catalogProductId = payload.lomiProductId || null;
+    const isPriceBased = !!catalogPriceId;
     console.log("Is price-based checkout:", isPriceBased);
-    console.log("Price ID being used:", priceId);
+    console.log("Price ID being used:", catalogPriceId);
 
     const baseLomiPayload = {
-      success_url: `${APP_BASE_URL}${successRedirectPath}?purchase_id=${purchaseId}&status=success`,
-      cancel_url: `${APP_BASE_URL}${cancelRedirectPath}?purchase_id=${purchaseId}&status=cancelled&flow=ticket`,
+      success_url: successUrl.toString(),
+      cancel_url: cancelUrl.toString(),
       currency_code: currencyCode,
       quantity: payload.quantity,
       customer_email: payload.userEmail,
@@ -251,6 +272,8 @@ serve(async (req: Request) => {
         customer_id: customerId,
         app_source: "djaouli_events_app",
         is_product_based: isPriceBased,
+        ...(catalogProductId && { lomi_product_id: catalogProductId }),
+        ...(catalogPriceId && { lomi_price_id: catalogPriceId }),
       },
       require_billing_address: false,
     };
@@ -258,7 +281,8 @@ serve(async (req: Request) => {
     const lomiPayload = isPriceBased
       ? {
           ...baseLomiPayload,
-          price_id: priceId,
+          price_id: catalogPriceId,
+          ...(catalogProductId && { product_id: catalogProductId }),
           title: `${payload.eventTitle} Tickets (x${payload.quantity})`,
           description: `Tickets for: ${payload.eventTitle}`,
         }

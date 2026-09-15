@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,10 @@ import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { t } from "@/lib/i18n/translations";
 import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useIsMobile } from "@/lib/utils/use-is-mobile";
+import {
+  loadCheckoutForm,
+  saveCheckoutForm,
+} from "@/lib/utils/checkout-form-storage";
 
 const CartContainer = ({
   children,
@@ -34,6 +38,21 @@ export default function CartPurchaseForm() {
   const [userPhone, setUserPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = loadCheckoutForm();
+    if (saved.name) setUserName(saved.name);
+    if (saved.email) setUserEmail(saved.email);
+    if (saved.phone) setUserPhone(saved.phone);
+  }, []);
+
+  const persistCheckoutFields = useCallback(() => {
+    saveCheckoutForm({
+      name: userName,
+      email: userEmail,
+      phone: userPhone,
+    });
+  }, [userName, userEmail, userPhone]);
 
   const scrollActiveFieldIntoView = useCallback(() => {
     if (!isMobile) return;
@@ -83,6 +102,11 @@ export default function CartPurchaseForm() {
     }
 
     setIsLoading(true);
+    saveCheckoutForm({
+      name: userName.trim(),
+      email: userEmail.trim(),
+      phone: userPhone.trim(),
+    });
 
     try {
       const cartItems = cart.lines.map((line) => ({
@@ -177,11 +201,12 @@ export default function CartPurchaseForm() {
                 name="name"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
+                onBlur={persistCheckoutFields}
                 onFocus={scrollActiveFieldIntoView}
                 autoComplete="name"
                 enterKeyHint="next"
                 autoCapitalize="words"
-                className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2"
+                className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2 focus-visible:ring-inset"
                 placeholder={t(
                   currentLanguage,
                   "cartPurchaseForm.placeholders.name",
@@ -200,11 +225,12 @@ export default function CartPurchaseForm() {
                 type="email"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
+                onBlur={persistCheckoutFields}
                 onFocus={scrollActiveFieldIntoView}
                 autoComplete="email"
                 enterKeyHint="next"
                 inputMode="email"
-                className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2"
+                className="rounded-sm min-h-11 text-base md:h-9 md:min-h-0 md:text-sm mt-2 focus-visible:ring-inset"
                 placeholder={t(
                   currentLanguage,
                   "cartPurchaseForm.placeholders.email",
@@ -222,8 +248,17 @@ export default function CartPurchaseForm() {
               </Label>
               <PhoneNumberInput
                 value={userPhone}
-                onChange={(value) => setUserPhone(value || "")}
-                className="rounded-sm h-9 text-sm mt-2"
+                onChange={(value) => {
+                  const next = value || "";
+                  setUserPhone(next);
+                  saveCheckoutForm({
+                    name: userName,
+                    email: userEmail,
+                    phone: next,
+                  });
+                }}
+                fieldSize="responsive"
+                className="mt-2"
                 placeholder={t(
                   currentLanguage,
                   "cartPurchaseForm.placeholders.phone",

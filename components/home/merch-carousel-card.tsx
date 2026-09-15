@@ -47,14 +47,15 @@ export function MerchCarouselCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-950">
         {hasImage ? (
           <Image
             src={displayImage}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+            quality={90}
             priority={false}
           />
         ) : (

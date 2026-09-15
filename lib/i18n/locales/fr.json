@@ -35,6 +35,7 @@
   },
   "djaouliCode": {
     "prefix": "CODE",
+    "readLink": "Lire le Code Djaouli",
     "item1": {
       "title": "PERSONNE NE TE REGARDE",
       "description": "Relâche-toi, respire, transpire. Ici, tu n'as rien à prouver — juste à kiffer."
@@ -276,6 +277,7 @@
   "purchaseModal": {
     "title": "Acheter des tickets",
     "description": "Entrez vos coordonnées pour acheter des tickets.",
+    "close": "Fermer",
     "only": "Seulement",
     "available": "disponible",
     "availablePlural": "disponibles",
@@ -366,16 +368,26 @@
   "paymentSuccess": {
     "title": "Paiement réussi !",
     "description": "Votre achat de ticket a été complété avec succès.",
+    "descriptionTicket": "Votre achat de ticket a été complété avec succès.",
+    "descriptionMerch": "Votre commande merch a été complétée avec succès.",
     "orderId": "ID commande : {orderId}",
+    "emailDelay": "L'e-mail peut prendre quelques minutes.",
+    "shareWhatsApp": "Partager sur WhatsApp",
+    "whatsAppText": "Commande {orderId}",
     "whatsNext": {
       "title": "Et maintenant ?",
       "checkEmail": "Vérifiez votre e-mail pour votre e-ticket",
       "presentTicket": "Présentez votre e-ticket QR code à l'événement",
-      "arriveEarly": "Arrivez tôt pour éviter les files d'attente"
+      "arriveEarly": "Arrivez tôt pour éviter les files d'attente",
+      "merchCheckEmail": "Vérifiez votre e-mail pour la confirmation de commande",
+      "merchWait": "Nous vous écrirons pour la livraison",
+      "merchKeepId": "Gardez cet ID de commande comme preuve de paiement"
     },
     "buttons": {
       "backToEvents": "Retour aux événements",
-      "browseGallery": "Parcourir la galerie"
+      "browseGallery": "Parcourir la galerie",
+      "backToEvent": "Retour à l'événement",
+      "backToMerch": "Retour au merch"
     },
     "support": "Besoin d'aide ? Contactez notre équipe de support"
   },
@@ -391,7 +403,10 @@
     },
     "buttons": {
       "backToEvents": "Retour aux événements",
-      "browseGallery": "Parcourir la galerie"
+      "browseGallery": "Parcourir la galerie",
+      "tryAgain": "Réessayer",
+      "backToEvent": "Retour à l'événement",
+      "backToMerch": "Retour au merch"
     },
     "support": "Besoin d'aide ? Contactez notre équipe de support"
   },
@@ -407,7 +422,9 @@
     },
     "buttons": {
       "backToEvents": "Retour à la boutique",
-      "browseGallery": "Parcourir la galerie"
+      "browseGallery": "Parcourir la galerie",
+      "tryAgain": "Réessayer",
+      "backToMerch": "Retour au merch"
     },
     "support": "Besoin d'aide ? Contactez notre équipe de support"
   },

@@ -40,17 +40,17 @@ function ProductImageCarousel({
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="flex-1 min-h-[650px] relative overflow-hidden rounded-sm bg-muted shadow-2xl">
+              <div className="relative overflow-hidden rounded-sm bg-neutral-950 shadow-2xl aspect-[4/5] max-h-[70vh] w-full">
                 <Image
                   src={image.url}
                   alt={
                     typeof productName === "string" ? productName : "Product"
                   }
                   fill
-                  className="object-cover"
-                  quality={100}
+                  className="object-contain"
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
               </div>
             </CarouselItem>
           ))}
@@ -279,20 +279,20 @@ function ProductDetail({ product }: ProductDetailContentProps) {
                 productName={product.name}
               />
             ) : mainImage ? (
-              <div className="flex-1 min-h-[650px] relative overflow-hidden rounded-sm bg-muted shadow-2xl">
+              <div className="relative overflow-hidden rounded-sm bg-neutral-950 shadow-2xl aspect-[4/5] max-h-[70vh] w-full">
                 <Image
                   src={mainImage}
                   alt={
                     typeof product.name === "string" ? product.name : "Product"
                   }
                   fill
-                  className="object-cover"
-                  quality={100}
+                  className="object-contain"
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
               </div>
             ) : (
-              <div className="flex-1 min-h-[650px] relative overflow-hidden rounded-sm bg-muted flex items-center justify-center shadow-2xl">
+              <div className="relative overflow-hidden rounded-sm bg-muted flex items-center justify-center shadow-2xl aspect-[4/5] max-h-[70vh] w-full">
                 <span className="text-muted-foreground">
                   {t(currentLanguage, "merchPage.productDetail.noImage")}
                 </span>
@@ -301,7 +301,7 @@ function ProductDetail({ product }: ProductDetailContentProps) {
           </motion.div>
 
           <motion.div
-            className="space-y-8 min-h-[650px] flex flex-col mt-0"
+            className="space-y-8 flex flex-col mt-0 md:min-h-[650px]"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}

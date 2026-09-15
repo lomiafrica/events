@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircleIcon, ShoppingCart } from "lucide-react";
+import { PlusCircleIcon, ShoppingCart, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useCart } from "./cart-context";
@@ -505,8 +505,13 @@ export default function CartModal() {
                         : undefined
                     }
                   >
-                    <CartContainer className="flex justify-between items-center mb-6 md:mb-8">
+                    <CartContainer className="flex justify-between items-start mb-6 md:mb-8">
                       <div>
+                        {isMobile && (
+                          <div className="flex justify-center pb-3 md:hidden">
+                            <span className="h-1 w-10 rounded-full bg-muted-foreground/40" />
+                          </div>
+                        )}
                         <h2
                           id="cart-modal-title"
                           className="text-2xl md:text-3xl font-bold text-foreground"
@@ -514,6 +519,14 @@ export default function CartModal() {
                           {t(currentLanguage, "cartModal.cart")}
                         </h2>
                       </div>
+                      <button
+                        type="button"
+                        onClick={closeCart}
+                        className="shrink-0 rounded-sm p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 min-h-11 min-w-11 inline-flex items-center justify-center"
+                        aria-label={t(currentLanguage, "purchaseModal.close")}
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
                     </CartContainer>
 
                     <div className="flex flex-col flex-1 min-h-0">

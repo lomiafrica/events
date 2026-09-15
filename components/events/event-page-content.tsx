@@ -10,6 +10,10 @@ import { YangoButton } from "@/components/events/yango-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/lib/i18n/translations";
 import CheckoutButton from "@/components/events/checkout-button";
+import {
+  EventStickyCta,
+  pickStickyCheckoutItem,
+} from "@/components/events/event-sticky-cta";
 import ArtistCard from "@/components/events/artist-card";
 import { useTranslation } from "@/lib/contexts/TranslationContext";
 import { trackViewContent } from "@/components/ui/FacebookPixel";
@@ -28,6 +32,8 @@ interface TicketTypeData {
   paymentLink?: string;
   active: boolean;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
 }
 
 interface BundleData {
@@ -44,6 +50,8 @@ interface BundleData {
   salesEnd?: string | null;
   maxPerOrder?: number;
   productId?: string;
+  lomiProductId?: string;
+  lomiPriceId?: string;
   ticketsIncluded?: number;
 }
 
@@ -321,7 +329,7 @@ export default function EventPageContent({ event }: EventPageContentProps) {
             <Separator className="my-6" />
 
             {/* Tickets/Bundles Section - Always Link Checkout Mode Logic */}
-            <div className="py-4">
+            <div id="event-tickets" className="py-4">
               {!globallyTicketsOnSale ? (
                 <div className="bg-secondary text-secondary-foreground p-4 rounded-sm mb-6">
                   <p className="font-medium">
@@ -458,10 +466,13 @@ export default function EventPageContent({ event }: EventPageContentProps) {
                                         salesStart: ticket.salesStart,
                                         salesEnd: ticket.salesEnd,
                                         productId: ticket.productId,
+                                        lomiProductId: ticket.lomiProductId,
+                                        lomiPriceId: ticket.lomiPriceId,
                                       }}
                                       eventDetails={{
                                         id: event._id,
                                         title: event.title,
+                                        slug: event.slug.current,
                                         dateText: formattedDate,
                                         timeText: formattedTime,
                                         venueName: event.location?.venueName,
@@ -597,11 +608,14 @@ export default function EventPageContent({ event }: EventPageContentProps) {
                                         salesStart: bundle.salesStart,
                                         salesEnd: bundle.salesEnd,
                                         productId: bundle.productId,
+                                        lomiProductId: bundle.lomiProductId,
+                                        lomiPriceId: bundle.lomiPriceId,
                                         ticketsIncluded: bundle.ticketsIncluded,
                                       }}
                                       eventDetails={{
                                         id: event._id,
                                         title: event.title,
+                                        slug: event.slug.current,
                                         dateText: formattedDate,
                                         timeText: formattedTime,
                                         venueName: event.location?.venueName,
@@ -729,6 +743,66 @@ export default function EventPageContent({ event }: EventPageContentProps) {
         </div>
       </div>
       <Footer />
+      {globallyTicketsOnSale &&
+        (() => {
+          const ticketCandidates =
+            event.ticketTypes?.map((ticket) => ({
+              id: ticket._key,
+              name: ticket.name,
+              price: ticket.price,
+              isBundle: false as const,
+              maxPerOrder: ticket.maxPerOrder,
+              stock: ticket.stock,
+              paymentLink: ticket.paymentLink,
+              active: ticket.active,
+              salesStart: ticket.salesStart,
+              salesEnd: ticket.salesEnd,
+              productId: ticket.productId,
+              lomiProductId: ticket.lomiProductId,
+              lomiPriceId: ticket.lomiPriceId,
+            })) ?? [];
+          const bundleCandidates =
+            event.bundles?.map((bundle) => ({
+              id: bundle.bundleId.current,
+              name: bundle.name,
+              price: bundle.price,
+              isBundle: true as const,
+              maxPerOrder: bundle.maxPerOrder,
+              stock: bundle.stock,
+              paymentLink: bundle.paymentLink,
+              active: bundle.active,
+              salesStart: bundle.salesStart,
+              salesEnd: bundle.salesEnd,
+              productId: bundle.productId,
+              lomiProductId: bundle.lomiProductId,
+              lomiPriceId: bundle.lomiPriceId,
+              ticketsIncluded: bundle.ticketsIncluded,
+            })) ?? [];
+          const stickyItem = pickStickyCheckoutItem([
+            ...ticketCandidates,
+            ...bundleCandidates,
+          ]);
+          if (!stickyItem) return null;
+          return (
+            <EventStickyCta
+              item={stickyItem}
+              eventDetails={{
+                id: event._id,
+                title: event.title,
+                slug: event.slug.current,
+                dateText: formattedDate,
+                timeText: formattedTime,
+                venueName: event.location?.venueName,
+              }}
+              globallyTicketsOnSale={globallyTicketsOnSale}
+              currentLanguage={currentLanguage}
+              currencySuffix={t(
+                currentLanguage,
+                "eventSlugPage.tickets.currencySuffix",
+              )}
+            />
+          );
+        })()}
     </>
   );
 }

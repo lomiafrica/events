@@ -4,6 +4,9 @@ import { PaymentSuccessClient } from "@/components/payment/payment-success-clien
 interface SearchParamsProps {
   searchParams: Promise<{
     purchase_id?: string;
+    purchase_ids?: string;
+    flow?: string;
+    event_slug?: string;
   }>;
 }
 
@@ -11,6 +14,7 @@ export default async function PaymentSuccessPage({
   searchParams,
 }: SearchParamsProps) {
   const params = await searchParams;
+  const purchaseId = params.purchase_id || params.purchase_ids;
 
   return (
     <Suspense
@@ -20,7 +24,11 @@ export default async function PaymentSuccessPage({
         </div>
       }
     >
-      <PaymentSuccessClient purchaseId={params.purchase_id} />
+      <PaymentSuccessClient
+        purchaseId={purchaseId}
+        flow={params.flow}
+        eventSlug={params.event_slug}
+      />
     </Suspense>
   );
 }

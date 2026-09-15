@@ -7,6 +7,7 @@ interface SearchParamsProps {
     purchase_ids?: string;
     status?: string;
     flow?: string;
+    event_slug?: string;
   }>;
 }
 
@@ -23,7 +24,11 @@ export default async function PaymentCancelPage({
         </div>
       }
     >
-      <PaymentCancelClient purchaseId={params.purchase_id} flow={params.flow} />
+      <PaymentCancelClient
+        purchaseId={params.purchase_id || params.purchase_ids}
+        flow={params.flow}
+        eventSlug={params.event_slug}
+      />
     </Suspense>
   );
 }

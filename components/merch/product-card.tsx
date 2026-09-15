@@ -35,7 +35,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 rounded-sm border-border/40 bg-card p-0 mb-6">
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 rounded-sm border-border/40 bg-card p-0">
       <div className="relative rounded-t-sm overflow-hidden">
         <Link
           href={`/merch/${slug}`}
@@ -44,14 +44,14 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
           prefetch
         >
           {hasValidImage ? (
-            <div className="aspect-square relative bg-muted overflow-hidden">
+            <div className="aspect-[3/4] relative bg-neutral-950 overflow-hidden">
               <Image
                 src={mainImage}
                 alt={product.name}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                quality={100}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                quality={90}
                 placeholder={
                   product.images?.[0]?.metadata?.lqip ? "blur" : undefined
                 }
@@ -59,17 +59,17 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
               />
             </div>
           ) : (
-            <div className="aspect-square bg-muted flex items-center justify-center">
+            <div className="aspect-[3/4] bg-muted flex items-center justify-center">
               <span className="text-muted-foreground text-sm">No Image</span>
             </div>
           )}
         </Link>
       </div>
 
-      <CardContent className="pt-1 pb-4 px-4 flex flex-col min-h-[100px]">
+      <CardContent className="pt-2 pb-3 px-2 md:px-4 flex flex-col">
         <div className="flex-1 space-y-1">
           <Link href={`/merch/${slug}`} className="block">
-            <h3 className="font-medium text-base leading-tight hover:text-primary transition-colors line-clamp-2">
+            <h3 className="font-medium text-sm md:text-base leading-tight hover:text-primary transition-colors line-clamp-2">
               {product.name}
             </h3>
           </Link>
@@ -84,7 +84,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
           )} */}
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col gap-2 pt-2">
           <span className="text-sm font-semibold">
             {formatPrice(product.price)} F CFA
           </span>
@@ -93,7 +93,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
               <Button
                 size="sm"
                 disabled
-                className={`rounded-sm px-4 py-2 text-xs font-medium ${button.primary}`}
+                className={`rounded-sm w-full px-3 py-2 text-xs font-medium ${button.primary}`}
               >
                 ...
               </Button>
@@ -101,7 +101,7 @@ function ProductCardContent({ product }: { product: SanityProduct }) {
           >
             <Button
               size="sm"
-              className={`rounded-sm px-4 py-2 text-xs font-medium transition-colors ${button.primary}`}
+              className={`rounded-sm w-full px-3 py-2 text-xs font-medium transition-colors ${button.primary}`}
               onClick={handleAddToCart}
             >
               {t(currentLanguage, "merchPage.productDetail.addToCart")}
