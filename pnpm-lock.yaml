@@ -23,7 +23,8 @@ overrides:
   linkify-it: ^5.0.1
   lodash: ^4.18.0
   lodash-es: ^4.18.0
-  markdown-it: ^14.2.0
+  markdown-it: ^14.3.1
+  moment: ^2.31.0
   minimatch: ^9.0.7
   minimatch@3: ^3.1.3
   next: ^16.2.6
@@ -40,8 +41,8 @@ overrides:
   yaml: ^2.8.3
   sharp: ^0.35.4
   adm-zip: ^0.6.1
-  brace-expansion@^1: ^1.1.18
-  brace-expansion@^2: ^2.1.4
+  brace-expansion@^1: ^1.1.21
+  brace-expansion@^2: ^2.1.7
   brace-expansion@^5: ^5.0.9
   valibot: ^1.4.2
   fast-uri: ^3.1.7
@@ -3348,11 +3349,11 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
-  brace-expansion@1.1.18:
-    resolution: {integrity: sha512-Edep/X9fGqVNmzKBVsDYIOtD+z1tuezV70LBjdCst9Tqu76lsnvRiZ6oTic1n+/BIwX6QDGAO94PN4N2SADvtw==}
+  brace-expansion@1.1.21:
+    resolution: {integrity: sha512-9zeA+KLZNNzglF2TPKRQEDyx6Yby7daAkuy8MiPzpXPsYDWi/DRM8jmwUDxokQjYqBpv5DgPiwD4h4ZZSy1Ujw==}
 
-  brace-expansion@2.1.4:
-    resolution: {integrity: sha512-hGfVzPxthbf3+2yjg/RBs60cB0FhqBS/zvdV/4wn4/BmN0bNMMHPc4V/BbFieqf1TKAGGAHnY4eSjajCl0f2Xg==}
+  brace-expansion@2.1.7:
+    resolution: {integrity: sha512-uZbew1NqdmPDTMJ8ah1y+b+9QEJrfkXFk3RcTQw3X0jW/xRUvFKsg1CfQdSYGdTbXZWExtU3J3ccxtnfw1Fi0g==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -5065,8 +5066,8 @@ packages:
   module-alias@2.3.4:
     resolution: {integrity: sha512-bOclZt8hkpuGgSSoG07PKmvzTizROilUTvLNyrMqvlC9snhs7y7GzjNWAVbISIOlhCP1T14rH1PDAV9iNyBq/w==}
 
-  moment@2.30.1:
-    resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
+  moment@2.31.0:
+    resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
 
   motion-dom@12.38.0:
     resolution: {integrity: sha512-pdkHLD8QYRp8VfiNLb8xIBJis1byQ9gPT3Jnh2jqfFtAsWUA3dEepDlsWe/xMpO8McV+VdpKVcp+E+TGJEtOoA==}
@@ -9354,7 +9355,7 @@ snapshots:
       '@sanity/client': 6.29.1(debug@4.4.3)
       '@sanity/types': 3.68.3(@types/react@19.2.14)(debug@4.4.3)
       get-random-values-esm: 1.0.2
-      moment: 2.30.1
+      moment: 2.31.0
       rxjs: 7.8.2
     transitivePeerDependencies:
       - '@types/react'
@@ -10120,12 +10121,12 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  brace-expansion@1.1.18:
+  brace-expansion@1.1.21:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
 
-  brace-expansion@2.1.4:
+  brace-expansion@2.1.7:
     dependencies:
       balanced-match: 1.0.2
 
@@ -11994,11 +11995,11 @@ snapshots:
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.18
+      brace-expansion: 1.1.21
 
   minimatch@9.0.9:
     dependencies:
-      brace-expansion: 2.1.4
+      brace-expansion: 2.1.7
 
   minimist-options@4.1.0:
     dependencies:
@@ -12031,7 +12032,7 @@ snapshots:
 
   module-alias@2.3.4: {}
 
-  moment@2.30.1: {}
+  moment@2.31.0: {}
 
   motion-dom@12.38.0:
     dependencies:
