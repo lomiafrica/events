@@ -80,7 +80,9 @@
       "nanoid@^5": "^5.1.16",
       "nanoid@^4": "5.1.16",
       "source-map-js": "1.2.2",
-      "decompress": "npm:@xhmikosr/decompress@11.1.4"
+      "decompress": "npm:@xhmikosr/decompress@11.1.4",
+      "zod": "^4.6.7",
+      "deepmerge": "4.1.2"
     }
   }
 }
